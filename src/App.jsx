@@ -5,6 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Layout from "./containers";
+import "./app.css";
 
 function App() {
   return (

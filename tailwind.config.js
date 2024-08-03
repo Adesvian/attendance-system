@@ -16,6 +16,8 @@ export default {
         light: {
           base: "#F7F9F2",
           secondary: "#91DDCF",
+          tealBg: "#DEF5E5",
+          teal: "#50B498",
           accent: "#E8C5E5",
           secondaccent: "#F19ED2",
         },
