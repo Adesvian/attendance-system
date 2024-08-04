@@ -1,11 +1,12 @@
-import { text } from "stream/consumers";
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class",
   theme: {
     extend: {
+      backgroundImage: {
+        "login-svg": "url('/login.svg')",
+      },
       colors: {
         dark: {
           base: "#1F2937",

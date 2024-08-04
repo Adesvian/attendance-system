@@ -6,6 +6,10 @@ import {
 } from "react-router-dom";
 import Layout from "./containers";
 import "./app.css";
+import Login from "./pages/login";
+import checkAuth from "./app/auth";
+
+const token = checkAuth();
 
 function App() {
   return (
@@ -13,7 +17,11 @@ function App() {
       <Router>
         <Routes>
           <Route path="/*" element={<Layout />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="*"
+            element={<Navigate to={token ? "/dashboard" : "/login"} replace />}
+          />
         </Routes>
       </Router>
     </>
