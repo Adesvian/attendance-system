@@ -76,7 +76,7 @@ const RecentAttendance = ({
                 <h2 className="text-sm font-medium leading-snug pb-0.5">
                   {attendance.name}{" "}
                   <span className="text-gray-400">
-                    dari kelas {attendance.className} has{" "}
+                    dari {attendance.className} has{" "}
                     {attendance.method === "Check-in" ? (
                       <span className="text-green-500">checked in</span>
                     ) : (

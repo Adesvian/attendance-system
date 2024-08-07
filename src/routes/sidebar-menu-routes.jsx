@@ -11,13 +11,14 @@ import {
   PiTimerLight,
   PiUserCircleMinus,
 } from "react-icons/pi";
+import { LiaClipboardListSolid, LiaClipboardCheckSolid } from "react-icons/lia";
 
 const iconClasses = `h-6 w-6`;
 const submenuIconClasses = `h-5 w-5`;
 
 const sidebar_routes = [
   {
-    path: "/dashboard",
+    path: "/dashboard-admin",
     name: "Dashboard",
     icon: <HiOutlineSquares2X2 className={iconClasses} />,
   },
@@ -27,9 +28,21 @@ const sidebar_routes = [
     icon: <PiUserCircleMinus className={iconClasses} />,
   },
   {
-    path: "/absensi",
-    name: "Absensi",
+    path: "",
     icon: <HiOutlineClipboard className={iconClasses} />,
+    name: "Absensi",
+    submenu: [
+      {
+        path: "/recapitulation-absensi",
+        name: "Rekapitulasi Absensi",
+        icon: <LiaClipboardCheckSolid className={iconClasses} />,
+      },
+      {
+        path: "/log-absensi",
+        name: "Log Absensi",
+        icon: <LiaClipboardListSolid className={iconClasses} />,
+      },
+    ],
   },
   {
     path: "",

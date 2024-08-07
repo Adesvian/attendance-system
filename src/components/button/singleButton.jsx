@@ -11,7 +11,7 @@ function SingleButton({
   return (
     <button
       type={type}
-      className={`btn ${btnBg} ${className}`}
+      className={`btn border-none ${btnBg} ${className}`}
       onClick={onClick}
       {...props}
     >

@@ -9,7 +9,7 @@ const Page404 = lazy(() => import("../pages/protected/404"));
 function PageContent() {
   return (
     <>
-      <div className="w-full h-screen flex flex-col">
+      <div className="w-full flex flex-col h-screen">
         {/* Page content here */}
         <Navbar />
         <div className="flex-1 overflow-y-auto md:pt-4 pt-4 px-6 bg-gray-300 dark:bg-base-300">

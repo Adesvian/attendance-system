@@ -1,5 +1,5 @@
 import React from "react";
-import SingleButton from "./singleButton";
+import SingleButton from "../../components/button/singleButton";
 
 function PeriodButtons({
   activeButton,

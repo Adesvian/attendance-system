@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setPageTitle } from "../redux/headerSlice";
-import StatsCard from "../components/card/stats-card";
-import BarChart from "../features/chart/BarChart";
+import { setPageTitle } from "../../redux/headerSlice";
+import StatsCard from "../../components/card/stats-card";
+import BarChart from "../../features/chart/BarChart";
 import { FiUsers } from "react-icons/fi";
 import { SiGoogleclassroom } from "react-icons/si";
 import { BsClipboardCheck, BsClipboardX } from "react-icons/bs";
 import { MdOutlinePendingActions } from "react-icons/md";
 import { MdOutlineWatchLater } from "react-icons/md";
-import RecentAttendance from "../features/activity/recent";
+import RecentAttendance from "../../features/activity/recent";
 
 const recentAttendances = [
   {

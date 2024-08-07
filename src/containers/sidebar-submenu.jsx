@@ -19,13 +19,13 @@ function SidebarSubMenu({ submenu, name, icon }) {
 
   // Determine icon size based on sidebar state
   const iconSize = sideBar ? "w-6 h-6" : "w-8 h-8";
-  const containerClasses = `flex items-center gap-x-3 duration-300 ${
+  const containerClasses = `flex flex-1 items-center gap-x-3 duration-300 ${
     sideBar ? "p-3" : "p-1.5"
   }`;
   const textClasses = `transition-transform duration-300 overflow-hidden whitespace-nowrap ${
     sideBar ? "max-w-[10rem] opacity-100" : "max-w-0 opacity-0"
   }`;
-  const chevronClasses = `w-6 h-6 duration-300 transition-transform ${
+  const chevronClasses = `w-6 h-6 -translate-x-3 duration-300 transition-transform ${
     sideBar
       ? isExpanded
         ? "rotate-180"
@@ -34,6 +34,10 @@ function SidebarSubMenu({ submenu, name, icon }) {
       ? "rotate-0"
       : "-rotate-90"
   } ${sideBar ? "" : "-ml-2.5"}`;
+
+  const linkContainerClasses = `flex items-center gap-x-3 rounded-md ${
+    sideBar ? "p-3" : "p-1.5 justify-center tooltip tooltip-right"
+  }`;
 
   return (
     <>
@@ -56,9 +60,9 @@ function SidebarSubMenu({ submenu, name, icon }) {
             {submenu.map((item, index) => (
               <li
                 key={index}
-                className={`rounded-md text-base-200 dark:text-dark-text text-sm mt-2 ${
+                className={`rounded-md  text-base-200 dark:text-dark-text text-sm mt-2 ${
                   location.pathname === item.path
-                    ? "bg-gray-200 text-black"
+                    ? "bg-gray-300 text-black"
                     : ""
                 }`}
               >
@@ -67,11 +71,14 @@ function SidebarSubMenu({ submenu, name, icon }) {
                   to={item.path}
                   className={({ isActive }) =>
                     isActive
-                      ? "bg-gray-200 text-black font-semibold"
+                      ? "bg-gray-200  text-black font-semibold"
                       : "font-normal"
                   }
                 >
-                  <div className="flex items-center gap-x-3 rounded-md text-sm hover:text-black hover:bg-gray-200 p-3">
+                  <div
+                    className={`${linkContainerClasses} hover:text-black hover:bg-gray-300 p-3`}
+                    data-tip={item.name}
+                  >
                     {item.icon}
                     <span
                       className={`${sideBar ? "" : "hidden"} whitespace-nowrap`}

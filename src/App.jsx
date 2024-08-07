@@ -19,8 +19,21 @@ function App() {
           <Route path="/*" element={<Layout />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="*"
-            element={<Navigate to={token ? "/dashboard" : "/login"} replace />}
+            path="/"
+            element={
+              <Navigate
+                to={
+                  token && token.role === "admin"
+                    ? "/dashboard-admin"
+                    : token && token.role === "guru"
+                    ? "/dashboard-guru"
+                    : token && token.role === "parent"
+                    ? "/dashboard-wali-murid"
+                    : "/login"
+                }
+                replace
+              />
+            }
           />
         </Routes>
       </Router>

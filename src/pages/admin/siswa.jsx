@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setPageTitle } from "../redux/headerSlice";
+import { setPageTitle } from "../../redux/headerSlice";
 
 function Siswa() {
   const dispatch = useDispatch();
