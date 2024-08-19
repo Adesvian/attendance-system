@@ -37,7 +37,7 @@ const checkAuth = () => {
         return Promise.reject(error);
       }
     );
-    return TOKEN;
+    return JSON.parse(TOKEN);
   }
 };
 

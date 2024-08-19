@@ -10,8 +10,14 @@ import {
   PiWhatsappLogoLight,
   PiTimerLight,
   PiUserCircleMinus,
+  PiBook,
 } from "react-icons/pi";
-import { LiaClipboardListSolid, LiaClipboardCheckSolid } from "react-icons/lia";
+import {
+  LiaClipboardListSolid,
+  LiaClipboardCheckSolid,
+  LiaDatabaseSolid,
+} from "react-icons/lia";
+import { GrSchedules } from "react-icons/gr";
 
 const iconClasses = `h-6 w-6`;
 const submenuIconClasses = `h-5 w-5`;
@@ -45,36 +51,29 @@ const sidebar_routes = [
     ],
   },
   {
-    path: "",
-    icon: <PiStudent className={`${iconClasses} inline`} />,
-    name: "Manajemen Siswa",
+    path: "/master-data",
+    name: "Manajemen Data",
+    icon: <LiaDatabaseSolid className={`${iconClasses} inline`} />,
     submenu: [
       {
-        path: "/tambah-siswa",
-        name: "Tambah Data Siswa",
-        icon: <HiOutlineUserAdd className={submenuIconClasses} />,
+        path: "/data-guru",
+        name: "Manajemen Data Guru",
+        icon: <PiUser className={submenuIconClasses} />,
       },
       {
-        path: "/show-siswa",
-        name: "Table Data Siswa",
-        icon: <HiOutlineTableCells className={submenuIconClasses} />,
-      },
-    ],
-  },
-  {
-    path: "/guru",
-    name: "Manajemen Guru",
-    icon: <PiUser className={`${iconClasses} inline`} />,
-    submenu: [
-      {
-        path: "/tambah-guru",
-        name: "Tambah Data Guru",
-        icon: <HiOutlineUserAdd className={submenuIconClasses} />,
+        path: "/data-siswa",
+        name: "Manajemen Data Siswa",
+        icon: <PiStudent className={submenuIconClasses} />,
       },
       {
-        path: "/show-guru",
-        name: "Table Data Guru",
-        icon: <HiOutlineTableCells className={submenuIconClasses} />,
+        path: "/data-mapel",
+        name: "Manajemen Data Mapel",
+        icon: <PiBook className={submenuIconClasses} />,
+      },
+      {
+        path: "/data-jadwal",
+        name: "Manajemen Data Jadwal",
+        icon: <GrSchedules className={submenuIconClasses} />,
       },
     ],
   },

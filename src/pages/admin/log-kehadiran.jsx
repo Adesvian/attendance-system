@@ -1,23 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import TableComponent from "../../features/recap/Table";
+import TableComponent from "../../components/table/TableAttendance";
 import { setPageTitle } from "../../redux/headerSlice";
-import SingleButton from "../../components/button/singleButton";
+import SingleButton from "../../components/button/Button";
 import { MdFileDownload } from "react-icons/md";
-import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
+import autotable from "jspdf-autotable";
 import moment from "moment";
 
 function LogKehadiran() {
   const dispatch = useDispatch();
   const dt = useRef(null);
+
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
 
   const logRecords = [
     {
-      profile:
-        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
+      profile: "https://img.daisyui.com/images/profile/demo/2@94.webp",
       name: "John Doe",
       className: "Kelas 1",
       status: "Late",
@@ -25,8 +25,7 @@ function LogKehadiran() {
       time: 1722446357,
     },
     {
-      profile:
-        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
+      profile: "https://img.daisyui.com/images/profile/demo/3@94.webp",
       name: "Hanan Smith",
       className: "Kelas 2",
       status: "On Time",
@@ -34,8 +33,7 @@ function LogKehadiran() {
       time: 1722646337,
     },
     {
-      profile:
-        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
+      profile: "https://img.daisyui.com/images/profile/demo/4@94.webp",
       name: "Bob Smith",
       className: "Kelas 3",
       status: "On Time",
@@ -43,8 +41,7 @@ function LogKehadiran() {
       time: 1722646327,
     },
     {
-      profile:
-        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
+      profile: "https://img.daisyui.com/images/profile/demo/5@94.webp",
       name: "Hanan Smith",
       className: "Kelas 2",
       status: "On Time",
@@ -52,8 +49,7 @@ function LogKehadiran() {
       time: 1722646337,
     },
     {
-      profile:
-        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
+      profile: "https://img.daisyui.com/images/profile/demo/5@94.webp",
       name: "Bob Smith",
       className: "Kelas 3",
       status: "On Time",
@@ -62,26 +58,51 @@ function LogKehadiran() {
     },
   ];
   const exportPdf = async () => {
-    if (dt.current) {
+    const data = dt.current;
+    if (data) {
       try {
-        const canvas = await html2canvas(dt.current);
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF();
-        const imgWidth = 210;
-        const pageHeight = 295;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+        var pdf = new jsPDF();
 
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.setFontSize(18);
+        pdf.text("Logs Records #" + moment().format("DD-MM-YYYY"), 14, 22);
+        pdf.setFontSize(11);
+        pdf.setTextColor(100);
 
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
+        var pageSize = pdf.internal.pageSize;
+        var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+        var text = pdf.splitTextToSize(
+          "Download Time : " +
+            moment().format("DD-MM-YYYY HH:mm:ss") +
+            "\n" +
+            "User Download : " +
+            JSON.parse(localStorage.getItem("token")).name +
+            "\n",
+          pageWidth - 35,
+          {}
+        );
+        pdf.text(text, 14, 30);
+
+        let i = 1;
+        const tableElement = data.cloneNode(true); // Clone the table to avoid modifying the original
+
+        // Update the header to replace 'Profile' with 'ID'
+        const headerCells = tableElement.querySelectorAll("th");
+        headerCells.forEach((cell) => {
+          if (cell.innerText === "Profile") {
+            cell.innerText = "ID";
+          }
+        });
+
+        // Update the table rows to replace profile with id
+        const tableRows = tableElement.querySelectorAll("tbody tr");
+        tableRows.forEach((row) => {
+          const profileCell = row.querySelector("td");
+          if (profileCell) {
+            profileCell.innerText = i++;
+          }
+        });
+
+        autotable(pdf, { html: tableElement, startY: 40 });
 
         pdf.save("table.pdf");
       } catch (error) {
@@ -127,7 +148,7 @@ function LogKehadiran() {
         <div className="flex justify-end lg:absolute lg:right-[25rem]">
           <SingleButton
             btnTitle={<MdFileDownload />}
-            btnBg="bg-blue-500 rounded-full text-white "
+            className="btn border-none bg-blue-500 rounded-full text-white "
             onClick={exportPdf}
           />
         </div>

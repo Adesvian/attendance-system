@@ -78,7 +78,7 @@ export const updateChartData = (period, setData) => {
       break;
     case "Year":
       labels = Array.from({ length: 12 }, (_, i) =>
-        moment().month(i).format("MMMM")
+        moment().month(i).format("MMM")
       );
       break;
     default:
@@ -181,6 +181,7 @@ export const updateChartData = (period, setData) => {
 export const BarChartTheme = (theme) => {
   return {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: "bottom",
@@ -193,6 +194,7 @@ export const BarChartTheme = (theme) => {
       x: {
         ticks: {
           color: `${theme === "dark" ? "white" : "black"}`,
+          // autoSkip: false,
         },
         grid: {
           color: `${

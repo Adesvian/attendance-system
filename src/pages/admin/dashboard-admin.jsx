@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
-import StatsCard from "../../components/card/stats-card";
+import StatsCard from "../../components/card/statsCard";
 import BarChart from "../../features/chart/BarChart";
 import { FiUsers } from "react-icons/fi";
 import { SiGoogleclassroom } from "react-icons/si";
@@ -124,7 +124,7 @@ function Dashboard() {
           Value="2"
         />
       </div>
-      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6 mt-5 mb-5">
+      <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 lg:gap-6 md:gap-x-5 gap-y-4 mt-5 mb-5">
         <BarChart />
         <RecentAttendance
           data={recentAttendances}

@@ -9,9 +9,8 @@ import {
   TablePagination,
   Paper,
   TableSortLabel,
-  Box,
 } from "@mui/material";
-import { visuallyHidden } from "@mui/utils";
+import { useSelector } from "react-redux";
 
 // Comparator functions for sorting
 const descendingComparator = (a, b, orderBy) => {
@@ -44,6 +43,7 @@ const stableSort = (array, comparator) => {
 
 const TableComponent = forwardRef(
   ({ data, columns, getStatusClass, type }, ref) => {
+    const theme = useSelector((state) => state.header.theme);
     const [order, setOrder] = useState("asc");
     const [orderBy, setOrderBy] = useState(columns[0]?.field || "");
     const [page, setPage] = useState(0);
@@ -62,6 +62,7 @@ const TableComponent = forwardRef(
             rowData.absen = row.absen;
             rowData.izin = row.izin;
             rowData.sakit = row.sakit;
+            rowData.percentage = row.percentage;
             return rowData;
           });
     }, [data, type]);
@@ -107,13 +108,18 @@ const TableComponent = forwardRef(
           <div className="flex justify-end">
             <TablePagination
               component="div"
-              className="-top-5 relative inline "
+              className="-top-5 relative inline dark:text-dark-text"
               count={formattedData.length}
               page={page}
               onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[2, 4, 6, 8]}
+              sx={{
+                "& .MuiTablePagination-selectIcon": {
+                  color: theme === "dark" ? "white" : "inherit",
+                },
+              }}
               labelRowsPerPage="Rows per page:"
               labelDisplayedRows={({ from, to, count }) =>
                 `${from}-${to} of ${count}`
@@ -122,8 +128,15 @@ const TableComponent = forwardRef(
           </div>
         )}
         {data.length > 0 ? (
-          <TableContainer component={Paper}>
-            <Table ref={ref} aria-label="data table">
+          <TableContainer
+            component={Paper}
+            className={type === "standard" ? "h-64 dark:bg-base-300" : ""}
+          >
+            <Table
+              ref={ref}
+              aria-label="data table"
+              className="whitespace-nowrap"
+            >
               <TableHead>
                 <TableRow>
                   {columns.map((col, index) => (
@@ -135,21 +148,28 @@ const TableComponent = forwardRef(
                           ? order
                           : false
                       }
+                      className="dark:bg-base-300 dark:text-dark-text bg-gray-100"
                     >
                       {type === "standard" ? (
                         <TableSortLabel
                           active={orderBy === col.field}
                           direction={orderBy === col.field ? order : "asc"}
                           onClick={() => handleRequestSort(col.field)}
+                          className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
+                          sx={{
+                            "&.Mui-active": {
+                              color: theme === "dark" ? "white" : "inherit", // Warna saat label aktif
+                              "& .MuiTableSortLabel-icon": {
+                                color: theme === "dark" ? "white" : "inherit", // Warna ikon saat label aktif
+                              },
+                            },
+                            "&:hover": {
+                              color: theme === "dark" ? "white" : "inherit", // Warna saat hover
+                            },
+                            color: theme === "dark" ? "white" : "inherit", // Warna default
+                          }}
                         >
                           {col.header}
-                          {orderBy === col.field ? (
-                            <Box component="span" sx={visuallyHidden}>
-                              {order === "desc"
-                                ? "sorted descending"
-                                : "sorted ascending"}
-                            </Box>
-                          ) : null}
                         </TableSortLabel>
                       ) : (
                         <div>{col.header}</div>
@@ -162,14 +182,30 @@ const TableComponent = forwardRef(
                 {paginatedRows.map((row, index) => (
                   <TableRow key={index}>
                     {columns.map((col, colIndex) => (
-                      <TableCell key={colIndex} align="center">
-                        <div
-                          className={`p-2 font-medium ${getStatusClass(
-                            row[col.field]
-                          )}`}
-                        >
-                          {row[col.field]}
-                        </div>
+                      <TableCell
+                        key={colIndex}
+                        align="center"
+                        className="dark:text-dark-text dark:bg-base-200"
+                      >
+                        {col.field === "profile" && (
+                          <div className="avatar">
+                            <div className="mask mask-squircle h-12 w-12">
+                              <img
+                                src={row[col.field]}
+                                alt="Avatar Tailwind CSS Component"
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {col.field !== "profile" && (
+                          <div
+                            className={`p-2 font-medium ${getStatusClass(
+                              row[col.field]
+                            )}`}
+                          >
+                            {row[col.field]}
+                          </div>
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>

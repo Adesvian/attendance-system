@@ -10,7 +10,6 @@ import Login from "./pages/login";
 import checkAuth from "./app/auth";
 
 const token = checkAuth();
-
 function App() {
   return (
     <>

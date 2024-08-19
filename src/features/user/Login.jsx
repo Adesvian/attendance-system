@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SingleButton from "../../components/button/singleButton";
+import SingleButton from "../../components/button/Button";
 import TextInput from "../../components/input/TextInput";
 import ErrorText from "../../components/input/ErrorText";
 
@@ -26,7 +26,8 @@ function LoginForm() {
     else {
       setLoading(true);
       // Call API to check user credentials and save token in localstorage
-      localStorage.setItem("token", loginObj.email);
+      const token = { name: loginObj.email, role: "admin" };
+      localStorage.setItem("token", JSON.stringify(token));
       setLoading(false);
       window.location.href = "/dashboard";
     }

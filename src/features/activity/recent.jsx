@@ -20,7 +20,7 @@ const RecentAttendance = ({
   );
 
   return (
-    <div className="bg-white h-[490px] overflow-y-auto dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-dark-text p-4">
+    <div className="bg-white overflow-y-auto dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-dark-text p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
           <div className="text-2xl font-bold">Recent Presence</div>

@@ -16,18 +16,18 @@ const routes = [
     component: LogKehadiran,
   },
   {
-    path: "/siswa",
+    path: "/data-siswa",
     name: "Siswa",
     component: Siswa,
   },
   {
-    path: "/guru",
+    path: "/data-guru",
     name: "Guru",
     component: Guru,
   },
   {
     path: "/recapitulation-absensi",
-    name: "Reap Absensi",
+    name: "Rekap Absensi",
     component: RecapAbsensi,
   },
 ];

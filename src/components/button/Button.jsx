@@ -2,19 +2,15 @@ import React from "react";
 
 function SingleButton({
   btnTitle,
-  btnBg,
   onClick,
   type = "button",
   className = "",
+  children,
   ...props
 }) {
   return (
-    <button
-      type={type}
-      className={`btn border-none ${btnBg} ${className}`}
-      onClick={onClick}
-      {...props}
-    >
+    <button type={type} className={className} onClick={onClick} {...props}>
+      {children}
       {btnTitle}
     </button>
   );

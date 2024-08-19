@@ -22,7 +22,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
   const containerClasses = `flex flex-1 items-center gap-x-3 duration-300 ${
     sideBar ? "p-3" : "p-1.5"
   }`;
-  const textClasses = `transition-transform duration-300 overflow-hidden whitespace-nowrap ${
+  const textClasses = `transition-transform duration-300 overflow-hidden  ${
     sideBar ? "max-w-[10rem] opacity-100" : "max-w-0 opacity-0"
   }`;
   const chevronClasses = `w-6 h-6 -translate-x-3 duration-300 transition-transform ${
@@ -56,7 +56,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
 
       {isExpanded && (
         <div className="w-fit mt-2">
-          <ul className="relative left-4">
+          <ul className="relative lg:left-4">
             {submenu.map((item, index) => (
               <li
                 key={index}
@@ -80,9 +80,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
                     data-tip={item.name}
                   >
                     {item.icon}
-                    <span
-                      className={`${sideBar ? "" : "hidden"} whitespace-nowrap`}
-                    >
+                    <span className={`${sideBar ? "" : "hidden"} `}>
                       {item.name}
                     </span>
                   </div>

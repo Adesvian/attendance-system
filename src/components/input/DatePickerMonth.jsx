@@ -77,10 +77,8 @@ const DatePickerComponent = ({
             field: { clearable: true, onClear: () => setCleared(true) },
           }}
           onChange={handleDateChange}
-          renderInput={(params) => (
-            <div>
-              <input {...params.inputProps} placeholder="Pilih bulan" />
-            </div>
+          textField={(params) => (
+            <input {...params.inputProps} placeholder="Pilih bulan" />
           )}
         />
       </LocalizationProvider>

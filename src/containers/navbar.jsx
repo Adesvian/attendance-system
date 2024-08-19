@@ -1,7 +1,7 @@
 import { HiBars3 } from "react-icons/hi2";
 import Avatar from "../components/profile/avatar";
 import Notify from "../components/notification/notification";
-import ToggleTheme from "../components/theme/toggle-theme";
+import ToggleTheme from "../components/theme/toggleTheme";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { setSidebar } from "../redux/headerSlice";
@@ -24,7 +24,7 @@ const Navbar = () => {
         <HiBars3 className="h-6 w-6 " />
       </button>
       <div className="flex-1">
-        <h1 className="text-2xl font-semibold ml-2 text-slate-800 dark:text-dark-text">
+        <h1 className="lg:text-2xl text-lg font-semibold ml-2 text-slate-800 dark:text-dark-text">
           {pageTitle}
         </h1>
       </div>

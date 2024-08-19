@@ -14,11 +14,12 @@ function BarChart() {
   useEffect(() => {
     updateChartData("Day", setData);
   }, []);
+
   return (
     <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 p-4 col-span-2">
-      <div className="flex justify-between ">
-        <div className="text-2xl font-bold text-base-200 dark:text-dark-text">
-          Total Attendance Per-{activeButton}
+      <div className="md:flex md:justify-between">
+        <div className="text-2xl font-bold text-base-200 dark:text-dark-text lg:my-4">
+          Total Attendance {activeButton}
         </div>
         <PeriodButtons
           activeButton={activeButton}
@@ -27,7 +28,10 @@ function BarChart() {
           setData={setData}
         />
       </div>
-      <Bar options={options} data={data} />
+      {/* Kontainer chart dengan width penuh dan max width tidak melebihi pembungkus */}
+      <div className="h-[25rem] w-full max-w-full">
+        <Bar options={options} data={data} />
+      </div>
     </div>
   );
 }

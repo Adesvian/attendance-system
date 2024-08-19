@@ -3,10 +3,52 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import DatePickerComponent from "../../components/input/DatePickerMonth";
 import ClassSelectorComponent from "../../components/input/Selector";
-import ExportButtonsComponent from "../../features/recap/ExportButton";
-import TableComponent from "../../features/recap/Table";
+import ExportButtonsComponent from "../../features/export/ExportButton";
+import TableComponent from "../../components/table/TableAttendance";
 import moment from "moment";
 
+const sampleRecords = [
+  {
+    name: "user 1",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 2",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 201,
+  },
+  {
+    name: "user 3",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 201,
+  },
+  {
+    name: "user 4",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 5",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+];
+
+const holidays = [
+  // { date: "2024-08-17", description: "Independence Day" },
+  // { date: "2024-08-19", description: "Holiday Event" },
+];
 const RecapAbsensi = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedClass, setSelectedClass] = useState("");
@@ -15,111 +57,6 @@ const RecapAbsensi = () => {
   const dt = useRef(null);
   const dispatch = useDispatch();
   const localTheme = useSelector((state) => state.header.theme);
-
-  const sampleRecords = [
-    {
-      name: "Hana Hermawan Gantari",
-      date: "2022-01-01",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 2",
-      date: "2022-01-01",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 3",
-      date: "2022-01-01",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-02",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-16",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-15",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-12",
-      class: "Kelas 1",
-      status: "izin",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-17",
-      class: "Kelas 1",
-      status: "sakit",
-    },
-    {
-      name: "Student 1",
-      date: "2022-01-03",
-      class: "Kelas 1",
-      status: "check-in",
-    },
-    {
-      name: "Student 2",
-      date: "2022-01-04",
-      class: "Kelas 2",
-      status: "check-in",
-    },
-    {
-      name: "Student 3",
-      date: "2022-01-02",
-      class: "Kelas 3",
-      status: "check-in",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-02",
-      class: "Kelas 4",
-      status: "check-in",
-    },
-    {
-      name: "Student 3",
-      date: "2022-01-08",
-      class: "Kelas 3",
-      status: "izin",
-    },
-    {
-      name: "Student 3",
-      date: "2022-01-09",
-      class: "Kelas 3",
-      status: "izin",
-    },
-    {
-      name: "Student 3",
-      date: "2022-01-10",
-      class: "Kelas 3",
-      status: "izin",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-08",
-      class: "Kelas 4",
-      status: "izin",
-    },
-    {
-      name: "Student 4",
-      date: "2022-01-09",
-      class: "Kelas 4",
-      status: "Sakit",
-    },
-  ];
 
   const handleDateChange = (newValue) => {
     setSelectedDate(newValue);
@@ -130,13 +67,22 @@ const RecapAbsensi = () => {
   };
 
   const fetchData = () => {
-    // Fetch data logic here
     if (selectedDate && selectedClass) {
       const selectedMonth = moment(selectedDate).month();
       const selectedYear = moment(selectedDate).year();
       const daysInMonth = moment(selectedDate).daysInMonth();
+      const today = moment().startOf("day");
 
-      const filteredData = sampleRecords.filter((record) => {
+      const processedRecords = sampleRecords.map((record) => ({
+        ...record,
+        date: moment.unix(record.date).format("YYYY-MM-DD"),
+      }));
+
+      const holidayDates = holidays.map((holiday) =>
+        moment(holiday.date, "YYYY-MM-DD")
+      );
+
+      const filteredData = processedRecords.filter((record) => {
         const recordDate = moment(record.date, "YYYY-MM-DD");
         return (
           recordDate.month() === selectedMonth &&
@@ -145,67 +91,116 @@ const RecapAbsensi = () => {
         );
       });
 
-      // Map status to corresponding abbreviations
-      const statusMap = {
-        "check-in": "P",
-        "-": "A",
+      const methodMap = {
+        "check-in": "H",
+        "-": "-",
         izin: "I",
         sakit: "S",
+        alfa: "A",
+        libur: "L", // For Saturday and Sunday
       };
 
-      // Format data for table
       const formattedData = filteredData.reduce((acc, record) => {
         const student = acc.find((s) => s.name === record.name);
-        const dayIndex = moment(record.date).date() - 1;
-        const status = statusMap[record.status] || "-";
+        const recordDate = moment(record.date, "YYYY-MM-DD").startOf("day");
+        const dayIndex = recordDate.date() - 1;
+        let method = methodMap[record.method] || "-";
 
         if (student) {
-          student.attendance[dayIndex] = status;
-          student[record.status]++;
+          student.attendance[dayIndex] = method;
         } else {
-          const attendance = Array(daysInMonth).fill("A"); // Default to "A" for absent
-          attendance[dayIndex] = status;
+          const attendance = Array(daysInMonth).fill("-"); // Default to "-" for future dates
+
+          attendance.forEach((_, index) => {
+            const currentDate = moment(selectedDate)
+              .date(index + 1)
+              .startOf("day");
+            const dayOfWeek = currentDate.day();
+            const isHoliday = holidayDates.some((holidayDate) =>
+              holidayDate.isSame(currentDate, "day")
+            );
+
+            if (isHoliday) {
+              attendance[index] = methodMap["libur"];
+            } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+              attendance[index] = methodMap["libur"];
+            }
+          });
+
+          attendance[dayIndex] = method;
           acc.push({
             name: record.name,
             attendance,
-            hadir: status === "P" ? 1 : 0,
-            absen: status === "A" ? 1 : 0,
-            izin: status === "I" ? 1 : 0,
-            sakit: status === "S" ? 1 : 0,
+            hadir: 0,
+            absen: 0,
+            izin: 0,
+            sakit: 0,
+            percentage: 0, // Add percentage field
           });
         }
         return acc;
       }, []);
 
-      // Aggregate counts for each student
-      const aggregatedData = formattedData.map((row) => {
-        const counts = {
-          hadir: 0,
-          absen: 0,
-          izin: 0,
-          sakit: 0,
-        };
-        row.attendance.forEach((status) => {
-          if (status === "P") counts.hadir++;
-          else if (status === "A") counts.absen++;
-          else if (status === "I") counts.izin++;
-          else if (status === "S") counts.sakit++;
+      formattedData.forEach((student) => {
+        student.attendance = student.attendance.map((status, index) => {
+          const currentDate = moment(selectedDate)
+            .date(index + 1)
+            .startOf("day");
+          const dayOfWeek = currentDate.day();
+          const isHoliday = holidayDates.some((holidayDate) =>
+            holidayDate.isSame(currentDate, "day")
+          );
+
+          if (isHoliday && status === "-") {
+            return methodMap["libur"];
+          } else if ((dayOfWeek === 0 || dayOfWeek === 6) && status === "-") {
+            return methodMap["libur"];
+          } else if (currentDate.isBefore(today) && status === "-") {
+            return methodMap["alfa"];
+          }
+          return status;
         });
 
-        return { ...row, ...counts };
+        student.hadir = student.attendance.filter(
+          (status) => status === "H"
+        ).length;
+        student.absen = student.attendance.filter(
+          (status) => status === "A"
+        ).length;
+        student.izin = student.attendance.filter(
+          (status) => status === "I"
+        ).length;
+        student.sakit = student.attendance.filter(
+          (status) => status === "S"
+        ).length;
+
+        const totalDays = student.attendance.length;
+        const holidaysCount = holidayDates.filter(
+          (holidayDate) =>
+            holidayDate.month() === selectedMonth &&
+            holidayDate.year() === selectedYear
+        ).length;
+        const weekendsCount = student.attendance.filter((_, index) => {
+          const currentDate = moment(selectedDate)
+            .date(index + 1)
+            .startOf("day");
+          return currentDate.day() === 0 || currentDate.day() === 6;
+        }).length;
+
+        const effectiveDays = totalDays - holidaysCount - weekendsCount;
+        student.percentage = ((student.hadir / effectiveDays) * 100).toFixed(1);
       });
 
-      setData(aggregatedData);
+      setData(formattedData);
     } else {
       setData([]);
     }
   };
 
   const generateColumns = () => {
-    // Generate columns logic here
     const daysInMonth = selectedDate ? moment(selectedDate).daysInMonth() : 0;
     const cols = [
-      { field: "name", header: "Nama" }, // Kolom nama
+      { field: "name", header: "Nama" },
       ...Array.from({ length: daysInMonth }, (_, i) => ({
         field: `day${i + 1}`,
         header: `${i + 1}`, // Kolom hari dengan angka
@@ -214,6 +209,7 @@ const RecapAbsensi = () => {
       { field: "absen", header: "Absen" },
       { field: "izin", header: "Izin" },
       { field: "sakit", header: "Sakit" },
+      { field: "percentage", header: "Kehadiran (%)" }, // Add percentage column
     ];
     return cols;
   };
@@ -225,52 +221,118 @@ const RecapAbsensi = () => {
     dataKey: col.field,
   }));
 
-  const exportPdf = () => {
-    // Export to PDF logic here
-    import("jspdf").then((jsPDF) => {
-      import("jspdf-autotable").then(() => {
-        // Menggunakan ukuran kertas 'a3'
-        const doc = new jsPDF.default("landscape", "pt", "a3");
+  const exportCSV = async () => {
+    try {
+      // Impor papaparse dan file-saver secara dinamis
+      const { unparse } = await import("papaparse");
+      const { saveAs } = await import("file-saver");
 
-        const tableData = data.map((row) => {
-          const rowData = { name: row.name };
-          row.attendance.forEach((att, i) => {
-            rowData[`day${i + 1}`] = att;
-          });
-          rowData.hadir = row.hadir;
-          rowData.absen = row.absen;
-          rowData.izin = row.izin;
-          rowData.sakit = row.sakit;
-          return rowData;
-        });
+      // Dapatkan jumlah hari dalam bulan yang dipilih
+      const daysInMonth = moment(selectedDate).daysInMonth();
 
-        // Menambahkan header dengan nama bulan dan kelas
-        const title = `Rekap Absensi - ${moment(selectedDate).format(
-          "MMMM YYYY"
-        )} - ${selectedClass}`;
-        doc.text(title, 40, 40);
+      // Buat header kolom untuk file CSV
+      const headers = [
+        "Nama",
+        ...Array.from({ length: daysInMonth }, (_, i) => `${i + 1}`), // Tanggal
+        "Hadir",
+        "Absen",
+        "Izin",
+        "Sakit",
+        "Kehadiran (%)",
+      ];
 
-        doc.autoTable({
-          head: [exportColumns.map((col) => col.title)],
-          body: tableData.map((row) =>
-            exportColumns.map((col) => row[col.dataKey])
-          ),
-          startY: 60,
-          margin: { left: 40, right: 40 },
-        });
+      // Buat data baris untuk file CSV
+      const rows = data.map((row) => [
+        row.name,
+        ...row.attendance,
+        row.hadir,
+        row.absen,
+        row.izin,
+        row.sakit,
+        row.percentage,
+      ]);
 
-        doc.save(
-          `rekap-absensi-${moment(selectedDate).format(
-            "YYYY-MMMM"
-          )}-${selectedClass}.pdf`
-        );
-      });
-    });
+      // Tambahkan header ke baris data
+      const csv = unparse([headers, ...rows]);
+
+      // Buat file CSV dan simpan
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      saveAs(
+        blob,
+        `rekap-absensi-${moment(selectedDate).format(
+          "YYYY-MMMM"
+        )}-${selectedClass}.csv`
+      );
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+    }
   };
 
-  const exportExcel = () => {
-    // Export to Excel logic here
-    import("xlsx").then((xlsx) => {
+  const exportPdf = async () => {
+    try {
+      // Import jsPDF and jsPDF-AutoTable modules
+      const { default: jsPDF } = await import("jspdf");
+      await import("jspdf-autotable");
+
+      // Menggunakan ukuran kertas 'a3'
+      const doc = new jsPDF("landscape", "pt", "a3");
+
+      const tableData = data.map((row) => {
+        const rowData = { name: row.name };
+        row.attendance.forEach((att, i) => {
+          rowData[`day${i + 1}`] = att;
+        });
+        rowData.hadir = row.hadir;
+        rowData.absen = row.absen;
+        rowData.izin = row.izin;
+        rowData.sakit = row.sakit;
+        rowData.percentage = row.percentage;
+        return rowData;
+      });
+
+      // Menambahkan header dengan nama bulan dan kelas
+      const title = `Rekap Absensi - ${moment(selectedDate).format(
+        "MMMM YYYY"
+      )} - ${selectedClass}`;
+      doc.text(title, 40, 40);
+
+      doc.setFontSize(11);
+      const pageSize = doc.internal.pageSize;
+      const pageWidth = pageSize.width || pageSize.getWidth();
+      const text = doc.splitTextToSize(
+        `Download Time : ${moment().format(
+          "DD-MM-YYYY HH:mm:ss"
+        )}\nUser Download : ${
+          JSON.parse(localStorage.getItem("token")).name
+        }\n`,
+        pageWidth - 35
+      );
+      doc.text(text, 40, 60);
+
+      doc.autoTable({
+        head: [exportColumns.map((col) => col.title)],
+        body: tableData.map((row) =>
+          exportColumns.map((col) => row[col.dataKey])
+        ),
+        startY: 85,
+        margin: { left: 40, right: 40 },
+      });
+
+      doc.save(
+        `rekap-absensi-${moment(selectedDate).format(
+          "YYYY-MMMM"
+        )}-${selectedClass}.pdf`
+      );
+    } catch (error) {
+      console.error("Error exporting to PDF:", error);
+    }
+  };
+
+  const exportExcel = async () => {
+    try {
+      // Import xlsx module
+      const xlsx = await import("xlsx");
+
       // Get the number of days in the selected month
       const daysInMonth = moment(selectedDate).daysInMonth();
 
@@ -282,6 +344,7 @@ const RecapAbsensi = () => {
         "Absen",
         "Izin",
         "Sakit",
+        "Kehadiran (%)",
       ];
 
       // Generate day names for the second row based on the selected month and year
@@ -308,6 +371,7 @@ const RecapAbsensi = () => {
         row.absen,
         row.izin,
         row.sakit,
+        row.percentage,
       ]);
 
       // Create worksheet
@@ -320,6 +384,7 @@ const RecapAbsensi = () => {
         { s: { r: 0, c: daysInMonth + 2 }, e: { r: 1, c: daysInMonth + 2 } }, // Merge Absen header
         { s: { r: 0, c: daysInMonth + 3 }, e: { r: 1, c: daysInMonth + 3 } }, // Merge Izin header
         { s: { r: 0, c: daysInMonth + 4 }, e: { r: 1, c: daysInMonth + 4 } }, // Merge Sakit header
+        { s: { r: 0, c: daysInMonth + 5 }, e: { r: 1, c: daysInMonth + 5 } }, // Merge Percentage header
       ];
 
       // Adjust column widths (optional)
@@ -330,6 +395,7 @@ const RecapAbsensi = () => {
         { width: 10 }, // Absen
         { width: 10 }, // Izin
         { width: 10 }, // Sakit
+        { width: 15 }, // Percentage
       ];
 
       // Create workbook
@@ -339,28 +405,32 @@ const RecapAbsensi = () => {
         type: "array",
       });
 
+      // Save the Excel file
       saveAsExcelFile(
         excelBuffer,
         `rekap-absensi-${moment(selectedDate).format(
           "YYYY-MMMM"
         )}-${selectedClass}`
       );
-    });
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+    }
   };
 
-  const saveAsExcelFile = (buffer, fileName) => {
-    import("file-saver").then((module) => {
-      if (module && module.default) {
-        const EXCEL_TYPE =
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-        const EXCEL_EXTENSION = ".xlsx";
-        const data = new Blob([buffer], {
-          type: EXCEL_TYPE,
-        });
+  const saveAsExcelFile = async (buffer, fileName) => {
+    try {
+      // Import file-saver module
+      const { default: FileSaver } = await import("file-saver");
 
-        module.default.saveAs(data, `${fileName}_export_${EXCEL_EXTENSION}`);
-      }
-    });
+      const EXCEL_TYPE =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const EXCEL_EXTENSION = ".xlsx";
+      const data = new Blob([buffer], { type: EXCEL_TYPE });
+
+      FileSaver.saveAs(data, `${fileName}_export${EXCEL_EXTENSION}`);
+    } catch (error) {
+      console.error("Error saving Excel file:", error);
+    }
   };
 
   useEffect(() => {
@@ -383,12 +453,14 @@ const RecapAbsensi = () => {
 
   const getStatusClass = (status) => {
     switch (status) {
-      case "P":
+      case "H":
         return "text-emerald-500";
       case "A":
         return "text-rose-500";
       case "I":
         return "text-indigo-500";
+      case "L":
+        return "text-rose-100 bg-rose-700";
       default:
         return "";
     }
@@ -410,12 +482,12 @@ const RecapAbsensi = () => {
           />
         </div>
         <ExportButtonsComponent
-          dt={dt}
+          exportCSV={exportCSV}
           exportExcel={exportExcel}
           exportPdf={exportPdf}
         />
         <TableComponent
-          dt={dt}
+          ref={dt}
           data={data}
           columns={columns}
           getStatusClass={getStatusClass}
