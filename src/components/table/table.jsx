@@ -12,8 +12,11 @@ import {
   Pagination,
 } from "@mui/material";
 import SingleButton from "../button/Button";
-import { AiOutlineEdit, AiTwotoneDelete } from "react-icons/ai";
+import { MdEdit, MdDelete } from "react-icons/md";
+import { FaCheck, FaXmark, FaEye } from "react-icons/fa6";
 import { useSelector } from "react-redux";
+import { ThemeProvider } from "@emotion/react";
+import getTheme from "./theme/tableTheme";
 
 const descendingComparator = (a, b, orderBy) => {
   if (b[orderBy] < a[orderBy]) {
@@ -43,11 +46,12 @@ const stableSort = (array, comparator) => {
   return stabilizedThis.map((el) => el[0]);
 };
 
-function TableDataManager({ data, columns, handleEdit, handleDelete }) {
+function TableDataManager({ data, columns, isUserTable = true, ...props }) {
   const theme = useSelector((state) => state.header.theme);
+  const muitheme = getTheme(theme);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState(columns[0]?.field || "");
-  const [page, setPage] = useState(1); // Mulai dari halaman 1
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Format data based on type
@@ -62,7 +66,6 @@ function TableDataManager({ data, columns, handleEdit, handleDelete }) {
   };
 
   const paginatedRows = useMemo(() => {
-    // Jika type adalah 'standard', lakukan sorting dan pagination
     const sortedRows = stableSort(formattedData, getComparator(order, orderBy));
     return sortedRows.slice(
       (page - 1) * rowsPerPage,
@@ -75,125 +78,142 @@ function TableDataManager({ data, columns, handleEdit, handleDelete }) {
   };
 
   return (
-    <div className=" mt-5">
-      <TableContainer component={Paper} className="h-[30rem] dark:bg-base-200">
-        <Table
-          stickyHeader
-          aria-label="sticky table"
-          className="whitespace-nowrap "
+    <div className="mt-5">
+      <ThemeProvider theme={muitheme}>
+        <TableContainer
+          component={Paper}
+          className="h-[30rem] dark:bg-base-200"
         >
-          <TableHead>
-            <TableRow>
-              {columns.map((col, index) => (
-                <TableCell
-                  key={index}
-                  align="center"
-                  sortDirection={orderBy === col.field ? order : false}
-                  className="dark:bg-base-200"
-                >
-                  <TableSortLabel
-                    active={orderBy === col.field}
-                    direction={orderBy === col.field ? order : "asc"}
-                    onClick={() => handleRequestSort(col.field)}
-                    className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
-                    sx={{
-                      "&.Mui-active": {
-                        color: theme === "dark" ? "white" : "inherit", // Warna saat label aktif
-                        "& .MuiTableSortLabel-icon": {
-                          color: theme === "dark" ? "white" : "inherit", // Warna ikon saat label aktif
-                        },
-                      },
-                      "&:hover": {
-                        color: theme === "dark" ? "white" : "inherit", // Warna saat hover
-                      },
-                      color: theme === "dark" ? "white" : "inherit", // Warna default
-                    }}
-                  >
-                    <span className="ml-5">{col.header}</span>
-                  </TableSortLabel>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {paginatedRows.map((row, index) => (
-              <TableRow key={index}>
-                {columns.map((col, colIndex) => (
+          <Table
+            stickyHeader
+            aria-label="sticky table"
+            className="whitespace-nowrap"
+          >
+            <TableHead>
+              <TableRow>
+                {columns.map((col, index) => (
                   <TableCell
-                    key={colIndex}
+                    key={index}
                     align="center"
-                    className="dark:text-dark-text"
+                    sortDirection={orderBy === col.field ? order : false}
+                    className="dark:bg-base-200"
                   >
-                    {col.field === "profile" ? (
-                      <div className="avatar">
-                        <div className="mask mask-circle h-20 w-20">
-                          <img
-                            src={row[col.field]}
-                            alt="Avatar Tailwind CSS Component"
-                          />
-                        </div>
-                      </div>
-                    ) : col.field === "action" ? (
-                      <div className="flex justify-center gap-x-2">
-                        <SingleButton
-                          // btnTitle={"Edit"}
-                          className="btn bg-amber-500 text-white hover:bg-amber-600 hover:text-white"
-                          onClick={() => handleEdit(row["nik"])}
-                        >
-                          <AiOutlineEdit />
-                        </SingleButton>
-                        <SingleButton
-                          // btnTitle={"Delete"}
-                          className="btn bg-rose-500 text-white hover:bg-rose-600 hover:text-white"
-                          onClick={() => handleDelete(row["nik"])}
-                        >
-                          <AiTwotoneDelete />
-                        </SingleButton>
-                      </div>
-                    ) : (
-                      <div className="p-2 font-medium">{row[col.field]}</div>
-                    )}
+                    <TableSortLabel
+                      active={orderBy === col.field}
+                      direction={orderBy === col.field ? order : "asc"}
+                      onClick={() => handleRequestSort(col.field)}
+                      className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
+                    >
+                      <span className="ml-5">{col.header}</span>
+                    </TableSortLabel>
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Stack spacing={2} className="flex justify-center my-4">
-        <Pagination
-          className="flex justify-end"
-          count={Math.ceil(formattedData.length / rowsPerPage)}
-          page={page}
-          onChange={handleChangePage}
-          variant="outlined"
-          shape="rounded"
-          sx={
-            theme === "dark"
-              ? {
-                  "& .MuiPaginationItem-root": {
-                    color: "white",
-                  },
-                  // background color
-                  "& .MuiPaginationItem-root.Mui-selected": {
-                    backgroundColor: "white",
-                    color: "black",
-                  },
-                  // border color untuk item tidak aktif berwarna putih
-                  "& .MuiPaginationItem-page": {
-                    borderColor: "white",
-                    color: "white",
-                  },
-                  // border color untuk previous dan next button
-                  "& .MuiPaginationItem-root.MuiButtonBase-root": {
-                    borderColor: "white",
-                  },
-                }
-              : {}
-          }
-        />
-      </Stack>
+            </TableHead>
+
+            <TableBody>
+              {paginatedRows.map((row, index) => (
+                <TableRow key={index}>
+                  {columns.map((col, colIndex) => (
+                    <TableCell
+                      key={colIndex}
+                      align="center"
+                      className="dark:text-dark-text"
+                    >
+                      {col.field === "profile" ? (
+                        <div className="avatar">
+                          <div className="mask mask-circle h-20 w-20">
+                            <img src={row[col.field]} alt="Avatar" />
+                          </div>
+                        </div>
+                      ) : col.field === "action" ? (
+                        <div className="flex justify-center gap-x-2">
+                          {isUserTable ? (
+                            <>
+                              <SingleButton
+                                className="btn border-none bg-amber-500 hover:bg-amber-600 text-white"
+                                onClick={() => props.handleAct1(row)}
+                              >
+                                <MdEdit /> Edit
+                              </SingleButton>
+                              <SingleButton
+                                className="btn border-none bg-rose-500 hover:bg-rose-600 text-white"
+                                onClick={() => props.handleAct2(row)}
+                              >
+                                <MdDelete /> Delete
+                              </SingleButton>
+                            </>
+                          ) : row.status === "Pending" ? (
+                            <>
+                              <SingleButton
+                                className={`btn border-none self-center ${
+                                  props.handleAct1.name === "handleAccept"
+                                    ? "bg-green-500 hover:bg-green-600"
+                                    : "bg-amber-500 hover:bg-amber-600"
+                                } text-white`}
+                                onClick={() => props.handleAct1(row)}
+                              >
+                                <FaCheck /> Accept
+                              </SingleButton>
+                              <SingleButton
+                                className="btn border-none self-center bg-rose-500 hover:bg-rose-600 text-white"
+                                onClick={() => props.handleAct2(row)}
+                              >
+                                <FaXmark /> Reject
+                              </SingleButton>
+                            </>
+                          ) : null}
+                        </div>
+                      ) : col.field === "attachment" ? (
+                        <button
+                          className="btn border-none self-center bg-amber-500 hover:bg-amber-600 text-white"
+                          onClick={() =>
+                            document
+                              .getElementById(`modal_${index}`)
+                              .showModal()
+                          }
+                        >
+                          <FaEye />
+                        </button>
+                      ) : (
+                        <div className="p-2 font-medium">{row[col.field]}</div>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Stack spacing={2} className="flex justify-center my-4">
+          <Pagination
+            className="flex justify-end"
+            count={Math.ceil(formattedData.length / rowsPerPage)}
+            page={page}
+            onChange={handleChangePage}
+            variant="outlined"
+            shape="rounded"
+          />
+        </Stack>
+        {paginatedRows.map((row, index) => (
+          <dialog key={index} id={`modal_${index}`} className="modal">
+            <div className="modal-box bg-white">
+              <img
+                src={`http://localhost:3001/permits/${row.attachment}`}
+                alt="Lampiran"
+                className="w-full h-auto"
+              />
+              <div className="modal-action">
+                <form method="dialog">
+                  <button className="btn border-none bg-gray-100 hover:bg-gray-300 text-black">
+                    Close
+                  </button>
+                </form>
+              </div>
+            </div>
+          </dialog>
+        ))}
+      </ThemeProvider>
     </div>
   );
 }

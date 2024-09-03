@@ -9,11 +9,13 @@ function Siswa() {
     dispatch(setPageTitle({ title: "Siswa" }));
   }, []);
   return (
-    <div className="grid lg:grid-cols-4 mt-2 md:grid-cols-2 grid-cols-1 gap-6">
-      <div className="stats shadow">
-        <div className="stat">siswa</div>
+    <>
+      <div className="grid lg:grid-cols-4 mt-2 md:grid-cols-2 grid-cols-1 gap-6">
+        <div className="stats shadow">
+          <div className="stat">siswa</div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

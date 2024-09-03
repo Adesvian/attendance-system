@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import DatePickerComponent from "../../components/input/DatePickerMonth";
-import ClassSelectorComponent from "../../components/input/Selector";
-import ExportButtonsComponent from "../../features/export/ExportButton";
+import ExportButtonsComponent from "../../features/export/Export";
 import TableComponent from "../../components/table/TableAttendance";
 import moment from "moment";
+import CustomSelect from "../../components/input/Select";
 
 const sampleRecords = [
   {
@@ -43,6 +43,48 @@ const sampleRecords = [
     method: "check-in",
     status: 200,
   },
+  {
+    name: "user 5",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 6",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 7",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 8",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 9",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
+  {
+    name: "user 10",
+    date: 1723050000,
+    class: "Kelas 1",
+    method: "check-in",
+    status: 200,
+  },
 ];
 
 const holidays = [
@@ -56,7 +98,6 @@ const RecapAbsensi = () => {
   const [data, setData] = useState([]);
   const dt = useRef(null);
   const dispatch = useDispatch();
-  const localTheme = useSelector((state) => state.header.theme);
 
   const handleDateChange = (newValue) => {
     setSelectedDate(newValue);
@@ -435,7 +476,7 @@ const RecapAbsensi = () => {
 
   useEffect(() => {
     dispatch(setPageTitle({ title: "Rekapitulasi Absensi" }));
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -467,34 +508,54 @@ const RecapAbsensi = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5 ">
-      <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 col-span-2">
-        <div className="flex gap-x-4 mb-4 font-poppins">
-          <DatePickerComponent
-            selectedDate={selectedDate}
-            handleDateChange={handleDateChange}
-            setCleared={setCleared}
-            localTheme={localTheme}
-          />
-          <ClassSelectorComponent
-            selectedClass={selectedClass}
-            handleClassChange={handleClassChange}
-          />
+    <>
+      <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
+        <div
+          className={`bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white col-span-2 ${
+            data && data.length > 0 ? "h-4/6 overflow-auto" : ""
+          }`}
+        >
+          <div className="sticky top-0 bg-white dark:bg-base-100 pl-4 pt-4 pr-4 pb-0.5">
+            <div className="flex gap-x-3 mb-4 font-poppins">
+              <DatePickerComponent
+                selectedDate={selectedDate}
+                handleDateChange={handleDateChange}
+                setCleared={setCleared}
+              />
+              <CustomSelect
+                value={selectedClass}
+                size="medium"
+                onChange={handleClassChange}
+                options={[
+                  { value: "", label: "Pilih Kelas" },
+                  { value: "Kelas 1", label: "Kelas 1" },
+                  { value: "Kelas 2", label: "Kelas 2" },
+                  { value: "Kelas 3", label: "Kelas 3" },
+                  { value: "Kelas 4", label: "Kelas 4" },
+                  { value: "Kelas 5", label: "Kelas 5" },
+                  { value: "Kelas 6", label: "Kelas 6" },
+                ]}
+              />
+            </div>
+            <ExportButtonsComponent
+              exportCSV={exportCSV}
+              exportExcel={exportExcel}
+              exportPdf={exportPdf}
+            />
+          </div>
+
+          <div className="px-4 pb-5 bg-white dark:bg-base-100">
+            <TableComponent
+              ref={dt}
+              data={data}
+              columns={columns}
+              getStatusClass={getStatusClass}
+              type="recap"
+            />
+          </div>
         </div>
-        <ExportButtonsComponent
-          exportCSV={exportCSV}
-          exportExcel={exportExcel}
-          exportPdf={exportPdf}
-        />
-        <TableComponent
-          ref={dt}
-          data={data}
-          columns={columns}
-          getStatusClass={getStatusClass}
-          type="recap"
-        />
       </div>
-    </div>
+    </>
   );
 };
 

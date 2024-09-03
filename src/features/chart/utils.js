@@ -20,7 +20,7 @@ ChartJS.register(
 
 const dataSiswa = [
   {
-    tanggal: "01-08-2022",
+    tanggal: "01-09-2022",
     data: [
       { name: "Kelas 1", data: 1000 },
       { name: "Kelas 2", data: 2000 },
@@ -31,7 +31,7 @@ const dataSiswa = [
     ],
   },
   {
-    tanggal: "01-08-2024",
+    tanggal: "01-09-2024",
     data: [
       { name: "Kelas 1", data: 10 },
       { name: "Kelas 2", data: 20 },
@@ -42,7 +42,7 @@ const dataSiswa = [
     ],
   },
   {
-    tanggal: "03-08-2024",
+    tanggal: "03-09-2024",
     data: [
       { name: "Kelas 1", data: 100 },
       { name: "Kelas 2", data: 200 },

@@ -1,6 +1,20 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+const baseURL_BE = import.meta.env.VITE_BASE_URL_BACKEND;
 function Avatar() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await axios.delete(`${baseURL_BE}/logout`, {
+        withCredentials: true,
+      });
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div className="dropdown dropdown-end">
       <div
@@ -26,7 +40,7 @@ function Avatar() {
           <a>Settings</a>
         </li>
         <li>
-          <a>Logout</a>
+          <a onClick={handleLogout}>Logout</a>
         </li>
       </ul>
     </div>

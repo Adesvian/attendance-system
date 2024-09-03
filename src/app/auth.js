@@ -1,44 +1,16 @@
-import axios from "axios";
+import CryptoJs from "crypto-js";
 
-const checkAuth = () => {
-  /*  Getting token value stored in localstorage, if token is not present we will open login page 
-    for all internal dashboard routes  */
-  const TOKEN = localStorage.getItem("token");
-  const PUBLIC_ROUTES = ["login"];
-  const isPublicPage = PUBLIC_ROUTES.some((r) =>
-    window.location.href.includes(r)
-  );
-
-  if (!TOKEN && !isPublicPage) {
-    window.location.href = "/login";
-    return;
-  } else {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${TOKEN}`;
-
-    axios.interceptors.request.use(
-      function (config) {
-        // UPDATE: Add this code to show global loading indicator
-        document.body.classList.add("loading-indicator");
-        return config;
-      },
-      function (error) {
-        return Promise.reject(error);
-      }
-    );
-
-    axios.interceptors.response.use(
-      function (response) {
-        // UPDATE: Add this code to hide global loading indicator
-        document.body.classList.remove("loading-indicator");
-        return response;
-      },
-      function (error) {
-        document.body.classList.remove("loading-indicator");
-        return Promise.reject(error);
-      }
-    );
-    return JSON.parse(TOKEN);
-  }
+// Decrypt function using CryptoJS
+export const decrypt = (key, data) => {
+  const bytes = CryptoJs.AES.decrypt(data, key);
+  return bytes.toString(CryptoJs.enc.Utf8);
 };
 
-export default checkAuth;
+export const decodeJWT = (token) => {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    console.error("Invalid JWT token:", e);
+    return null;
+  }
+};

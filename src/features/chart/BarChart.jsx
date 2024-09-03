@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import PeriodButtons from "./periodButton";
+import PeriodButtons from "./TimePeriod";
 import { updateChartData, BarChartTheme } from "./utils";
 import { Bar } from "react-chartjs-2";
 import { useSelector } from "react-redux";
