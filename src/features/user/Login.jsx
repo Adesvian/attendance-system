@@ -1,58 +1,114 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SingleButton from "../../components/button/Button";
 import TextInput from "../../components/input/TextInput";
-import ErrorText from "../../components/input/ErrorText";
+import Alert from "@mui/material/Alert";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { decrypt } from "../../app/auth"; // Pastikan ini diimpor dari file auth.js
+import { login } from "../../redux/authSlice";
+
+const baseURL_BE = import.meta.env.VITE_BASE_URL_BACKEND;
 
 function LoginForm() {
-  const INITIAL_LOGIN_OBJ = {
-    email: "",
-    password: "",
-  };
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const INITIAL_LOGIN_OBJ = {
+    username: "",
+    password: "",
+  };
   const [loginObj, setLoginObj] = useState(INITIAL_LOGIN_OBJ);
 
-  const submitForm = (e) => {
+  useEffect(() => {
+    const checkAuthCookies = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/get-cookies", {
+          withCredentials: true, // Mengirim cookie dalam permintaan
+        });
+
+        const authToken = response.data._USER_AUTH_RAMADHAN;
+
+        if (authToken) {
+          try {
+            // Coba dekripsi token
+            const decryptedToken = decrypt(
+              import.meta.env.VITE_JWT_SECRET,
+              authToken
+            );
+            // Jika dekripsi berhasil, lakukan navigasi ke dashboard
+            if (decryptedToken) {
+              dispatch(login(decryptedToken)); // Dispatch login action jika token valid
+              navigate("/dashboard-admin");
+            } else {
+              setErrorMessage("Something went wrong, please log in again.");
+              navigate("/login");
+            }
+          } catch (error) {
+            console.error("Invalid token decryption:", error);
+            setErrorMessage("Invalid session, please log in again.");
+            navigate("/login");
+          }
+        } else {
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Error fetching cookies:", error);
+        setErrorMessage("Failed to validate session, please log in again.");
+      }
+    };
+
+    checkAuthCookies();
+  }, [dispatch, navigate]);
+
+  const submitForm = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setErrorMessage("");
 
-    console.log(loginObj.email);
+    try {
+      const response = await axios.post(`${baseURL_BE}/login`, loginObj, {
+        withCredentials: true,
+      });
 
-    if (loginObj.email.trim() === "")
-      return setErrorMessage("Email is required! (use any value)");
-    if (loginObj.password.trim() === "")
-      return setErrorMessage("Password is required! (use any value)");
-    else {
-      setLoading(true);
-      // Call API to check user credentials and save token in localstorage
-      const token = { name: loginObj.email, role: "admin" };
-      localStorage.setItem("token", JSON.stringify(token));
+      if (response.status === 200) {
+        dispatch(login(response.data));
+        navigate("/dashboard-admin");
+      } else {
+        setErrorMessage("Login failed! Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(
+        error.response?.data?.message || "An error occurred! Please try again."
+      );
+    } finally {
       setLoading(false);
-      window.location.href = "/dashboard";
     }
   };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setLoginObj({ ...loginObj, [id]: value });
+    setLoginObj((prev) => ({ ...prev, [id]: value }));
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-login-svg bg-cover">
-      <div className="bg-white py-12 px-16 rounded-md shadow-md w-full max-w-md font-poppins">
+      <div className="bg-white py-12 px-16 rounded-md shadow-md w-full max-w-md font-poppins relative">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800">Log in</h2>
           <span className="text-sm text-gray-600">
             Please enter your details
           </span>
         </div>
+
         <form onSubmit={submitForm}>
           <TextInput
-            id="email"
-            type="email"
-            label="Email"
-            value={loginObj.email}
+            id="username"
+            type="text"
+            label="Username"
+            value={loginObj.username}
             onChange={handleChange}
             required
           />
@@ -64,16 +120,23 @@ function LoginForm() {
             onChange={handleChange}
             required
           />
-          <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
+          {errorMessage && (
+            <Alert severity="error" className="my-4">
+              {errorMessage}
+            </Alert>
+          )}
           <SingleButton
             type="submit"
-            className={`w-full mt-6 border-none text-white${
-              loading ? " loading" : ""
-            }`}
+            className="btn bg-blue-500 hover:bg-blue-600 w-full border-none text-white"
             btnTitle="Login"
-            btnBg="bg-blue-500 hover:bg-blue-600"
           />
         </form>
+
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md">
+            <span className="loading loading-spinner text-primary"></span>
+          </div>
+        )}
       </div>
     </div>
   );

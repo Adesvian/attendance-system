@@ -1,9 +1,4 @@
-import {
-  HiOutlineSquares2X2,
-  HiOutlineClipboard,
-  HiOutlineTableCells,
-} from "react-icons/hi2";
-import { HiOutlineUserAdd } from "react-icons/hi";
+import { HiOutlineSquares2X2, HiOutlineClipboard } from "react-icons/hi2";
 import {
   PiStudent,
   PiUser,
@@ -26,17 +21,20 @@ const sidebar_routes = [
   {
     path: "/dashboard-admin",
     name: "Dashboard",
+    role: ["admin"],
     icon: <HiOutlineSquares2X2 className={iconClasses} />,
   },
   {
-    path: "/absence",
+    path: "/permit",
     name: "Ketidakhadiran",
+    role: ["teacher"],
     icon: <PiUserCircleMinus className={iconClasses} />,
   },
   {
     path: "",
     icon: <HiOutlineClipboard className={iconClasses} />,
     name: "Absensi",
+    role: ["admin", "teacher", "parent"],
     submenu: [
       {
         path: "/recapitulation-absensi",
@@ -51,12 +49,13 @@ const sidebar_routes = [
     ],
   },
   {
-    path: "/master-data",
+    path: "",
     name: "Manajemen Data",
+    role: ["admin"],
     icon: <LiaDatabaseSolid className={`${iconClasses} inline`} />,
     submenu: [
       {
-        path: "/data-guru",
+        path: "/teacher",
         name: "Manajemen Data Guru",
         icon: <PiUser className={submenuIconClasses} />,
       },
@@ -80,11 +79,13 @@ const sidebar_routes = [
   {
     path: "/whatsapp",
     name: "Whatsapp Configuration",
+    role: ["admin"],
     icon: <PiWhatsappLogoLight className={iconClasses} />,
   },
   {
     path: "/time-setting",
     name: "Time Setting",
+    role: ["admin"],
     icon: <PiTimerLight className={iconClasses} />,
   },
 ];

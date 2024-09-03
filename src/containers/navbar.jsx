@@ -16,7 +16,7 @@ const Navbar = () => {
   }, [open, dispatch]);
 
   return (
-    <div className="navbar sticky top-0 shadow-md bg-gray-200 dark:bg-base-200">
+    <div className="navbar sticky top-0 shadow-md bg-gray-200 dark:bg-base-200 z-50">
       <button
         onClick={() => setOpen((prev) => !prev)}
         className=" drawer-button text-gray-800 dark:text-dark-text hover:bg-gray-400/30 p-2 rounded-md dark:hover:bg-gray-600/30"

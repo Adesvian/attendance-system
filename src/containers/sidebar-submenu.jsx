@@ -7,12 +7,11 @@ function SidebarSubMenu({ submenu, name, icon }) {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const { sideBar } = useSelector((state) => state.header);
-
   // Determine if the submenu should be expanded based on the current path
   useEffect(() => {
     const isCurrentPath = submenu.some((m) => m.path === location.pathname);
     setIsExpanded(isCurrentPath);
-  }, [submenu, location.pathname]);
+  }, []);
 
   // Toggle submenu visibility
   const handleToggle = () => setIsExpanded((prev) => !prev);
@@ -57,36 +56,39 @@ function SidebarSubMenu({ submenu, name, icon }) {
       {isExpanded && (
         <div className="w-fit mt-2">
           <ul className="relative lg:left-4">
-            {submenu.map((item, index) => (
-              <li
-                key={index}
-                className={`rounded-md  text-base-200 dark:text-dark-text text-sm mt-2 ${
-                  location.pathname === item.path
-                    ? "bg-gray-300 text-black"
-                    : ""
-                }`}
-              >
-                <NavLink
-                  end
-                  to={item.path}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "bg-gray-200  text-black font-semibold"
-                      : "font-normal"
-                  }
+            {submenu.map((item, index) => {
+              const active =
+                location.pathname === item.path ||
+                (location.pathname.startsWith(item.path) && item.path !== "");
+              return (
+                <li
+                  key={index}
+                  className={`rounded-md  text-base-200 dark:text-dark-text text-sm mt-2 ${
+                    active ? "bg-gray-300 text-black" : ""
+                  }`}
                 >
-                  <div
-                    className={`${linkContainerClasses} hover:text-black hover:bg-gray-300 p-3`}
-                    data-tip={item.name}
+                  <NavLink
+                    end
+                    to={item.path}
+                    className={
+                      active
+                        ? "bg-gray-200  text-black font-semibold"
+                        : "font-normal"
+                    }
                   >
-                    {item.icon}
-                    <span className={`${sideBar ? "" : "hidden"} `}>
-                      {item.name}
-                    </span>
-                  </div>
-                </NavLink>
-              </li>
-            ))}
+                    <div
+                      className={`${linkContainerClasses} hover:text-black hover:bg-gray-300 p-3`}
+                      data-tip={item.name}
+                    >
+                      {item.icon}
+                      <span className={`${sideBar ? "" : "hidden"} `}>
+                        {item.name}
+                      </span>
+                    </div>
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

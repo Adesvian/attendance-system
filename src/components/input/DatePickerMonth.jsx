@@ -3,82 +3,37 @@ import React from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
+import getTheme from "./theme/DatePickerMonthTheme";
+import { useSelector } from "react-redux";
 
 const DatePickerComponent = ({
   selectedDate,
   handleDateChange,
   setCleared,
-  localTheme,
+  label = "Pilih bulan",
+  placeholder = "Pilih bulan",
 }) => {
-  const theme = createTheme({
-    components: {
-      MuiPickersToolbar: {
-        styleOverrides: {
-          root: {
-            color: "#9ca3af",
-            borderRadius: "6px",
-            borderWidth: "2px",
-            borderColor: "#9ca3af",
-            border: "2px solid",
-            backgroundColor: "transparent",
-          },
-        },
-      },
-      MuiInputBase: {
-        styleOverrides: {
-          root: {
-            color: localTheme === "dark" ? "#ffffff" : "#000000",
-          },
-        },
-      },
-      MuiInputLabel: {
-        styleOverrides: {
-          root: {
-            color: localTheme === "dark" ? "#ffffff" : "#000000",
-          },
-        },
-      },
-      MuiIconButton: {
-        styleOverrides: {
-          root: {
-            color: localTheme === "dark" ? "#ffffff" : "#000000",
-          },
-        },
-      },
-      MuiTextField: {
-        styleOverrides: {
-          root: {
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: localTheme === "dark" ? "#ffffff" : "#000000",
-              },
-              "&:hover fieldset": {
-                borderColor: localTheme === "dark" ? "#ffffff" : "#000000",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: localTheme === "dark" ? "#ffffff" : "#000000",
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+  const theme = useSelector((state) => state.header.theme);
+  const muitheme = getTheme(theme);
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={muitheme}>
       <LocalizationProvider dateAdapter={AdapterMoment}>
         <DatePicker
-          label="Pilih bulan"
+          label={label}
           views={["year", "month"]}
           value={selectedDate}
-          slotProps={{
-            field: { clearable: true, onClear: () => setCleared(true) },
-          }}
           onChange={handleDateChange}
+          slotProps={{
+            field: {
+              clearable: true,
+              onClear: () => setCleared(true),
+              placeholder,
+            },
+          }}
           textField={(params) => (
-            <input {...params.inputProps} placeholder="Pilih bulan" />
+            <input {...params.inputProps} placeholder={placeholder} />
           )}
         />
       </LocalizationProvider>

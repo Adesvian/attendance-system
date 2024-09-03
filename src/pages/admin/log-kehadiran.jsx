@@ -140,27 +140,29 @@ function LogKehadiran() {
       { field: "time", header: "Time" },
     ]);
     dispatch(setPageTitle({ title: "Log Kehadiran" }));
-  }, [dispatch]);
+  }, []);
 
   return (
-    <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
-      <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 col-span-2">
-        <div className="flex justify-end lg:absolute lg:right-[25rem]">
-          <SingleButton
-            btnTitle={<MdFileDownload />}
-            className="btn border-none bg-blue-500 rounded-full text-white "
-            onClick={exportPdf}
+    <>
+      <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
+        <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 col-span-2">
+          <div className="flex justify-end lg:absolute lg:right-[25rem]">
+            <SingleButton
+              btnTitle={<MdFileDownload />}
+              className="btn border-none bg-blue-500 rounded-full text-white "
+              onClick={exportPdf}
+            />
+          </div>
+          <TableComponent
+            ref={dt}
+            data={data}
+            columns={columns}
+            getStatusClass={getStatusClass}
+            type="standard"
           />
         </div>
-        <TableComponent
-          ref={dt}
-          data={data}
-          columns={columns}
-          getStatusClass={getStatusClass}
-          type="standard"
-        />
       </div>
-    </div>
+    </>
   );
 }
 

@@ -1,12 +1,21 @@
+import React, { cloneElement } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SidebarSubMenu from "./sidebar-submenu";
-import sidebar_routes from "../routes/sidebar-menu-routes";
-import React, { cloneElement } from "react";
+import sidebar_routes from "../routes/SidebarRoutesMenu";
+import { decodeJWT } from "../app/auth";
 
 function LeftSidebar() {
   const location = useLocation();
   const sideBar = useSelector((state) => state.header.sideBar);
+  const Token = useSelector((state) => state.auth);
+
+  console.log(decodeJWT(Token).role);
+
+  // Filter sidebar routes based on user role
+  const filteredRoutes = sidebar_routes.filter((menu) =>
+    menu.role.includes("admin")
+  );
 
   // Sidebar width classes
   const sidebarClasses = sideBar
@@ -38,22 +47,21 @@ function LeftSidebar() {
           <h1
             className={`text-dark-base dark:text-dark-text text-center mt-2 font-medium text-xl ${titleClasses}`}
           >
-            none
+            Admin Panel
           </h1>
         </div>
 
         <ul>
-          {sidebar_routes.map((menu, index) => {
+          {filteredRoutes.map((menu, index) => {
+            const active =
+              location.pathname === menu.path ||
+              (location.pathname.startsWith(menu.path) && menu.path !== "");
             return (
               <li
                 key={index}
                 className={`rounded-md text-base-200 dark:text-dark-text text-sm mt-2 ${
                   sideBar ? "" : "lg:block hidden"
-                } ${
-                  location.pathname === menu.path
-                    ? "bg-gray-300 dark:bg-gray-200 text-black"
-                    : ""
-                }`}
+                } ${active ? "bg-gray-300 dark:bg-gray-200 text-black" : ""}`}
               >
                 {menu.submenu ? (
                   <SidebarSubMenu {...menu} />
@@ -61,8 +69,8 @@ function LeftSidebar() {
                   <NavLink
                     end
                     to={menu.path}
-                    className={({ isActive }) =>
-                      isActive
+                    className={
+                      active
                         ? "bg-gray-200  text-black font-semibold"
                         : "font-normal"
                     }

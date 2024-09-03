@@ -1,11 +1,17 @@
-import LeftSidebar from "./left-sidebar";
-import PageContent from "./page-content";
+import React, { Suspense, lazy } from "react";
+import SuspenseContent from "./suspense-content";
+
+// Lazy load components
+const LeftSidebar = lazy(() => import("./left-sidebar"));
+const PageContent = lazy(() => import("./page-content"));
 
 function Layout() {
   return (
     <div className="flex">
-      <LeftSidebar />
-      <PageContent />
+      <Suspense fallback={<SuspenseContent />}>
+        <LeftSidebar />
+        <PageContent />
+      </Suspense>
     </div>
   );
 }
