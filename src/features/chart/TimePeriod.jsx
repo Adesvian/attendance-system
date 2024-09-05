@@ -1,15 +1,9 @@
 import React from "react";
 import SingleButton from "../../components/button/Button";
 
-function PeriodButtons({
-  activeButton,
-  setActiveButton,
-  updateChartData,
-  setData,
-}) {
+function PeriodButtons({ activeButton, setActiveButton }) {
   const handleButtonClick = (period) => {
     setActiveButton(period);
-    updateChartData(period, setData);
   };
 
   const getButtonBgClass = (period) => {
@@ -25,10 +19,9 @@ function PeriodButtons({
           <SingleButton
             key={period}
             btnTitle={period}
-            className={
-              `lg:px-4 px-2 lg:py-1.5 py-1 rounded-sm font-semibold lg:text-base text-xs ` +
-              getButtonBgClass(period)
-            }
+            className={`lg:px-4 px-2 lg:py-1.5 py-1 rounded-sm font-semibold lg:text-base text-xs ${getButtonBgClass(
+              period
+            )}`}
             onClick={() => handleButtonClick(period)}
           />
         ))}

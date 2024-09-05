@@ -35,7 +35,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
   } ${sideBar ? "" : "-ml-2.5"}`;
 
   const linkContainerClasses = `flex items-center gap-x-3 rounded-md ${
-    sideBar ? "p-3" : "p-1.5 justify-center tooltip tooltip-right"
+    sideBar ? "p-3" : "p-1.5 justify-center"
   }`;
 
   return (
@@ -54,8 +54,8 @@ function SidebarSubMenu({ submenu, name, icon }) {
       </div>
 
       {isExpanded && (
-        <div className="w-fit mt-2">
-          <ul className="relative lg:left-4">
+        <div className="w-full -ml-4 mt-2">
+          <ul className="relative lg:left-4 bg-gray-300 dark:bg-base-300 p-2 rounded-md">
             {submenu.map((item, index) => {
               const active =
                 location.pathname === item.path ||
@@ -63,8 +63,8 @@ function SidebarSubMenu({ submenu, name, icon }) {
               return (
                 <li
                   key={index}
-                  className={`rounded-md  text-base-200 dark:text-dark-text text-sm mt-2 ${
-                    active ? "bg-gray-300 text-black" : ""
+                  className={`rounded-md text-base-200 dark:text-dark-text text-sm mt-2 ${
+                    active ? "bg-gray-400 dark:bg-dark-text text-black" : ""
                   }`}
                 >
                   <NavLink
@@ -72,13 +72,12 @@ function SidebarSubMenu({ submenu, name, icon }) {
                     to={item.path}
                     className={
                       active
-                        ? "bg-gray-200  text-black font-semibold"
+                        ? "bg-gray-200 text-black font-semibold"
                         : "font-normal"
                     }
                   >
                     <div
-                      className={`${linkContainerClasses} hover:text-black hover:bg-gray-300 p-3`}
-                      data-tip={item.name}
+                      className={`${linkContainerClasses} hover:text-black dark:hover:bg-dark-text hover:bg-gray-400 p-3`}
                     >
                       {item.icon}
                       <span className={`${sideBar ? "" : "hidden"} `}>

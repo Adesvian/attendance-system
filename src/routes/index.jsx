@@ -1,6 +1,10 @@
 import { lazy } from "react";
 
 const Dashboard = lazy(() => import("../pages/admin/dashboard-admin"));
+const DashboardParent = lazy(() =>
+  import("../pages/wali-murid/dashboard-parent")
+);
+const DashboardTeacher = lazy(() => import("../pages/guru/dashboard-teacher"));
 const LogKehadiran = lazy(() => import("../pages/admin/log-kehadiran"));
 const Siswa = lazy(() => import("../pages/admin/siswa"));
 const Guru = lazy(() => import("../pages/guru/teacher"));
@@ -15,6 +19,18 @@ const routes = [
     name: "Dashboard",
     role: ["admin"],
     component: Dashboard,
+  },
+  {
+    path: "/dashboard-wali-murid",
+    name: "Dashboard",
+    role: ["parent"],
+    component: DashboardParent,
+  },
+  {
+    path: "/dashboard-teacher",
+    name: "Dashboard",
+    role: ["teacher"],
+    component: DashboardTeacher,
   },
   {
     path: "/log-absensi",

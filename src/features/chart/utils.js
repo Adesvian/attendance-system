@@ -18,44 +18,7 @@ ChartJS.register(
   Legend
 );
 
-const dataSiswa = [
-  {
-    tanggal: "01-09-2022",
-    data: [
-      { name: "Kelas 1", data: 1000 },
-      { name: "Kelas 2", data: 2000 },
-      { name: "Kelas 3", data: 3000 },
-      { name: "Kelas 4", data: 4000 },
-      { name: "Kelas 5", data: 5000 },
-      { name: "Kelas 6", data: 6000 },
-    ],
-  },
-  {
-    tanggal: "01-09-2024",
-    data: [
-      { name: "Kelas 1", data: 10 },
-      { name: "Kelas 2", data: 20 },
-      { name: "Kelas 3", data: 30 },
-      { name: "Kelas 4", data: 40 },
-      { name: "Kelas 5", data: 50 },
-      { name: "Kelas 6", data: 60 },
-    ],
-  },
-  {
-    tanggal: "03-09-2024",
-    data: [
-      { name: "Kelas 1", data: 100 },
-      { name: "Kelas 2", data: 200 },
-      { name: "Kelas 3", data: 300 },
-      { name: "Kelas 4", data: 400 },
-      { name: "Kelas 5", data: 500 },
-      { name: "Kelas 6", data: 600 },
-    ],
-  },
-  // Tambahkan objek tanggal dan data lainnya di sini
-];
-
-export const updateChartData = (period, setData) => {
+export const updateChartData = (period, setData, attendancesData) => {
   let labels = [];
   let datasets = [];
 
@@ -63,12 +26,18 @@ export const updateChartData = (period, setData) => {
   const currentMonth = moment().month();
   const currentDate = moment().date();
   const kelasUnik = [
-    ...new Set(dataSiswa.flatMap((item) => item.data.map((d) => d.name))),
+    "Kelas 1",
+    "Kelas 2",
+    "Kelas 3",
+    "Kelas 4",
+    "Kelas 5",
+    "Kelas 6",
   ];
 
+  // Define labels based on the selected period
   switch (period) {
     case "Day":
-      labels = Array.from({ length: 1 }, (_, i) => "Today");
+      labels = ["Today"];
       break;
     case "Month":
       labels = Array.from(
@@ -85,7 +54,7 @@ export const updateChartData = (period, setData) => {
       labels = [];
   }
 
-  const filteredData = dataSiswa.filter(
+  const filteredData = attendancesData.filter(
     (item) => moment(item.tanggal, "DD-MM-YYYY").year() === currentYear
   );
 
@@ -96,11 +65,11 @@ export const updateChartData = (period, setData) => {
           .filter(
             (item) => moment(item.tanggal, "DD-MM-YYYY").month() === monthIndex
           )
-          .reduce((sum, item) => {
-            return (
-              sum + item.data.reduce((monthSum, d) => monthSum + d.data, 0)
-            );
-          }, 0);
+          .reduce(
+            (sum, item) =>
+              sum + item.data.reduce((monthSum, d) => monthSum + d.data, 0),
+            0
+          );
       });
     } else if (period === "Month") {
       const monthData = filteredData.filter(
@@ -112,23 +81,22 @@ export const updateChartData = (period, setData) => {
           .filter(
             (item) => moment(item.tanggal, "DD-MM-YYYY").date() === dayIndex + 1
           )
-          .reduce((sum, item) => {
-            return sum + item.data.reduce((daySum, d) => daySum + d.data, 0);
-          }, 0);
+          .reduce(
+            (sum, item) =>
+              sum + item.data.reduce((daySum, d) => daySum + d.data, 0),
+            0
+          );
       });
     } else if (period === "Day") {
-      return labels.map(() => {
-        return kelasUnik.map((kelas) => {
-          return filteredData
-            .filter(
-              (item) =>
-                moment(item.tanggal, "DD-MM-YYYY").date() === currentDate
-            )
-            .reduce((sum, item) => {
-              const dataItem = item.data.find((d) => d.name === kelas);
-              return sum + (dataItem ? dataItem.data : 0);
-            }, 0);
-        });
+      return kelasUnik.map((kelas) => {
+        return filteredData
+          .filter(
+            (item) => moment(item.tanggal, "DD-MM-YYYY").date() === currentDate
+          )
+          .reduce((sum, item) => {
+            const dataItem = item.data.find((d) => d.name === kelas);
+            return sum + (dataItem ? dataItem.data : 0);
+          }, 0);
       });
     } else {
       return [];
@@ -137,16 +105,8 @@ export const updateChartData = (period, setData) => {
 
   const aggregatedData = aggregateData(period);
 
-  if (period === "Year") {
-    datasets.push({
-      label: "Total",
-      data: aggregatedData,
-      backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
-        Math.random() * 255
-      )}, ${Math.floor(Math.random() * 255)}, 0.5)`,
-    });
-  } else if (period === "Month") {
-    const colors = labels.map(
+  if (period === "Year" || period === "Month") {
+    const backgroundColors = labels.map(
       () =>
         `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
           Math.random() * 255
@@ -156,19 +116,19 @@ export const updateChartData = (period, setData) => {
     datasets.push({
       label: "Total",
       data: aggregatedData,
-      backgroundColor: colors,
+      backgroundColor: backgroundColors,
     });
   } else {
-    kelasUnik.forEach((kelas, index) => {
-      const dataKelas = aggregatedData.map((timeData) => timeData[index]);
+    datasets = kelasUnik.map((kelas, index) => {
+      const dataKelas = aggregatedData[index];
 
-      datasets.push({
+      return {
         label: kelas,
-        data: dataKelas,
+        data: [dataKelas],
         backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
           Math.random() * 255
         )}, ${Math.floor(Math.random() * 255)}, 0.5)`,
-      });
+      };
     });
   }
 
@@ -176,42 +136,4 @@ export const updateChartData = (period, setData) => {
     labels,
     datasets,
   });
-};
-
-export const BarChartTheme = (theme) => {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          color: `${theme === "dark" ? "white" : "black"}`,
-        },
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: `${theme === "dark" ? "white" : "black"}`,
-          // autoSkip: false,
-        },
-        grid: {
-          color: `${
-            theme === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)"
-          }`,
-        },
-      },
-      y: {
-        ticks: {
-          color: `${theme === "dark" ? "white" : "black"}`,
-        },
-        grid: {
-          color: `${
-            theme === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)"
-          }`,
-        },
-      },
-    },
-  };
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import TableComponent from "../../components/table/TableAttendance";
 import { setPageTitle } from "../../redux/headerSlice";
 import SingleButton from "../../components/button/Button";
@@ -7,56 +7,16 @@ import { MdFileDownload } from "react-icons/md";
 import jsPDF from "jspdf";
 import autotable from "jspdf-autotable";
 import moment from "moment";
+import axios from "axios";
+import { decodeJWT } from "../../app/auth";
 
 function LogKehadiran() {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth);
   const dt = useRef(null);
-
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
 
-  const logRecords = [
-    {
-      profile: "https://img.daisyui.com/images/profile/demo/2@94.webp",
-      name: "John Doe",
-      className: "Kelas 1",
-      status: "Late",
-      method: "Check-in",
-      time: 1722446357,
-    },
-    {
-      profile: "https://img.daisyui.com/images/profile/demo/3@94.webp",
-      name: "Hanan Smith",
-      className: "Kelas 2",
-      status: "On Time",
-      method: "Check-in",
-      time: 1722646337,
-    },
-    {
-      profile: "https://img.daisyui.com/images/profile/demo/4@94.webp",
-      name: "Bob Smith",
-      className: "Kelas 3",
-      status: "On Time",
-      method: "Check-in",
-      time: 1722646327,
-    },
-    {
-      profile: "https://img.daisyui.com/images/profile/demo/5@94.webp",
-      name: "Hanan Smith",
-      className: "Kelas 2",
-      status: "On Time",
-      method: "Check-in",
-      time: 1722646337,
-    },
-    {
-      profile: "https://img.daisyui.com/images/profile/demo/5@94.webp",
-      name: "Bob Smith",
-      className: "Kelas 3",
-      status: "On Time",
-      method: "Check-in",
-      time: 1722646327,
-    },
-  ];
   const exportPdf = async () => {
     const data = dt.current;
     if (data) {
@@ -75,7 +35,7 @@ function LogKehadiran() {
             moment().format("DD-MM-YYYY HH:mm:ss") +
             "\n" +
             "User Download : " +
-            JSON.parse(localStorage.getItem("token")).name +
+            decodeJWT(user).name +
             "\n",
           pageWidth - 35,
           {}
@@ -104,7 +64,7 @@ function LogKehadiran() {
 
         autotable(pdf, { html: tableElement, startY: 40 });
 
-        pdf.save("table.pdf");
+        pdf.save(`Logs-Records-${moment().format("DD-MM-YYYY")}.pdf`);
       } catch (error) {
         console.error("Error generating PDF: ", error);
       }
@@ -125,18 +85,46 @@ function LogKehadiran() {
   };
 
   useEffect(() => {
-    setData(
-      logRecords.map((record) => ({
-        ...record,
-        time: moment.unix(record.time).local().format("DD-MM-YYYY HH:mm"),
-      }))
-    );
+    const fetchData = async () => {
+      try {
+        // Fetch attendance data
+        const attendanceResponse = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`
+        );
+
+        // Fetch student data
+        const studentsResponse = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
+        );
+        const studentsMap = {};
+        studentsResponse.data.forEach((student) => {
+          studentsMap[student.name] = student.gender; // Adjust the property names based on your API response
+        });
+
+        const updatedData = attendanceResponse.data.map((record) => ({
+          ...record,
+          profile: `assets/icon/${
+            studentsMap[record.student_name] === "Perempuan" ? "girl" : "boy"
+          }-icon.png`,
+          status: record.status === 200 ? "On Time" : "Late",
+          method: record.method === 1001 ? "Check-In" : "Check-Out",
+          gender: studentsMap[record.gender], // Assuming name is the field in your attendance record
+          time: moment.unix(record.date).local().format("DD-MM-YYYY HH:mm"),
+          unixTime: record.date, // Keep the raw unix time for sorting
+        }));
+        const sortedData = updatedData.sort((a, b) => b.unixTime - a.unixTime);
+        setData(sortedData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
     setColumns([
       { field: "profile", header: "Profile" },
-      { field: "name", header: "Name" },
-      { field: "className", header: "Kelas" },
-      { field: "status", header: "Status" },
+      { field: "student_name", header: "Name" },
+      { field: "class", header: "Kelas" },
       { field: "method", header: "Method" },
+      { field: "status", header: "Status" },
       { field: "time", header: "Time" },
     ]);
     dispatch(setPageTitle({ title: "Log Kehadiran" }));
@@ -146,7 +134,7 @@ function LogKehadiran() {
     <>
       <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
         <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 col-span-2">
-          <div className="flex justify-end lg:absolute lg:right-[25rem]">
+          <div className="flex justify-end lg:relative lg:right-[23rem] lg:top-[3rem] -mt-11">
             <SingleButton
               btnTitle={<MdFileDownload />}
               className="btn border-none bg-blue-500 rounded-full text-white "

@@ -1,26 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BsClipboardCheck, BsSortUpAlt, BsSortDown } from "react-icons/bs";
 import moment from "moment";
+import axios from "axios";
 
 const getRelativeTime = (time) => moment.unix(time).fromNow();
 
 const RecentAttendance = ({
   data,
   initialRowsPerPage = 5,
-  initialSortOrder = "asc",
+  initialSortOrder = "desc",
 }) => {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
+
+  // Fetch data dari /api/students
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
+        );
+        // Ambil hanya student name dan gender
+        const studentData = response.data.map(({ name, gender }) => ({
+          name,
+          gender,
+        }));
+        setStudents(studentData);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   const toggleSortOrder = () =>
     setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
 
   const sortedData = [...data].sort((a, b) =>
-    sortOrder === "asc" ? a.time - b.time : b.time - a.time
+    sortOrder === "desc" ? a.date - b.date : b.date - a.date
   );
 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
   return (
-    <div className="bg-white overflow-y-auto dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-dark-text p-4">
+    <div className="bg-white h-[32rem] overflow-y-auto dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-dark-text p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
           <div className="text-2xl font-bold">Recent Presence</div>
@@ -61,37 +91,53 @@ const RecentAttendance = ({
         </div>
       </div>
       <div>
-        {sortedData.slice(0, rowsPerPage).map((attendance, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-3 mb-2 bg-gray-100 dark:bg-gray-800 rounded-md"
-          >
-            <div className="flex items-center gap-3 text-gray-900 dark:text-dark-text">
-              <img
-                src={attendance.profile}
-                alt="profile"
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <h2 className="text-sm font-medium leading-snug pb-0.5">
-                  {attendance.name}{" "}
-                  <span className="text-gray-400">
-                    dari {attendance.className} has{" "}
-                    {attendance.method === "Check-in" ? (
-                      <span className="text-green-500">checked in</span>
-                    ) : (
-                      <span className="text-red-500">checked out</span>
+        {sortedData.slice(0, rowsPerPage).map((attendance, index) => {
+          // Cari gender siswa berdasarkan nama
+          const student = students.find(
+            (student) => student.name === attendance.student_name
+          );
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 mb-2 bg-gray-100 dark:bg-gray-800 rounded-md"
+            >
+              <div className="flex items-center gap-3 text-gray-900 dark:text-dark-text">
+                <img
+                  src={`assets/icon/${
+                    student.gender === "Perempuan" ? "girl" : "boy"
+                  }-icon.png`}
+                  alt="profile"
+                  className="w-10 h-10 rounded-full"
+                />
+                <div>
+                  <h2 className="text-sm font-medium leading-snug pb-0.5">
+                    {attendance.student_name}{" "}
+                    <span className="text-gray-400">
+                      dari {attendance.class} has{" "}
+                      {attendance.method === 1001 ? (
+                        <span className="text-green-500">checked in</span>
+                      ) : (
+                        <span className="text-red-500">checked out</span>
+                      )}
+                    </span>
+                  </h2>
+                  <h3 className="text-gray-400 text-xs font-normal leading-4">
+                    {attendance.method !== 1002 && (
+                      <span>
+                        {attendance.status === 200 ? (
+                          <span>On time | </span>
+                        ) : (
+                          <span>Late | </span>
+                        )}
+                      </span>
                     )}
-                  </span>
-                </h2>
-                <h3 className="text-gray-400 text-xs font-normal leading-4">
-                  {attendance.status && <span>{attendance.status} | </span>}
-                  {getRelativeTime(attendance.time)}
-                </h3>
+                    {getRelativeTime(attendance.date)}
+                  </h3>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

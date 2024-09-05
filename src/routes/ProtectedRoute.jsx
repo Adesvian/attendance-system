@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { fetchCookies } from "../redux/authSlice";
+import { fetchCookies, fetchTeacherData } from "../redux/authSlice";
+import { decodeJWT } from "../app/auth";
 
 function ProtectedRoute() {
   const dispatch = useDispatch();
   const [cookies, setCookies] = useState(null);
+  const [teacher, setTeacher] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,6 +18,16 @@ function ProtectedRoute() {
         // Cek apakah cookies adalah objek kosong
         if (result && Object.keys(result).length > 0) {
           setCookies(result);
+          if (decodeJWT(result).role !== "admin") {
+            const teacherResult = await dispatch(
+              fetchTeacherData(decodeJWT(result).name)
+            ).unwrap();
+            if (teacherResult && Object.keys(teacherResult).length > 0) {
+              setTeacher(teacherResult);
+            } else {
+              setTeacher(false);
+            }
+          }
         } else {
           setCookies(false); // Set cookies menjadi false jika objek kosong
         }

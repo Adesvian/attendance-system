@@ -10,9 +10,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 
-function Permit() {
+function PermitParent() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.teacher);
+  const user = useSelector((state) => state.teacher);
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ function Permit() {
       if (result.isConfirmed) {
         axios
           .put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/permitsudpateStatus/${
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/ParentsudpateStatus/${
               row.id
             }`,
             {
@@ -217,4 +217,4 @@ function Permit() {
   );
 }
 
-export default Permit;
+export default PermitParent;

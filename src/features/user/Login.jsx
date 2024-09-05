@@ -5,10 +5,7 @@ import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { decrypt } from "../../app/auth"; // Pastikan ini diimpor dari file auth.js
-import { login } from "../../redux/authSlice";
-
-const baseURL_BE = import.meta.env.VITE_BASE_URL_BACKEND;
+import { decodeJWT, decrypt } from "../../app/auth"; // Pastikan ini diimpor dari file auth.js
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -24,9 +21,12 @@ function LoginForm() {
   useEffect(() => {
     const checkAuthCookies = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/get-cookies", {
-          withCredentials: true, // Mengirim cookie dalam permintaan
-        });
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/get-cookies`,
+          {
+            withCredentials: true,
+          }
+        );
 
         const authToken = response.data._USER_AUTH_RAMADHAN;
 
@@ -39,8 +39,14 @@ function LoginForm() {
             );
             // Jika dekripsi berhasil, lakukan navigasi ke dashboard
             if (decryptedToken) {
-              dispatch(login(decryptedToken)); // Dispatch login action jika token valid
-              navigate("/dashboard-admin");
+              const role = decodeJWT(decryptedToken).role;
+              if (role === "admin") {
+                navigate("/dashboard-admin");
+              } else if (role === "teacher") {
+                navigate("/dashboard-teacher");
+              } else {
+                navigate("/dashboard-wali-murid");
+              }
             } else {
               setErrorMessage("Something went wrong, please log in again.");
               navigate("/login");
@@ -68,13 +74,22 @@ function LoginForm() {
     setErrorMessage("");
 
     try {
-      const response = await axios.post(`${baseURL_BE}/login`, loginObj, {
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/login`,
+        loginObj,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.status === 200) {
-        dispatch(login(response.data));
-        navigate("/dashboard-admin");
+        if (response.data.role === "admin") {
+          navigate("/dashboard-admin");
+        } else if (response.data.role === "teacher") {
+          navigate("/dashboard-teacher");
+        } else {
+          navigate("/dashboard-wali-murid");
+        }
       } else {
         setErrorMessage("Login failed! Please try again.");
       }

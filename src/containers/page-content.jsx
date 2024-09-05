@@ -6,16 +6,19 @@ import SuspenseContent from "./suspense-content";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import { fetchCookies } from "../redux/authSlice";
+import { decodeJWT } from "../app/auth";
 
 const Page404 = lazy(() => import("../pages/utils/404"));
 
 function PageContent() {
-  const user = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.token);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const filteredRoutes = routes.filter((route) => route.role.includes("admin"));
+  const filteredRoutes = routes.filter((route) =>
+    route.role.includes(decodeJWT(user).role)
+  );
 
   useEffect(() => {
     const checkSession = async () => {
@@ -50,7 +53,7 @@ function PageContent() {
   }, [location, dispatch, navigate]);
   return (
     <>
-      <div className="w-full flex flex-col h-auto ">
+      <div className="w-full lg:flex-1 overflow-y-auto h-screen ">
         <Navbar />
         <div className="flex-1 overflow-y-auto md:pt-4 pt-4 px-6 bg-gray-300 dark:bg-base-300">
           <Suspense fallback={<SuspenseContent />}>

@@ -25,6 +25,18 @@ const sidebar_routes = [
     icon: <HiOutlineSquares2X2 className={iconClasses} />,
   },
   {
+    path: "/dashboard-teacher",
+    name: "Dashboard",
+    role: ["teacher"],
+    icon: <HiOutlineSquares2X2 className={iconClasses} />,
+  },
+  {
+    path: "/dashboard-wali-murid",
+    name: "Dashboard",
+    role: ["parent"],
+    icon: <HiOutlineSquares2X2 className={iconClasses} />,
+  },
+  {
     path: "/permit",
     name: "Ketidakhadiran",
     role: ["teacher"],

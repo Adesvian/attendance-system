@@ -96,7 +96,7 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                     key={index}
                     align="center"
                     sortDirection={orderBy === col.field ? order : false}
-                    className="dark:bg-base-200"
+                    className="dark:bg-base-200 "
                   >
                     <TableSortLabel
                       active={orderBy === col.field}
@@ -199,7 +199,9 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
           <dialog key={index} id={`modal_${index}`} className="modal">
             <div className="modal-box bg-white">
               <img
-                src={`http://localhost:3001/permits/${row.attachment}`}
+                src={`${import.meta.env.VITE_BASE_URL_BACKEND}/permits/${
+                  row.attachment
+                }`}
                 alt="Lampiran"
                 className="w-full h-auto"
               />

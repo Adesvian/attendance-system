@@ -8,18 +8,16 @@ import { decodeJWT } from "../app/auth";
 function LeftSidebar() {
   const location = useLocation();
   const sideBar = useSelector((state) => state.header.sideBar);
-  const Token = useSelector((state) => state.auth);
-
-  console.log(decodeJWT(Token).role);
+  const user = useSelector((state) => state.auth.token);
 
   // Filter sidebar routes based on user role
   const filteredRoutes = sidebar_routes.filter((menu) =>
-    menu.role.includes("admin")
+    menu.role.includes(decodeJWT(user).role)
   );
 
   // Sidebar width classes
   const sidebarClasses = sideBar
-    ? "lg:w-72 w-fit" // Expanded on desktop and mobile
+    ? "lg:w-64 w-fit" // Expanded on desktop and mobile
     : "lg:w-24 w-0"; // Collapsed on desktop, hidden on mobile
 
   // Image and title classes
@@ -28,12 +26,12 @@ function LeftSidebar() {
 
   // Link container and icon classes
   const linkContainerClasses = `flex items-center gap-x-3 rounded-md ${
-    sideBar ? "p-3" : "p-1.5 justify-center tooltip tooltip-right"
+    sideBar ? "p-3" : "p-1.5 justify-center"
   }`;
 
   return (
     <div
-      className={`${sidebarClasses} min-h-screen duration-300 bg-gray-200 dark:bg-base-200 drop-shadow-md `}
+      className={`${sidebarClasses} h-screen overflow-y-auto duration-300 bg-gray-200 dark:bg-base-200 drop-shadow-md `}
     >
       <div className="p-2">
         <div className="flex flex-col items-center">
@@ -77,7 +75,6 @@ function LeftSidebar() {
                   >
                     <div
                       className={`${linkContainerClasses} hover:bg-gray-300 hover:text-black`}
-                      data-tip={menu.name}
                     >
                       {cloneElement(menu.icon, {
                         className: `flex-shrink-0 ${

@@ -9,11 +9,23 @@ import {
   TablePagination,
   Paper,
   TableSortLabel,
+  ThemeProvider,
 } from "@mui/material";
 import { useSelector } from "react-redux";
+import getTheme from "./theme/tableTheme";
 
 // Comparator functions for sorting
+const parseDate = (dateString) => {
+  const [datePart, timePart] = dateString.split(" ");
+  const [day, month, year] = datePart.split("-").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes);
+};
+
 const descendingComparator = (a, b, orderBy) => {
+  if (orderBy === "time") {
+    return parseDate(b[orderBy]) - parseDate(a[orderBy]);
+  }
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -44,10 +56,11 @@ const stableSort = (array, comparator) => {
 const TableComponent = forwardRef(
   ({ data, columns, getStatusClass, type }, ref) => {
     const theme = useSelector((state) => state.header.theme);
+    const muitheme = getTheme(theme);
     const [order, setOrder] = useState("asc");
     const [orderBy, setOrderBy] = useState(columns[0]?.field || "");
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(2);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     // Format data based on type
     const formattedData = useMemo(() => {
@@ -104,120 +117,125 @@ const TableComponent = forwardRef(
 
     return (
       <div className="text-gray-800 dark:text-white mt-5 ">
-        {type === "standard" && (
-          <div className="flex justify-end">
-            <TablePagination
-              component="div"
-              className="-top-5 relative inline dark:text-dark-text"
-              count={formattedData.length}
-              page={page}
-              onPageChange={handleChangePage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[2, 4, 6, 8]}
-              sx={{
-                "& .MuiTablePagination-selectIcon": {
-                  color: theme === "dark" ? "white" : "inherit",
-                },
-              }}
-              labelRowsPerPage="Rows per page:"
-              labelDisplayedRows={({ from, to, count }) =>
-                `${from}-${to} of ${count}`
+        <ThemeProvider theme={muitheme}>
+          {type === "standard" && (
+            <div className="flex justify-end">
+              <TablePagination
+                component="div"
+                className="-top-5 relative inline dark:text-dark-text"
+                count={formattedData.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                sx={{
+                  "& .MuiTablePagination-selectIcon": {
+                    color: theme === "dark" ? "white" : "inherit",
+                  },
+                }}
+                labelRowsPerPage="Rows per page:"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}-${to} of ${count}`
+                }
+              />
+            </div>
+          )}
+          {data.length > 0 ? (
+            <TableContainer
+              component={Paper}
+              className={
+                type === "standard" ? "max-h-[32rem] dark:bg-base-300" : ""
               }
-            />
-          </div>
-        )}
-        {data.length > 0 ? (
-          <TableContainer
-            component={Paper}
-            className={type === "standard" ? "h-64 dark:bg-base-300" : ""}
-          >
-            <Table
-              ref={ref}
-              aria-label="data table"
-              className="whitespace-nowrap"
             >
-              <TableHead>
-                <TableRow>
-                  {columns.map((col, index) => (
-                    <TableCell
-                      key={index}
-                      align="center"
-                      sortDirection={
-                        type === "standard" && orderBy === col.field
-                          ? order
-                          : false
-                      }
-                      className="dark:bg-base-300 dark:text-dark-text bg-gray-100"
-                    >
-                      {type === "standard" ? (
-                        <TableSortLabel
-                          active={orderBy === col.field}
-                          direction={orderBy === col.field ? order : "asc"}
-                          onClick={() => handleRequestSort(col.field)}
-                          className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
-                          sx={{
-                            "&.Mui-active": {
-                              color: theme === "dark" ? "white" : "inherit", // Warna saat label aktif
-                              "& .MuiTableSortLabel-icon": {
-                                color: theme === "dark" ? "white" : "inherit", // Warna ikon saat label aktif
-                              },
-                            },
-                            "&:hover": {
-                              color: theme === "dark" ? "white" : "inherit", // Warna saat hover
-                            },
-                            color: theme === "dark" ? "white" : "inherit", // Warna default
-                          }}
-                        >
-                          {col.header}
-                        </TableSortLabel>
-                      ) : (
-                        <div>{col.header}</div>
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedRows.map((row, index) => (
-                  <TableRow key={index}>
-                    {columns.map((col, colIndex) => (
+              <Table
+                stickyHeader
+                aria-label="sticky table"
+                ref={ref}
+                className="whitespace-nowrap"
+              >
+                <TableHead>
+                  <TableRow>
+                    {columns.map((col, index) => (
                       <TableCell
-                        key={colIndex}
+                        key={index}
                         align="center"
-                        className="dark:text-dark-text dark:bg-base-200"
+                        sortDirection={
+                          type === "standard" && orderBy === col.field
+                            ? order
+                            : false
+                        }
+                        className="dark:bg-base-300 "
                       >
-                        {col.field === "profile" && (
-                          <div className="avatar">
-                            <div className="mask mask-squircle h-12 w-12">
-                              <img
-                                src={row[col.field]}
-                                alt="Avatar Tailwind CSS Component"
-                              />
-                            </div>
-                          </div>
-                        )}
-                        {col.field !== "profile" && (
-                          <div
-                            className={`p-2 font-medium ${getStatusClass(
-                              row[col.field]
-                            )}`}
+                        {type === "standard" ? (
+                          <TableSortLabel
+                            active={orderBy === col.field}
+                            direction={orderBy === col.field ? order : "asc"}
+                            onClick={() => handleRequestSort(col.field)}
+                            className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
+                            sx={{
+                              "&.Mui-active": {
+                                color: theme === "dark" ? "white" : "inherit", // Warna saat label aktif
+                                "& .MuiTableSortLabel-icon": {
+                                  color: theme === "dark" ? "white" : "inherit", // Warna ikon saat label aktif
+                                },
+                              },
+                              "&:hover": {
+                                color: theme === "dark" ? "white" : "inherit", // Warna saat hover
+                              },
+                              color: theme === "dark" ? "white" : "inherit", // Warna default
+                            }}
                           >
-                            {row[col.field]}
-                          </div>
+                            {col.header}
+                          </TableSortLabel>
+                        ) : (
+                          <div>{col.header}</div>
                         )}
                       </TableCell>
                     ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <div className="text-center text-gray-500">
-            Tabel kosong. Pilih tanggal dan kelas untuk menampilkan data.
-          </div>
-        )}
+                </TableHead>
+                <TableBody>
+                  {paginatedRows.map((row, index) => (
+                    <TableRow key={index}>
+                      {columns.map((col, colIndex) => (
+                        <TableCell
+                          key={colIndex}
+                          align="center"
+                          className="dark:text-dark-text dark:bg-base-200"
+                        >
+                          {col.field === "profile" && (
+                            <div className="avatar">
+                              <div className="mask mask-squircle h-12 w-12">
+                                <img
+                                  src={row[col.field]}
+                                  alt="Avatar Tailwind CSS Component"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          {col.field !== "profile" && (
+                            <div
+                              className={`p-2 mr-5 font-medium ${getStatusClass(
+                                row[col.field]
+                              )}`}
+                            >
+                              {row[col.field]}
+                            </div>
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <div className="text-center text-gray-500">
+              Tabel kosong. Pilih tanggal dan kelas untuk menampilkan data.
+            </div>
+          )}
+        </ThemeProvider>
       </div>
     );
   }

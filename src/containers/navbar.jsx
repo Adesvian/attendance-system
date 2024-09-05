@@ -8,17 +8,21 @@ import { setSidebar } from "../redux/headerSlice";
 
 const Navbar = () => {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(window.innerWidth > 768);
   const { pageTitle } = useSelector((state) => state.header);
 
   useEffect(() => {
     dispatch(setSidebar({ sidebar: open }));
   }, [open, dispatch]);
 
+  const toggleSidebar = () => {
+    setOpen((prevOpen) => !prevOpen); // Toggle nilai open
+  };
+
   return (
     <div className="navbar sticky top-0 shadow-md bg-gray-200 dark:bg-base-200 z-50">
       <button
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={toggleSidebar}
         className=" drawer-button text-gray-800 dark:text-dark-text hover:bg-gray-400/30 p-2 rounded-md dark:hover:bg-gray-600/30"
       >
         <HiBars3 className="h-6 w-6 " />
