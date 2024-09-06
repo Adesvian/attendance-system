@@ -82,6 +82,7 @@ function LoginForm() {
         }
       );
 
+      console.log(response);
       if (response.status === 200) {
         if (response.data.role === "admin") {
           navigate("/dashboard-admin");

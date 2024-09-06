@@ -55,7 +55,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
 
       {isExpanded && (
         <div className="w-full -ml-4 mt-2">
-          <ul className="relative lg:left-4 bg-gray-300 dark:bg-base-300 p-2 rounded-md">
+          <ul className="relative lg:left-4 bg-white dark:bg-base-300 p-2 rounded-md">
             {submenu.map((item, index) => {
               const active =
                 location.pathname === item.path ||
@@ -64,7 +64,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
                 <li
                   key={index}
                   className={`rounded-md text-base-200 dark:text-dark-text text-sm mt-2 ${
-                    active ? "bg-gray-400 dark:bg-dark-text text-black" : ""
+                    active ? "bg-gray-200 dark:bg-dark-text text-black" : ""
                   }`}
                 >
                   <NavLink
@@ -72,12 +72,12 @@ function SidebarSubMenu({ submenu, name, icon }) {
                     to={item.path}
                     className={
                       active
-                        ? "bg-gray-200 text-black font-semibold"
+                        ? "bg-gray-200 text-black text-sm font-semibold"
                         : "font-normal"
                     }
                   >
                     <div
-                      className={`${linkContainerClasses} hover:text-black dark:hover:bg-dark-text hover:bg-gray-400 p-3`}
+                      className={`${linkContainerClasses} hover:text-black dark:hover:bg-dark-text hover:bg-gray-200 p-3`}
                     >
                       {item.icon}
                       <span className={`${sideBar ? "" : "hidden"} `}>

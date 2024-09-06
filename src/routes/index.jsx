@@ -7,8 +7,10 @@ const DashboardParent = lazy(() =>
 const DashboardTeacher = lazy(() => import("../pages/guru/dashboard-teacher"));
 const LogKehadiran = lazy(() => import("../pages/admin/log-kehadiran"));
 const Siswa = lazy(() => import("../pages/admin/siswa"));
-const Guru = lazy(() => import("../pages/guru/teacher"));
+const Teacher = lazy(() => import("../pages/guru/teacher"));
 const CreateTeacher = lazy(() => import("../pages/guru/create-teacher"));
+const Subject = lazy(() => import("../pages/admin/subject"));
+const ClassSchedule = lazy(() => import("../pages/admin/class-schedule"));
 const RecapAbsensi = lazy(() => import("../pages/admin/recap-absen"));
 const Permit = lazy(() => import("../pages/guru/permit"));
 const CreatePermit = lazy(() => import("../pages/guru/create-permit"));
@@ -48,13 +50,25 @@ const routes = [
     path: "/teacher",
     name: "Guru",
     role: ["admin"],
-    component: Guru,
+    component: Teacher,
   },
   {
     path: "/teacher/create-teacher",
     name: "Tambah Guru",
     role: ["admin"],
     component: CreateTeacher,
+  },
+  {
+    path: "/data-mapel",
+    name: "Subject",
+    role: ["admin"],
+    component: Subject,
+  },
+  {
+    path: "/data-jadwal",
+    name: "Jadwal Ajar Guru",
+    role: ["admin"],
+    component: ClassSchedule,
   },
   {
     path: "/recapitulation-absensi",

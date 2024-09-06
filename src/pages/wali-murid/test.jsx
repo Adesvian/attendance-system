@@ -81,6 +81,154 @@ const RecapAbsensi = () => {
             { value: "Kelas 5", label: "Kelas 5" },
             { value: "Kelas 6", label: "Kelas 6" },
           ]);
+          const studentsResponse = await axios.get(
+            `${
+              import.meta.env.VITE_BASE_URL_BACKEND
+            }/students?class=${encodeURIComponent(selectedClass)}`
+          );
+          const students = studentsResponse.data;
+
+          const attendanceResponse = await axios.get(
+            `${
+              import.meta.env.VITE_BASE_URL_BACKEND
+            }/attendance?class=${encodeURIComponent(selectedClass)}&method=1001`
+          );
+          const attendanceRecords = attendanceResponse.data;
+
+          const selectedMonth = moment(selectedDate).month();
+          const selectedYear = moment(selectedDate).year();
+          const daysInMonth = moment(selectedDate).daysInMonth();
+          const today = moment().startOf("day");
+
+          const processedRecords = attendanceRecords.map((record) => ({
+            ...record,
+            date: moment.unix(record.date).format("YYYY-MM-DD"),
+          }));
+
+          const holidayDates = holidays.map((holiday) =>
+            moment(holiday.date, "DD-MM-YYYY")
+          );
+
+          const filteredData = processedRecords.filter((record) => {
+            const recordDate = moment(record.date, "YYYY-MM-DD");
+            return (
+              recordDate.month() === selectedMonth &&
+              recordDate.year() === selectedYear &&
+              record.class === selectedClass
+            );
+          });
+
+          const methodMap = {
+            1001: "H",
+            "-": "-",
+            izin: "I",
+            sakit: "S",
+            alfa: "A",
+            libur: "L",
+          };
+
+          const formattedData = students.map((student) => {
+            const attendance = Array(daysInMonth).fill("-");
+
+            attendance.forEach((_, index) => {
+              const currentDate = moment(selectedDate)
+                .date(index + 1)
+                .startOf("day");
+              const dayOfWeek = currentDate.day();
+              const isHoliday = holidayDates.some((holidayDate) =>
+                holidayDate.isSame(currentDate, "day")
+              );
+
+              if (isHoliday) {
+                attendance[index] = methodMap["libur"];
+              } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                attendance[index] = methodMap["libur"];
+              }
+            });
+
+            // Temukan semua catatan kehadiran untuk siswa ini
+            const studentAttendanceRecords = filteredData.filter(
+              (record) => record.student_name === student.name
+            );
+
+            // Tandai setiap record kehadiran
+            studentAttendanceRecords.forEach((record) => {
+              const recordDate = moment(record.date, "YYYY-MM-DD").startOf(
+                "day"
+              );
+              const dayIndex = recordDate.date() - 1;
+              let method = methodMap[record.method] || "-";
+              attendance[dayIndex] = method;
+            });
+
+            return {
+              name: student.name,
+              attendance,
+              hadir: 0,
+              absen: 0,
+              izin: 0,
+              sakit: 0,
+              percentage: 0,
+            };
+          });
+
+          formattedData.forEach((student) => {
+            student.attendance = student.attendance.map((status, index) => {
+              const currentDate = moment(selectedDate)
+                .date(index + 1)
+                .startOf("day");
+              const dayOfWeek = currentDate.day();
+              const isHoliday = holidayDates.some((holidayDate) =>
+                holidayDate.isSame(currentDate, "day")
+              );
+
+              if (isHoliday && status === "-") {
+                return methodMap["libur"];
+              } else if (
+                (dayOfWeek === 0 || dayOfWeek === 6) &&
+                status === "-"
+              ) {
+                return methodMap["libur"];
+              } else if (currentDate.isBefore(today) && status === "-") {
+                return methodMap["alfa"];
+              }
+              return status;
+            });
+
+            student.hadir = student.attendance.filter(
+              (status) => status === "H"
+            ).length;
+            student.absen = student.attendance.filter(
+              (status) => status === "A"
+            ).length;
+            student.izin = student.attendance.filter(
+              (status) => status === "I"
+            ).length;
+            student.sakit = student.attendance.filter(
+              (status) => status === "S"
+            ).length;
+
+            const totalDays = student.attendance.length;
+            const holidaysCount = holidayDates.filter(
+              (holidayDate) =>
+                holidayDate.month() === selectedMonth &&
+                holidayDate.year() === selectedYear
+            ).length;
+            const weekendsCount = student.attendance.filter((_, index) => {
+              const currentDate = moment(selectedDate)
+                .date(index + 1)
+                .startOf("day");
+              return currentDate.day() === 0 || currentDate.day() === 6;
+            }).length;
+
+            const effectiveDays = totalDays - holidaysCount - weekendsCount;
+            student.percentage = (
+              (student.hadir / effectiveDays) *
+              100
+            ).toFixed(1);
+          });
+
+          setData(formattedData);
         }
       } catch (err) {
         console.error(err); // Use console.error for error logging

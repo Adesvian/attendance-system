@@ -16,8 +16,10 @@ function Dashboard() {
   const user = useSelector((state) => state.auth);
 
   const [studentCount, setStudentCount] = useState(0);
+  const [subjectCount, setSubjectCount] = useState(0);
   const [teacherCount, setTeacherCount] = useState(0);
   const [classCount, setClassCount] = useState(0);
+  const [classScheduleCount, setClassScheduleCount] = useState(0);
   const [presenceRate, setPresenceRate] = useState(0);
   const [absentCount, setAbsentCount] = useState(0);
   const [onTimeCount, setOnTimeCount] = useState(0);
@@ -29,18 +31,26 @@ function Dashboard() {
 
     const fetchData = async () => {
       try {
-        const [students, teachers, classes, permits, attendance] =
-          await Promise.all([
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/students`),
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/permitstoday`),
-            axios.get(
-              `${import.meta.env.VITE_BASE_URL_BACKEND}/attendancetoday`
-            ),
-          ]);
+        const [
+          students,
+          subjects,
+          teachers,
+          classes,
+          permits,
+          attendance,
+          classSchedule,
+        ] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/students`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/permitstoday`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/attendancetoday`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classschedule`),
+        ]);
 
         setStudentCount(students.data.length);
+        setSubjectCount(subjects.data.length);
         setTeacherCount(teachers.data.length);
         setClassCount(classes.data.length);
         const attendanceRate =
@@ -50,7 +60,7 @@ function Dashboard() {
         const formattedRate = parseFloat(attendanceRate.toFixed(2));
         setPresenceRate(formattedRate);
         setAbsentCount(
-          permits.data.filter((a) => a.status === "Approve").length
+          permits.data.filter((a) => a.status === "Accepted").length
         );
         setOnTimeCount(
           attendance.data.filter((a) => a.status === 200 && a.method === 1001)
@@ -58,6 +68,7 @@ function Dashboard() {
         );
         setLateCount(attendance.data.filter((a) => a.status === 201).length);
         setAttendance(attendance.data);
+        setClassScheduleCount(classSchedule.data.length);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -95,14 +106,14 @@ function Dashboard() {
             <SiBookstack className="bg-emerald-200 text-emerald-600 w-16 h-16 rounded-[22px] p-4" />
           }
           Title="Subject"
-          Value={classCount}
+          Value={subjectCount}
         />
         <StatsCard
           Icon={
             <GrSchedules className="bg-fuchsia-200 text-fuchsia-600 w-16 h-16 rounded-[22px] p-4" />
           }
           Title="Schedules"
-          Value={classCount}
+          Value={classScheduleCount}
         />
         <StatsCard
           Icon={

@@ -124,10 +124,31 @@ function Permit() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch class data only for the current teacher
+        const { data: classesData } = await axios.get(
+          `${
+            import.meta.env.VITE_BASE_URL_BACKEND
+          }/classschedule?teacherid=${encodeURIComponent(user.nid)}`
+        );
+
+        const { data: allClassesData } = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/classes`
+        );
+
+        // Get unique class names based on teacher login
+        const classString = [
+          ...new Set(classesData.map((item) => item.class_id)),
+        ]
+          .map((id) => allClassesData.find((c) => c.id === id)?.name)
+          .filter(Boolean) // Filter out undefined values
+          .join(",");
+
         const response = await axios.get(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
-          }/permits?class=${encodeURIComponent(user.class)}`
+          }/permits?class=${encodeURIComponent(
+            user.class != "" ? user.class : classString
+          )}`
         );
         const convertedData = response.data
           .map((item) => ({
@@ -146,14 +167,18 @@ function Permit() {
 
     fetchData();
 
-    setColumns([
+    const newColumns = [
       { field: "name", header: "Name" },
       { field: "class", header: "Kelas" },
       { field: "reason", header: "Alasan" },
       { field: "attachment", header: "Lampiran" },
       { field: "date", header: "Date" },
       { field: "status", header: "Status" },
-      {
+    ];
+
+    // Hanya tambahkan kolom action jika user.class tidak kosong
+    if (user.class != "") {
+      newColumns.push({
         field: "action",
         header: "Action",
         render: (row) =>
@@ -175,8 +200,11 @@ function Permit() {
               </Button>
             </div>
           ),
-      },
-    ]);
+      });
+    }
+
+    setColumns(newColumns);
+
     dispatch(setPageTitle({ title: "Ketidakhadiran" }));
   }, []);
 

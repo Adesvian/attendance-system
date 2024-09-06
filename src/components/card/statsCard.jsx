@@ -1,7 +1,10 @@
 import React from "react";
 import Tooltip from "@mui/material/Tooltip";
+import { useSelector } from "react-redux";
 
 function StatsCard({ Title, Value, Icon }) {
+  const user = useSelector((state) => state.auth.teacher);
+
   // Daftar judul yang valid untuk menampilkan tooltip
   const validTitles = [
     "Presence",
@@ -11,8 +14,28 @@ function StatsCard({ Title, Value, Icon }) {
     "Pending Approval",
   ];
 
-  // Cek apakah Title ada di dalam daftar validTitles
-  const showTooltip = validTitles.includes(Title);
+  const utils = ["Student", "Class", "Subject", "Schedules"];
+
+  // Cek apakah Title ada di dalam daftar validTitles atau utils
+  const showTooltip =
+    validTitles.includes(Title) || (user && utils.includes(Title));
+
+  // Tooltip content untuk judul dari utils jika user login
+  const utilsTooltipContent = {
+    Student: "Jumlah siswa dari kelas yang anda ampu",
+    Class: "Jumlah kelas yang di pegang saat ini",
+    Subject: "Jumlah subject yang di ajarkan saat ini",
+    Schedules: "Jumlah jadwal ajar yang anda miliki",
+  };
+
+  const getTooltipTitle = () => {
+    if (validTitles.includes(Title)) {
+      return `Status ${Title} berdasarkan hari ini`;
+    } else if (user && utils.includes(Title)) {
+      return utilsTooltipContent[Title];
+    }
+    return "";
+  };
 
   const content = (
     <div className="bg-white dark:bg-base-100 rounded-md shadow-md font-semibold">
@@ -31,7 +54,7 @@ function StatsCard({ Title, Value, Icon }) {
   );
 
   return showTooltip ? (
-    <Tooltip title={`Status ${Title} berdasarkan hari ini`} arrow>
+    <Tooltip title={getTooltipTitle()} arrow>
       {content}
     </Tooltip>
   ) : (

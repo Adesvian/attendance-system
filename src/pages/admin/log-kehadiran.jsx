@@ -12,7 +12,7 @@ import { decodeJWT } from "../../app/auth";
 
 function LogKehadiran() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.teacher);
   const dt = useRef(null);
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -35,7 +35,7 @@ function LogKehadiran() {
             moment().format("DD-MM-YYYY HH:mm:ss") +
             "\n" +
             "User Download : " +
-            decodeJWT(user).name +
+            (user ? user.name : "admin") +
             "\n",
           pageWidth - 35,
           {}

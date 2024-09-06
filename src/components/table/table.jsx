@@ -162,7 +162,19 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                                 <FaXmark /> Reject
                               </SingleButton>
                             </>
-                          ) : null}
+                          ) : (
+                            <div>
+                              <img
+                                src={`/public/assets/icon/${
+                                  row.status === "Accepted"
+                                    ? "approve"
+                                    : "rejected"
+                                }.png`}
+                                alt="Attachment"
+                                className="w-full h-20"
+                              />
+                            </div>
+                          )}
                         </div>
                       ) : col.field === "attachment" ? (
                         <button
@@ -205,6 +217,11 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                 alt="Lampiran"
                 className="w-full h-auto"
               />
+              <p className="mt-3">
+                <span className="font-bold ">Keterangan:</span>
+                <br />
+                {row.notes}
+              </p>
               <div className="modal-action">
                 <form method="dialog">
                   <button className="btn border-none bg-gray-100 hover:bg-gray-300 text-black">

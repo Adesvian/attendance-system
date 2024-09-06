@@ -44,9 +44,7 @@ function LeftSidebar() {
           />
           <h1
             className={`text-dark-base dark:text-dark-text text-center mt-2 font-medium text-xl ${titleClasses}`}
-          >
-            Admin Panel
-          </h1>
+          ></h1>
         </div>
 
         <ul>

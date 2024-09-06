@@ -24,82 +24,93 @@ function DashboardTeacher() {
   const [onTimeCount, setOnTimeCount] = useState(0);
   const [lateCount, setLateCount] = useState(0);
   const [attendance, setAttendance] = useState([]);
+  const [chartData, setchartData] = useState([]);
 
   const fetchData = async () => {
     try {
-      // Fetch student data
-      const students = await axios.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/students?class=${encodeURIComponent(user.class)}`
-      );
+      // Helper function to fetch data
+      const fetchDataFromApi = async (endpoint) => {
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/${endpoint}`
+        );
+        return data;
+      };
 
-      // Fetch class data only for the current teacher
-      const classes = await axios.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/classschedule?teacherid=${encodeURIComponent(user.id)}`
-      );
+      // Fetch class, subject, and attendance data in parallel
+      const [classes, allClasses, allSubjects] = await Promise.all([
+        fetchDataFromApi(
+          `classschedule?teacherid=${encodeURIComponent(user.nid)}`
+        ),
+        fetchDataFromApi("classes"),
+        fetchDataFromApi("subjects"),
+      ]);
 
-      // Fetch permit data for today
-      const permits = await axios.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/permits?class=${encodeURIComponent(user.class)}`
-      );
-
-      // Fetch attendance data for today
-      const attendance = await axios.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/attendancetoday?class=${encodeURIComponent(user.class)}`
-      );
-
-      // Get unique classes and subjects based on teacher login
-      const uniqueClasses = [
-        ...new Set(classes.data.map((item) => item.class_id)),
-      ];
-      const uniqueSubjects = [
-        ...new Set(classes.data.map((item) => item.subject_id)),
+      // Get unique class and subject IDs
+      const uniqueClassIds = [...new Set(classes.map((item) => item.class_id))];
+      const uniqueSubjectIds = [
+        ...new Set(classes.map((item) => item.subject_id)),
       ];
 
-      setStudentCount(students.data.length);
+      // Get unique class and subject names
+      const uniqueClasses = uniqueClassIds
+        .map((id) => allClasses.find((c) => c.id === id)?.name)
+        .filter(Boolean); // Filter out undefined values
+
+      const uniqueSubjects = uniqueSubjectIds
+        .map((id) => allSubjects.find((s) => s.id === id)?.name)
+        .filter(Boolean);
+
+      const classString = uniqueClasses.join(",");
+
+      // Fetch attendance, students, permits, and today's attendance data in parallel
+      const [Chartattendance, students, permits, attendance] =
+        await Promise.all([
+          fetchDataFromApi(`attendance?class=${classString}`),
+          fetchDataFromApi(
+            `students?class=${encodeURIComponent(user.class || classString)}`
+          ),
+          fetchDataFromApi(
+            `permits?class=${encodeURIComponent(user.class || classString)}`
+          ),
+          fetchDataFromApi(
+            `attendancetoday?class=${encodeURIComponent(
+              user.class || classString
+            )}`
+          ),
+        ]);
+
+      // Set data to state
+      setchartData(Chartattendance);
+      setStudentCount(students.length);
       setClassCount(uniqueClasses.length);
       setSubjectCount(uniqueSubjects.length);
-      setClassscheduleCount(classes.data.length);
-      setPermitCount(permits.data.length);
-      const attendanceRate =
-        (attendance.data.filter((a) => a.method === 1001).length /
-          students.data.length) *
-        100;
-      const formattedRate = parseFloat(attendanceRate.toFixed(2));
-      setPresenceRate(formattedRate);
+      setClassscheduleCount(classes.length);
+      setPermitCount(
+        permits.filter((permit) => permit.status === "Pending").length
+      );
 
-      // Mendapatkan tanggal hari ini dalam epoch Unix time (mulai dari tengah malam hari ini)
+      const attendanceRate =
+        (attendance.filter((a) => a.method === 1001).length / students.length) *
+        100;
+      setPresenceRate(parseFloat(attendanceRate.toFixed(2)));
+
+      // Get today's start and end in Unix epoch time
       const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
       const todayEnd = Math.floor(new Date().setHours(23, 59, 59, 999) / 1000);
 
-      const approvedToday = permits.data.filter(
-        (permit) =>
-          permit.status === "Approve" &&
-          permit.date >= todayStart &&
-          permit.date <= todayEnd
-      );
-
       setAbsentCount(
-        permits.data.filter(
+        permits.filter(
           (permit) =>
-            permit.status === "Approve" &&
+            permit.status === "Accepted" &&
             permit.date >= todayStart &&
             permit.date <= todayEnd
         ).length
       );
       setOnTimeCount(
-        attendance.data.filter((a) => a.status === 200 && a.method === 1001)
-          .length
+        attendance.filter((a) => a.status === 200 && a.method === 1001).length
       );
-      setLateCount(attendance.data.filter((a) => a.status === 201).length);
-      setAttendance(attendance.data);
+      setLateCount(attendance.filter((a) => a.status === 201).length);
+      setAttendance(attendance);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -178,7 +189,7 @@ function DashboardTeacher() {
         />
       </div>
       <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 lg:gap-6 md:gap-x-5 gap-y-4 mt-5 mb-5">
-        <BarChart />
+        <BarChart chartData={chartData} />
         <RecentAttendance
           data={attendance}
           initialRowsPerPage={5}

@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import moment from "moment";
 
-function BarChart() {
+function BarChart({ chartData }) {
   const [activeButton, setActiveButton] = useState("Day");
   const [data, setData] = useState({ labels: [], datasets: [] });
   const theme = useSelector((state) => state.header.theme);
@@ -20,7 +20,7 @@ function BarChart() {
         const response = await axios.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`
         );
-        const attendanceData = response.data;
+        const attendanceData = chartData ? chartData : response.data;
 
         // Mengelompokkan data berdasarkan tanggal
         const groupedData = attendanceData.reduce((acc, curr) => {
@@ -76,7 +76,7 @@ function BarChart() {
     };
 
     fetchAttendanceData();
-  }, []);
+  }, [chartData]);
 
   useEffect(() => {
     updateChartData(activeButton, setData, attendancesData);
