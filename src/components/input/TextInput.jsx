@@ -1,7 +1,16 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-function TextInput({ id, type, label, value, onChange, required }) {
+function TextInput({
+  id,
+  name,
+  type,
+  label,
+  value = "",
+  onChange = () => {},
+  required,
+}) {
+  // Default value set to empty string
   const [showPassword, setShowPassword] = useState(false);
 
   const handleTogglePassword = () => {
@@ -13,7 +22,8 @@ function TextInput({ id, type, label, value, onChange, required }) {
       <input
         type={showPassword && type === "password" ? "text" : type}
         id={id}
-        value={value}
+        value={value} // Controlled input
+        name={name}
         onChange={onChange}
         required={required}
         placeholder={label}

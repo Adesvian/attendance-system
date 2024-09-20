@@ -1,17 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { decrypt } from "../app/auth";
+import { decrypt } from "../app/api/v1/auth";
 
 // Thunk untuk fetch data guru
 export const fetchTeacherData = createAsyncThunk(
   "auth/fetchTeacherData",
-  async (name) => {
+  async (nid) => {
     const response = await axios.get(
-      `${
-        import.meta.env.VITE_BASE_URL_BACKEND
-      }/teachers?nama=${encodeURIComponent(name)}`
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${encodeURIComponent(
+        nid
+      )}`
     );
-    return response.data[0];
+    return response.data.data;
   }
 );
 

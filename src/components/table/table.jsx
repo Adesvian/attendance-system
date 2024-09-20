@@ -12,7 +12,7 @@ import {
   Pagination,
 } from "@mui/material";
 import SingleButton from "../button/Button";
-import { MdEdit, MdDelete } from "react-icons/md";
+import { MdEdit, MdDelete, MdRemoveRedEye } from "react-icons/md";
 import { FaCheck, FaXmark, FaEye } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { ThemeProvider } from "@emotion/react";
@@ -96,7 +96,7 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                     key={index}
                     align="center"
                     sortDirection={orderBy === col.field ? order : false}
-                    className="dark:bg-base-200 "
+                    className="dark:bg-base-200 whitespace-nowrap"
                   >
                     <TableSortLabel
                       active={orderBy === col.field}
@@ -118,29 +118,39 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                     <TableCell
                       key={colIndex}
                       align="center"
-                      className="dark:text-dark-text"
+                      className={`text-[14px] p-[8px] w-[9px] whitespace-normal ${
+                        index % 2 === 0
+                          ? "bg-gray-100 dark:text-dark-text dark:bg-base-200"
+                          : "bg-white dark:bg-base-300"
+                      }`}
                     >
                       {col.field === "profile" ? (
                         <div className="avatar">
-                          <div className="mask mask-circle h-20 w-20">
+                          <div className="mask mask-circle w-14">
                             <img src={row[col.field]} alt="Avatar" />
                           </div>
                         </div>
                       ) : col.field === "action" ? (
-                        <div className="flex justify-center gap-x-2">
+                        <div className="flex justify-center gap-x-1">
                           {isUserTable ? (
                             <>
                               <SingleButton
-                                className="btn border-none bg-amber-500 hover:bg-amber-600 text-white"
-                                onClick={() => props.handleAct1(row)}
+                                className="p-3 rounded-md flex gap-x-2 items-center border-none bg-sky-500 hover:bg-sky-600 text-white"
+                                onClick={() => props.handleAct0(row)}
                               >
-                                <MdEdit /> Edit
+                                <MdRemoveRedEye />
                               </SingleButton>
                               <SingleButton
-                                className="btn border-none bg-rose-500 hover:bg-rose-600 text-white"
+                                className="p-3 rounded-md flex gap-x-2 items-center border-none bg-amber-500 hover:bg-amber-600 text-white"
+                                onClick={() => props.handleAct1(row)}
+                              >
+                                <MdEdit />
+                              </SingleButton>
+                              <SingleButton
+                                className="p-3 rounded-md flex gap-x-2 items-center border-none bg-rose-500 hover:bg-rose-600 text-white"
                                 onClick={() => props.handleAct2(row)}
                               >
-                                <MdDelete /> Delete
+                                <MdDelete />
                               </SingleButton>
                             </>
                           ) : row.status === "Pending" ? (
@@ -165,7 +175,7 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                           ) : (
                             <div>
                               <img
-                                src={`/public/assets/icon/${
+                                src={`/assets/icon/${
                                   row.status === "Accepted"
                                     ? "approve"
                                     : "rejected"
@@ -188,7 +198,7 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                           <FaEye />
                         </button>
                       ) : (
-                        <div className="p-2 font-medium">{row[col.field]}</div>
+                        <div className="font-medium">{row[col.field]}</div>
                       )}
                     </TableCell>
                   ))}
@@ -207,31 +217,34 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
             shape="rounded"
           />
         </Stack>
-        {paginatedRows.map((row, index) => (
-          <dialog key={index} id={`modal_${index}`} className="modal">
-            <div className="modal-box bg-white">
-              <img
-                src={`${import.meta.env.VITE_BASE_URL_BACKEND}/permits/${
-                  row.attachment
-                }`}
-                alt="Lampiran"
-                className="w-full h-auto"
-              />
-              <p className="mt-3">
-                <span className="font-bold ">Keterangan:</span>
-                <br />
-                {row.notes}
-              </p>
-              <div className="modal-action">
-                <form method="dialog">
-                  <button className="btn border-none bg-gray-100 hover:bg-gray-300 text-black">
-                    Close
-                  </button>
-                </form>
-              </div>
-            </div>
-          </dialog>
-        ))}
+        {paginatedRows.map(
+          (row, index) =>
+            row.attachment && (
+              <dialog key={index} id={`modal_${index}`} className="modal">
+                <div className="modal-box bg-white">
+                  <img
+                    src={`${import.meta.env.VITE_BASE_URL_BACKEND}/permits/${
+                      row.attachment
+                    }`}
+                    alt="Lampiran"
+                    className="w-full h-auto"
+                  />
+                  <p className="mt-3">
+                    <span className="font-bold ">Keterangan:</span>
+                    <br />
+                    {row.notes}
+                  </p>
+                  <div className="modal-action">
+                    <form method="dialog">
+                      <button className="btn border-none bg-gray-100 hover:bg-gray-300 text-black">
+                        Close
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </dialog>
+            )
+        )}
       </ThemeProvider>
     </div>
   );

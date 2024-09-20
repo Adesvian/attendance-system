@@ -7,7 +7,7 @@ const PageContent = lazy(() => import("./page-content"));
 
 function Layout() {
   return (
-    <div className="flex bg-gray-300 dark:bg-base-300">
+    <div className="flex bg-gray-300 dark:bg-base-300 -dark">
       <Suspense fallback={<SuspenseContent />}>
         <LeftSidebar />
         <PageContent />

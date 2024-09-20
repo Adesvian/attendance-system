@@ -5,52 +5,35 @@ import { Button } from "@mui/material";
 import { MdOutlineAdd } from "react-icons/md";
 import TableDataManager from "../../components/table/table"; // Pastikan nama file dan path sudah benar
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { fetchTeachers, deleteTeacher } from "../../app/api/v1/admin-services";
+
 function Guru() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
 
+  const handleView = (row) => {
+    navigate(`/teacher/view-teacher/${row.nid}`);
+  };
+
   const handleEdit = (row) => {
-    console.log("Edit clicked for: ", row);
-    // Implementasi logika edit di sini
+    navigate(`/teacher/edit-teacher/${row.nid}`);
   };
 
-  // Definisikan fungsi handleDelete
   const handleDelete = (row) => {
-    console.log("Delete clicked for: ", row);
-    // Implementasi logika hapus di sini
-  };
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`
-      );
-      const updatedData = response.data.map((teacher) => {
-        return {
-          ...teacher,
-          profile: `assets/icon/${
-            teacher.gender === "Perempuan" ? "miss" : "sir"
-          }.png`,
-          type: teacher.type === "teacher_class" ? "Guru Kelas" : "Guru Mapel",
-        };
-      });
-
-      setData(updatedData);
-    } catch (error) {
-      console.error(error);
-    }
+    deleteTeacher(row.nid, setData);
   };
 
   useEffect(() => {
-    fetchData();
+    fetchTeachers(setData);
     setColumns([
       { field: "profile", header: "Profile" },
       { field: "nid", header: "NIK" },
       { field: "name", header: "Name" },
-      { field: "type", header: "Type" },
+      { field: "ttl", header: "Tempat Tgl. Lahir" },
+      { field: "type", header: "Type Guru" },
+      { field: "address", header: "Alamat" },
       { field: "action", header: "Action" },
     ]);
     dispatch(setPageTitle({ title: "Guru" }));
@@ -74,6 +57,7 @@ function Guru() {
           <TableDataManager
             data={data}
             columns={columns}
+            handleAct0={handleView}
             handleAct1={handleEdit}
             handleAct2={handleDelete}
           />

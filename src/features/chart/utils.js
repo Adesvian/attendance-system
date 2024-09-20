@@ -18,7 +18,7 @@ ChartJS.register(
   Legend
 );
 
-export const updateChartData = (period, setData, attendancesData) => {
+export const updateChartData = (period, setChart, data) => {
   let labels = [];
   let datasets = [];
 
@@ -54,7 +54,7 @@ export const updateChartData = (period, setData, attendancesData) => {
       labels = [];
   }
 
-  const filteredData = attendancesData.filter(
+  const filteredData = data.filter(
     (item) => moment(item.tanggal, "DD-MM-YYYY").year() === currentYear
   );
 
@@ -132,7 +132,7 @@ export const updateChartData = (period, setData, attendancesData) => {
     });
   }
 
-  setData({
+  setChart({
     labels,
     datasets,
   });

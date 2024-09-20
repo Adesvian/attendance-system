@@ -55,7 +55,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
 
       {isExpanded && (
         <div className="w-full -ml-4 mt-2">
-          <ul className="relative lg:left-4 bg-white dark:bg-base-300 p-2 rounded-md">
+          <ul className="relative lg:left-4 bg-gray-100 dark:bg-base-300 p-2 rounded-md">
             {submenu.map((item, index) => {
               const active =
                 location.pathname === item.path ||

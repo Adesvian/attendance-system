@@ -5,8 +5,10 @@ import { Button } from "@mui/material";
 import { MdOutlineAdd } from "react-icons/md";
 import TableDataManager from "../../components/table/table"; // Ensure the file name and path are correct
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import moment from "moment";
+import {
+  deleteClassSchedule,
+  fetchSchedules,
+} from "../../app/api/v1/admin-services";
 
 function ClassSchedule() {
   const dispatch = useDispatch();
@@ -15,74 +17,16 @@ function ClassSchedule() {
   const [columns, setColumns] = useState([]);
 
   const handleEdit = (row) => {
-    console.log("Edit clicked for: ", row);
-    // Implement edit logic here
+    navigate(`/data-jadwal/edit-jadwal/${row.id}`);
   };
 
   // Define handleDelete function
   const handleDelete = (row) => {
-    console.log("Delete clicked for: ", row);
-    // Implement delete logic here
-  };
-
-  const fetchData = async () => {
-    try {
-      const [
-        scheduleResponse,
-        classesResponse,
-        subjectsResponse,
-        teachersResponse,
-      ] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classschedule`),
-        axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
-        axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`),
-        axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
-      ]);
-
-      const scheduleData = scheduleResponse.data;
-      const classesData = classesResponse.data;
-      const subjectsData = subjectsResponse.data;
-      const teachersData = teachersResponse.data;
-
-      // Create mappings for classes, subjects, and teachers
-      const classMap = {};
-      classesData.forEach((item) => {
-        classMap[item.id] = item.name; // Assuming your classes data has 'id' and 'name'
-      });
-
-      const subjectMap = {};
-      subjectsData.forEach((item) => {
-        subjectMap[item.id] = item.name; // Assuming your subjects data has 'id' and 'name'
-      });
-
-      const teacherMap = {};
-      teachersData.forEach((item) => {
-        teacherMap[item.id] = item.name; // Assuming your teachers data has 'id' and 'name'
-      });
-
-      // Map the schedule data to replace IDs with names
-      const transformedData = scheduleData.map((item) => ({
-        className: classMap[item.class_id] || item.class_id,
-        subjectName: subjectMap[item.subject_id] || item.subject_id,
-        teacherName: teacherMap[item.teacher_id] || item.teacher_id,
-        day: item.day,
-        time: `${moment(item.start_time).utc().format("HH:mm")} - ${moment(
-          item.end_time
-        )
-          .utc()
-          .format("HH:mm")}`,
-      }));
-
-      console.log(transformedData);
-
-      setData(transformedData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    deleteClassSchedule(row.id, setData);
   };
 
   useEffect(() => {
-    fetchData();
+    fetchSchedules(setData);
     setColumns([
       { field: "className", header: "Kelas" },
       { field: "subjectName", header: "Subject" },
@@ -91,7 +35,7 @@ function ClassSchedule() {
       { field: "time", header: "Waktu" },
       { field: "action", header: "Action" },
     ]);
-    dispatch(setPageTitle({ title: "Guru" }));
+    dispatch(setPageTitle({ title: "Jadwal Ajar Guru" }));
   }, [dispatch]);
 
   return (
@@ -103,9 +47,9 @@ function ClassSchedule() {
               variant="contained"
               className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
               startIcon={<MdOutlineAdd />}
-              onClick={() => navigate("/teacher/create-teacher")}
+              onClick={() => navigate("/data-jadwal/create-jadwal")}
             >
-              Tambah Data Guru
+              Tambah Jadwal Guru
             </Button>
           </div>
 

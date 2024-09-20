@@ -64,7 +64,7 @@ const TableComponent = forwardRef(
 
     // Format data based on type
     const formattedData = useMemo(() => {
-      return type === "standard"
+      return type === "logs-table"
         ? data
         : data.map((row) => {
             const rowData = { name: row.name };
@@ -81,7 +81,7 @@ const TableComponent = forwardRef(
     }, [data, type]);
 
     const handleRequestSort = (property) => {
-      if (type === "standard") {
+      if (type === "logs-table") {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
@@ -89,8 +89,8 @@ const TableComponent = forwardRef(
     };
 
     const paginatedRows = useMemo(() => {
-      // Jika type adalah 'standard', lakukan sorting dan pagination
-      if (type === "standard") {
+      // Jika type adalah 'logs-table', lakukan sorting dan pagination
+      if (type === "logs-table") {
         const sortedRows = stableSort(
           formattedData,
           getComparator(order, orderBy)
@@ -101,7 +101,7 @@ const TableComponent = forwardRef(
         );
       }
 
-      // Jika type bukan 'standard', tampilkan seluruh data tanpa sorting dan pagination
+      // Jika type bukan 'logs-table', tampilkan seluruh data tanpa sorting dan pagination
       return formattedData;
     }, [formattedData, order, orderBy, page, rowsPerPage, type]);
 
@@ -118,7 +118,7 @@ const TableComponent = forwardRef(
     return (
       <div className="text-gray-800 dark:text-white mt-5 ">
         <ThemeProvider theme={muitheme}>
-          {type === "standard" && (
+          {type === "logs-table" && (
             <div className="flex justify-end">
               <TablePagination
                 component="div"
@@ -145,7 +145,7 @@ const TableComponent = forwardRef(
             <TableContainer
               component={Paper}
               className={
-                type === "standard" ? "max-h-[32rem] dark:bg-base-300" : ""
+                type === "logs-table" ? "max-h-[32rem] dark:bg-base-300" : ""
               }
             >
               <Table
@@ -161,13 +161,13 @@ const TableComponent = forwardRef(
                         key={index}
                         align="center"
                         sortDirection={
-                          type === "standard" && orderBy === col.field
+                          type === "logs-table" && orderBy === col.field
                             ? order
                             : false
                         }
-                        className="dark:bg-base-300 "
+                        className="dark:bg-base-300 bg-base-300"
                       >
-                        {type === "standard" ? (
+                        {type === "logs-table" ? (
                           <TableSortLabel
                             active={orderBy === col.field}
                             direction={orderBy === col.field ? order : "asc"}
@@ -175,15 +175,15 @@ const TableComponent = forwardRef(
                             className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
                             sx={{
                               "&.Mui-active": {
-                                color: theme === "dark" ? "white" : "inherit", // Warna saat label aktif
+                                color: theme === "dark" ? "white" : "inherit",
                                 "& .MuiTableSortLabel-icon": {
-                                  color: theme === "dark" ? "white" : "inherit", // Warna ikon saat label aktif
+                                  color: theme === "dark" ? "white" : "inherit",
                                 },
                               },
                               "&:hover": {
-                                color: theme === "dark" ? "white" : "inherit", // Warna saat hover
+                                color: theme === "dark" ? "white" : "inherit",
                               },
-                              color: theme === "dark" ? "white" : "inherit", // Warna default
+                              color: theme === "dark" ? "white" : "inherit",
                             }}
                           >
                             {col.header}
@@ -202,7 +202,11 @@ const TableComponent = forwardRef(
                         <TableCell
                           key={colIndex}
                           align="center"
-                          className="dark:text-dark-text dark:bg-base-200"
+                          className={` ${
+                            index % 2 === 0
+                              ? "bg-gray-100 dark:text-dark-text dark:bg-base-200"
+                              : "bg-white dark:bg-base-300"
+                          }`}
                         >
                           {col.field === "profile" && (
                             <div className="avatar">
@@ -232,7 +236,9 @@ const TableComponent = forwardRef(
             </TableContainer>
           ) : (
             <div className="text-center text-gray-500">
-              Tabel kosong. Pilih tanggal dan kelas untuk menampilkan data.
+              {type === "logs-table"
+                ? "Tabel kosong. Tidak ada data."
+                : "Tabel kosong. Pilih tanggal dan kelas untuk menampilkan data."}
             </div>
           )}
         </ThemeProvider>

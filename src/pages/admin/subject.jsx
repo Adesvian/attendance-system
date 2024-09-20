@@ -6,6 +6,7 @@ import { MdOutlineAdd } from "react-icons/md";
 import TableDataManager from "../../components/table/table"; // Pastikan nama file dan path sudah benar
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { deleteSubject, fetchSubjects } from "../../app/api/v1/admin-services";
 function Subject() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -13,37 +14,23 @@ function Subject() {
   const [columns, setColumns] = useState([]);
 
   const handleEdit = (row) => {
-    console.log("Edit clicked for: ", row);
-    // Implementasi logika edit di sini
+    navigate(`/data-mapel/edit-mapel/${row.id}`);
   };
 
   // Definisikan fungsi handleDelete
   const handleDelete = (row) => {
-    console.log("Delete clicked for: ", row);
-    // Implementasi logika hapus di sini
-  };
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`
-      );
-
-      setData(response.data);
-    } catch (error) {
-      console.error(error);
-    }
+    deleteSubject(row.id, setData);
   };
 
   useEffect(() => {
-    fetchData();
+    fetchSubjects(setData);
     setColumns([
-      { field: "id", header: "ID" },
+      { field: "no", header: "No" },
       { field: "name", header: "Name" },
       { field: "category", header: "Category" },
       { field: "action", header: "Action" },
     ]);
-    dispatch(setPageTitle({ title: "Guru" }));
+    dispatch(setPageTitle({ title: "Mata Pelajaran" }));
   }, []);
 
   return (
@@ -55,9 +42,9 @@ function Subject() {
               variant="contained"
               className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
               startIcon={<MdOutlineAdd />}
-              onClick={() => navigate("/teacher/create-teacher")}
+              onClick={() => navigate("/data-mapel/create-mapel")}
             >
-              Tambah Data Guru
+              Tambah Data Mapel
             </Button>
           </div>
 

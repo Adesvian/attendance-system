@@ -6,15 +6,23 @@ import { useSelector } from "react-redux";
 import getTheme from "../input/theme/SelectTheme"; // Pastikan path ini sesuai dengan lokasi file tema Anda
 import { ThemeProvider } from "@mui/material/styles";
 
-const CustomSelect = ({ value, onChange, options, size = "small" }) => {
+const CustomSelect = ({ value, onChange, options, name, size = "small" }) => {
   const theme = useSelector((state) => state.header.theme);
-  const muiTheme = getTheme(theme); // Dapatkan tema berdasarkan tema lokal
+  const muiTheme = getTheme(theme);
+  const handleChange = (event) => {
+    onChange({
+      target: {
+        name: name,
+        value: event.target.value,
+      },
+    });
+  };
 
   return (
     <ThemeProvider theme={muiTheme}>
       <Select
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         displayEmpty
         size={size}
         inputProps={{ "aria-label": "Filter by Status" }}

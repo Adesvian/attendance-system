@@ -21,10 +21,6 @@ function Permit() {
   const navigate = useNavigate();
 
   const handleAccept = (row) => {
-    const dateToEpoch = (dateString) => {
-      const date = new Date(dateString);
-      return Math.floor(date.getTime() / 1000);
-    };
     Swal.fire({
       title: "Apakah anda yakin?",
       text: `Menerima izin tidak hadir untuk ${row.name}?`,
@@ -37,13 +33,11 @@ function Permit() {
       if (result.isConfirmed) {
         axios
           .put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/permitsudpateStatus/${
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-udpate-status/${
               row.id
             }`,
             {
-              ...row,
-              date: dateToEpoch(row.date),
-              status: "Accepted",
+              status: 200,
             }
           )
           .then(() => {
@@ -71,10 +65,6 @@ function Permit() {
   };
 
   const handleReject = (row) => {
-    const dateToEpoch = (dateString) => {
-      const date = new Date(dateString);
-      return Math.floor(date.getTime() / 1000);
-    };
     Swal.fire({
       title: "Apakah anda yakin?",
       text: `Menolak izin tidak hadir untuk ${row.name}?`,
@@ -87,13 +77,11 @@ function Permit() {
       if (result.isConfirmed) {
         axios
           .put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/permitsudpateStatus/${
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-udpate-status/${
               row.id
             }`,
             {
-              ...row,
-              date: dateToEpoch(row.date),
-              status: "Rejected",
+              status: 400,
             }
           )
           .then(() => {
@@ -122,40 +110,52 @@ function Permit() {
   });
 
   useEffect(() => {
+    dispatch(setPageTitle({ title: "Ketidakhadiran" }));
     const fetchData = async () => {
       try {
         // Fetch class data only for the current teacher
-        const { data: classesData } = await axios.get(
+        const { data: classes } = await axios.get(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
-          }/classschedule?teacherid=${encodeURIComponent(user.nid)}`
+          }/class-schedule?teacherid=${encodeURIComponent(user.nid)}`
         );
 
-        const { data: allClassesData } = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/classes`
-        );
-
-        // Get unique class names based on teacher login
-        const classString = [
-          ...new Set(classesData.map((item) => item.class_id)),
-        ]
-          .map((id) => allClassesData.find((c) => c.id === id)?.name)
-          .filter(Boolean) // Filter out undefined values
-          .join(",");
+        const uniqueClass = [
+          ...new Set(classes.data.map((item) => item.class_id)),
+        ];
+        const classParams = uniqueClass.join(",");
 
         const response = await axios.get(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
           }/permits?class=${encodeURIComponent(
-            user.class != "" ? user.class : classString
+            user.class != null ? user.class.id : classParams
           )}`
         );
-        const convertedData = response.data
-          .map((item) => ({
-            ...item,
-            date: moment(item.date * 1000).format("YYYY-MM-DD"),
-          }))
-          .sort((a, b) => b.id - a.id);
+
+        const convertedData = await Promise.all(
+          response.data.data.map(async (item) => {
+            const studentResponse = await axios.get(
+              `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${
+                item.student_rfid
+              }`
+            );
+            const student = studentResponse.data;
+
+            return {
+              ...item,
+              name: student.data.name,
+              class: "Kelas " + item.class_id,
+              status:
+                item.status === 300
+                  ? "Pending"
+                  : item.status === 200
+                  ? "Accepted"
+                  : "Rejected",
+              date: moment(item.date * 1000).format("YYYY-MM-DD"),
+            };
+          })
+        );
 
         setData(convertedData);
       } catch (err) {
@@ -204,10 +204,7 @@ function Permit() {
     }
 
     setColumns(newColumns);
-
-    dispatch(setPageTitle({ title: "Ketidakhadiran" }));
   }, []);
-
   return (
     <div className="grid lg:grid-cols-1 md:grid-cols-1 grid-cols-1 gap-6 mt-5">
       <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 font-poppins">

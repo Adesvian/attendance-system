@@ -5,25 +5,41 @@ import { lazy, Suspense, useEffect } from "react";
 import SuspenseContent from "./suspense-content";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
-import { fetchCookies } from "../redux/authSlice";
-import { decodeJWT } from "../app/auth";
+import { decodeJWT } from "../app/api/v1/auth";
+// import { fetchCookies } from "../redux/authSlice";
 
 const Page404 = lazy(() => import("../pages/utils/404"));
 
 function PageContent() {
-  const user = useSelector((state) => state.auth.token);
+  const userToken = useSelector((state) => state.auth.token);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const filteredRoutes = routes.filter((route) =>
-    route.role.includes(decodeJWT(user).role)
+    route.role.includes(decodeJWT(userToken).role)
   );
+
+  function getCookie(name) {
+    const cookieString = document.cookie;
+    const cookies = cookieString.split("; ");
+
+    for (let cookie of cookies) {
+      const [cookieName, cookieValue] = cookie.split("=");
+
+      if (cookieName === name) {
+        return cookieValue;
+      }
+    }
+
+    return null;
+  }
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const cookies = await dispatch(fetchCookies()).unwrap();
+        // const cookies = await dispatch(fetchCookies()).unwrap();
+        const cookies = getCookie("_USER_AUTH_RAMADHAN");
 
         if (!cookies || Object.keys(cookies).length === 0) {
           Swal.fire({

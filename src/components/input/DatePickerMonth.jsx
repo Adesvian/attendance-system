@@ -13,6 +13,7 @@ const DatePickerComponent = ({
   setCleared,
   label = "Pilih bulan",
   placeholder = "Pilih bulan",
+  views = ["year", "month"],
 }) => {
   const theme = useSelector((state) => state.header.theme);
   const muitheme = getTheme(theme);
@@ -22,7 +23,7 @@ const DatePickerComponent = ({
       <LocalizationProvider dateAdapter={AdapterMoment}>
         <DatePicker
           label={label}
-          views={["year", "month"]}
+          views={views}
           value={selectedDate}
           onChange={handleDateChange}
           slotProps={{

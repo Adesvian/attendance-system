@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BsClipboardCheck, BsSortUpAlt, BsSortDown } from "react-icons/bs";
 import moment from "moment";
-import axios from "axios";
+import { fetchRecentStudents } from "../../app/api/v1/admin-services";
+import { useSelector } from "react-redux";
 
 const getRelativeTime = (time) => moment.unix(time).fromNow();
 
@@ -10,33 +11,15 @@ const RecentAttendance = ({
   initialRowsPerPage = 5,
   initialSortOrder = "desc",
 }) => {
+  const user = useSelector((state) => state.auth.teacher);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
 
-  // Fetch data dari /api/students
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
-        );
-        // Ambil hanya student name dan gender
-        const studentData = response.data.map(({ name, gender }) => ({
-          name,
-          gender,
-        }));
-        setStudents(studentData);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudents();
+    fetchRecentStudents(setStudents, setError, setLoading);
   }, []);
 
   const toggleSortOrder = () =>
@@ -92,9 +75,8 @@ const RecentAttendance = ({
       </div>
       <div>
         {sortedData.slice(0, rowsPerPage).map((attendance, index) => {
-          // Cari gender siswa berdasarkan nama
           const student = students.find(
-            (student) => student.name === attendance.student_name
+            (student) => student.name === attendance.student.name
           );
           return (
             <div
@@ -111,10 +93,12 @@ const RecentAttendance = ({
                 />
                 <div>
                   <h2 className="text-sm font-medium leading-snug pb-0.5">
-                    {attendance.student_name}{" "}
+                    {attendance.student.name}{" "}
                     <span className="text-gray-400">
-                      dari {attendance.class} has{" "}
-                      {attendance.method === 1001 ? (
+                      dari {attendance.student.class.name} has{" "}
+                      {!attendance.method ? (
+                        <span className="text-green-500">tapped in</span>
+                      ) : attendance.method === 1001 ? (
                         <span className="text-green-500">checked in</span>
                       ) : (
                         <span className="text-red-500">checked out</span>
@@ -124,7 +108,9 @@ const RecentAttendance = ({
                   <h3 className="text-gray-400 text-xs font-normal leading-4">
                     {attendance.method !== 1002 && (
                       <span>
-                        {attendance.status === 200 ? (
+                        {!attendance.status ? (
+                          ""
+                        ) : attendance.status === 200 ? (
                           <span>On time | </span>
                         ) : (
                           <span>Late | </span>

@@ -3,110 +3,33 @@ import SingleButton from "../../components/button/Button";
 import TextInput from "../../components/input/TextInput";
 import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useDispatch } from "react-redux";
-import { decodeJWT, decrypt } from "../../app/auth"; // Pastikan ini diimpor dari file auth.js
+import { checkAuthCookies, login } from "./login";
 
 function LoginForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const INITIAL_LOGIN_OBJ = {
+  const [creds, setCreds] = useState({
     username: "",
     password: "",
-  };
-  const [loginObj, setLoginObj] = useState(INITIAL_LOGIN_OBJ);
+  });
 
   useEffect(() => {
-    const checkAuthCookies = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/get-cookies`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        const authToken = response.data._USER_AUTH_RAMADHAN;
-
-        if (authToken) {
-          try {
-            // Coba dekripsi token
-            const decryptedToken = decrypt(
-              import.meta.env.VITE_JWT_SECRET,
-              authToken
-            );
-            // Jika dekripsi berhasil, lakukan navigasi ke dashboard
-            if (decryptedToken) {
-              const role = decodeJWT(decryptedToken).role;
-              if (role === "admin") {
-                navigate("/dashboard-admin");
-              } else if (role === "teacher") {
-                navigate("/dashboard-teacher");
-              } else {
-                navigate("/dashboard-wali-murid");
-              }
-            } else {
-              setErrorMessage("Something went wrong, please log in again.");
-              navigate("/login");
-            }
-          } catch (error) {
-            console.error("Invalid token decryption:", error);
-            setErrorMessage("Invalid session, please log in again.");
-            navigate("/login");
-          }
-        } else {
-          navigate("/login");
-        }
-      } catch (error) {
-        console.error("Error fetching cookies:", error);
-        setErrorMessage("Failed to validate session, please log in again.");
-      }
-    };
-
-    checkAuthCookies();
+    checkAuthCookies(setErrorMessage, navigate);
   }, [dispatch, navigate]);
 
   const submitForm = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage("");
-
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/login`,
-        loginObj,
-        {
-          withCredentials: true,
-        }
-      );
-
-      console.log(response);
-      if (response.status === 200) {
-        if (response.data.role === "admin") {
-          navigate("/dashboard-admin");
-        } else if (response.data.role === "teacher") {
-          navigate("/dashboard-teacher");
-        } else {
-          navigate("/dashboard-wali-murid");
-        }
-      } else {
-        setErrorMessage("Login failed! Please try again.");
-      }
-    } catch (error) {
-      console.error(error);
-      setErrorMessage(
-        error.response?.data?.message || "An error occurred! Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
+    await login(creds, setErrorMessage, navigate);
+    setLoading(false);
   };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setLoginObj((prev) => ({ ...prev, [id]: value }));
+    setCreds((prev) => ({ ...prev, [id]: value }));
   };
 
   return (
@@ -124,7 +47,7 @@ function LoginForm() {
             id="username"
             type="text"
             label="Username"
-            value={loginObj.username}
+            value={creds.username}
             onChange={handleChange}
             required
           />
@@ -132,7 +55,7 @@ function LoginForm() {
             id="password"
             type="password"
             label="Password"
-            value={loginObj.password}
+            value={creds.password}
             onChange={handleChange}
             required
           />
