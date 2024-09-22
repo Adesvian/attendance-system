@@ -205,7 +205,11 @@ function ViewTeacher() {
                 name="type"
                 type="text"
                 label="Tipe Guru"
-                value={teacherData.type}
+                value={
+                  teacherData.type === "Class Teacher"
+                    ? "Wali Kelas"
+                    : "Guru Mapel"
+                }
                 className="dark:bg-base-300 dark:text-dark-text"
                 onChange={() => {}}
                 readOnly
@@ -227,7 +231,7 @@ function ViewTeacher() {
                   name="class"
                   type="text"
                   label="Kelas"
-                  value={teacherData.class}
+                  value={`Kelas ${teacherData.class}`}
                   className="dark:bg-base-300 dark:text-dark-text"
                   onChange={() => {}}
                   readOnly

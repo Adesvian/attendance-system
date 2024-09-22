@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import TextInput from "../../components/input/TextInput";
@@ -9,9 +9,11 @@ import { io } from "socket.io-client";
 import {
   handleChangeParentData,
   submitStudentData,
+  updateStudentData,
 } from "../../app/api/v1/admin-services";
 
-function CreateStudent() {
+function EditStudent() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -33,14 +35,78 @@ function CreateStudent() {
     address: "",
     username: "",
     password: "",
+    isnew: false,
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, type, checked, value } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
     setStudentData((prevData) =>
-      handleChangeParentData(prevData, parentData, name, value)
+      handleChangeParentData(prevData, parentData, name, newValue)
     );
   };
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        const studentResponse = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`
+        );
+
+        const userResponse = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
+            studentResponse.data.data.parent_nid
+          }`
+        );
+
+        const student = studentResponse.data.data;
+        const user = userResponse.data.data;
+
+        const response = {
+          rfid: student.rfid,
+          name: student.name,
+          class: student.class.id,
+          gender: student.gender,
+          birth_of_place: student.birth_of_place,
+          birth_of_date:
+            student.birth_of_date === null
+              ? ""
+              : new Date(student.birth_of_date).toISOString().split("T")[0],
+          username: user.username,
+          password: "",
+          parent_nid: student.parent.nid,
+          parent_name: student.parent.name,
+          parent_gender: student.parent.gender,
+          parent_birth_of_place: student.parent.birth_of_place,
+          parent_birth_of_date:
+            student.parent.birth_of_date === null
+              ? ""
+              : new Date(student.parent.birth_of_date)
+                  .toISOString()
+                  .split("T")[0],
+          phone_num: student.parent.phone_num,
+          address: student.parent.address,
+          parent_type: "new",
+          isnew: false,
+          default_nid: student.parent.nid,
+        };
+
+        const formatData = (data) => {
+          const formattedData = {};
+          for (const key in data) {
+            formattedData[key] = data[key] === null ? "" : data[key];
+          }
+          return formattedData;
+        };
+
+        const formattedData = formatData(response);
+
+        setStudentData(formattedData);
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+      }
+    };
+    fetchStudentData();
+  }, []);
 
   useEffect(() => {
     if (studentData.parent_type === "exist") {
@@ -62,16 +128,7 @@ function CreateStudent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const form = e.target;
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    setLoading(true);
-
-    const success = await submitStudentData(studentData, setLoading);
+    const success = await updateStudentData(studentData, id, setLoading);
     if (success) {
       navigate("/data-siswa");
     }
@@ -125,7 +182,7 @@ function CreateStudent() {
                     name="rfid"
                     type="text"
                     label="Tap card on reader"
-                    value={studentData.rfid}
+                    value={studentData.rfid || ""}
                     onChange={handleChange}
                     readOnly
                     required
@@ -145,7 +202,7 @@ function CreateStudent() {
                     name="name"
                     type="text"
                     label="Nama"
-                    value={studentData.name}
+                    value={studentData.name || ""}
                     onChange={handleChange}
                     required
                   />
@@ -166,7 +223,7 @@ function CreateStudent() {
                     name="birth_of_place"
                     type="text"
                     label="Tempat Lahir"
-                    value={studentData.birth_of_place}
+                    value={studentData.birth_of_place || ""}
                     onChange={handleChange}
                   />
                 </div>
@@ -184,7 +241,7 @@ function CreateStudent() {
                     name="birth_of_date"
                     type="date"
                     label="Tempat Lahir"
-                    value={studentData.birth_of_date}
+                    value={studentData.birth_of_date || ""}
                     onChange={handleChange}
                   />
                 </div>
@@ -202,7 +259,7 @@ function CreateStudent() {
                     name="gender"
                     id="gender"
                     onChange={handleChange}
-                    value={studentData.gender}
+                    value={studentData.gender || "Laki-Laki"}
                     className="border p-3 rounded-md w-full"
                     required
                   >
@@ -250,7 +307,7 @@ function CreateStudent() {
                     name="parent_type"
                     id="parent_type"
                     onChange={handleChange}
-                    value={studentData.parent_type}
+                    value={studentData.parent_type || "new"}
                     className="border p-3 rounded-md w-full"
                     required
                   >
@@ -309,6 +366,21 @@ function CreateStudent() {
         {studentData.parent_type === "new" && (
           <div className="grid lg:grid-cols-1 md:grid-cols-1 grid-cols-1 gap-6 my-5">
             <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-5 px-10 font-poppins">
+              <div className="flex my-6 mb-10 gap-x-2 text-sm">
+                <input
+                  id="isnew"
+                  name="isnew"
+                  type="checkbox"
+                  className="checkbox checkbox-sm checkbox-primary"
+                  defaultChecked={studentData.isnew || false}
+                  onChange={handleChange}
+                />
+                Dengan mencentang ini maka data wali murid yang di submit akan
+                diinputkan sebagai
+                <span className="text-red-600 font-medium">
+                  data wali murid baru
+                </span>
+              </div>
               <div className="mt-5 grid grid-cols-1 gap-x-5 sm:grid-cols-6">
                 <div className="sm:col-span-3">
                   <label
@@ -323,7 +395,7 @@ function CreateStudent() {
                       name="parent_nid"
                       type="number"
                       label="NIK"
-                      value={studentData.parent_nid}
+                      value={studentData.parent_nid || ""}
                       onChange={handleChange}
                       required
                     />
@@ -342,14 +414,13 @@ function CreateStudent() {
                       name="parent_name"
                       type="text"
                       label="Nama"
-                      value={studentData.parent_name}
+                      value={studentData.parent_name || ""}
                       onChange={handleChange}
                       required
                     />
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
                 <div className="sm:col-span-3">
                   <label
@@ -364,7 +435,7 @@ function CreateStudent() {
                       name="parent_birth_of_place"
                       type="text"
                       label="Tempat Lahir Wali"
-                      value={studentData.parent_birth_of_place}
+                      value={studentData.parent_birth_of_place || ""}
                       onChange={handleChange}
                     />
                   </div>
@@ -382,7 +453,7 @@ function CreateStudent() {
                       name="parent_birth_of_date"
                       type="date"
                       label="Tempat Lahir"
-                      value={studentData.parent_birth_of_date}
+                      value={studentData.parent_birth_of_date || ""}
                       onChange={handleChange}
                     />
                   </div>
@@ -400,7 +471,7 @@ function CreateStudent() {
                       name="parent_gender"
                       id="parent_gender"
                       onChange={handleChange}
-                      value={studentData.parent_gender}
+                      value={studentData.parent_gender || ""}
                       className="border p-3 rounded-md w-full"
                       required
                     >
@@ -410,7 +481,6 @@ function CreateStudent() {
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
                 <div className="sm:col-span-3">
                   <label
@@ -425,7 +495,7 @@ function CreateStudent() {
                       name="phone_num"
                       type="text"
                       label="No Whatsapp Wali"
-                      value={studentData.phone_num}
+                      value={studentData.phone_num || ""}
                       onChange={handleChange}
                     />
                   </div>
@@ -443,7 +513,7 @@ function CreateStudent() {
                       name="address"
                       type="text"
                       label="Alamat Siswa"
-                      value={studentData.address}
+                      value={studentData.address || ""}
                       onChange={handleChange}
                     />
                   </div>
@@ -463,7 +533,7 @@ function CreateStudent() {
                       name="username"
                       type="text"
                       label="Username"
-                      value={studentData.username}
+                      value={studentData.username || ""}
                       onChange={handleChange}
                       required
                     />
@@ -482,9 +552,9 @@ function CreateStudent() {
                       name="password"
                       type="password"
                       label="Password"
-                      value={studentData.password}
+                      value={studentData.password || ""}
                       onChange={handleChange}
-                      required
+                      required={studentData.isnew ? true : false}
                     />
                   </div>
                 </div>
@@ -511,4 +581,4 @@ function CreateStudent() {
   );
 }
 
-export default CreateStudent;
+export default EditStudent;

@@ -7,7 +7,10 @@ import { Button } from "@mui/material";
 import TableDataManager from "../../components/table/table";
 import { MdOutlineAdd } from "react-icons/md";
 import moment from "moment";
-import { fetchStudentData } from "../../app/api/v1/admin-services";
+import {
+  deleteStudent,
+  fetchStudentData,
+} from "../../app/api/v1/admin-services";
 
 function Student() {
   const dispatch = useDispatch();
@@ -20,14 +23,12 @@ function Student() {
   };
 
   const handleEdit = (row) => {
-    console.log("Edit clicked for: ", row);
-    // Implementasi logika edit di sini
+    navigate(`/data-siswa/edit-siswa/${row.rfid}`);
   };
 
   // Definisikan fungsi handleDelete
   const handleDelete = (row) => {
-    console.log("Delete clicked for: ", row);
-    // Implementasi logika hapus di sini
+    deleteStudent(row, setData);
   };
 
   useEffect(() => {

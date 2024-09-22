@@ -608,7 +608,7 @@ export const submitTeacherData = async (teacherData, setLoading) => {
 };
 
 export const updateTeacherData = async (teacherData, id, setLoading) => {
-  // setLoading(true);
+  setLoading(true);
 
   const formatTeacherData = {
     nid: String(teacherData.nid),
@@ -1004,10 +1004,8 @@ export const handleChangeParentData = (
 ) => {
   const newData = { ...studentData, [name]: value };
 
-  if (
-    name === "parent_nid" ||
-    (name === "parent_exist" && newData.parent_type === "exist")
-  ) {
+  // If parent_type is set to 'exist'
+  if (name === "parent_exist" && newData.parent_type === "exist") {
     const parentExist = parentData.find((parent) => parent.nid === value);
 
     if (parentExist) {
@@ -1019,17 +1017,21 @@ export const handleChangeParentData = (
       newData.phone_num = parentExist.phone_num;
       newData.address = parentExist.address;
     }
-  } else if (name === "parent_type" && value === "new") {
-    newData.parent_exist = "";
-    newData.parent_nid = "";
-    newData.parent_name = "";
-    newData.parent_gender = "Laki-Laki";
-    newData.parent_birth_of_place = "";
-    newData.parent_birth_of_date = "";
-    newData.phone_num = "";
-    newData.address = "";
-    newData.username = "";
-    newData.password = "";
+  }
+
+  // If parent_type is set to 'new', reset all relevant fields
+  if (name === "parent_type" && value === "new") {
+    newData.parent_exist = ""; // Clear existing parent selection
+    newData.parent_nid = ""; // Reset NID for new parent
+    newData.parent_name = ""; // Reset name for new parent
+    newData.parent_gender = "Laki-Laki"; // Default value
+    newData.parent_birth_of_place = ""; // Reset birth place
+    newData.parent_birth_of_date = ""; // Reset birth date
+    newData.phone_num = ""; // Reset phone number
+    newData.address = ""; // Reset address
+    newData.username = ""; // Reset username
+    newData.password = ""; // Reset password
+    newData.isnew = false; // Reset isnew state
   }
 
   return newData;
@@ -1052,9 +1054,11 @@ export const fetchStudentData = async (setData) => {
         class: student.class.name,
         ttl:
           student.birth_of_place || student.birth_of_date
-            ? `${student.birth_of_place}, ${moment(
+            ? `${student.birth_of_place}, ${
                 student.birth_of_date
-              ).format("DD/MM/YY")}`
+                  ? moment(student.birth_of_date).format("DD/MM/YY")
+                  : ""
+              }`
             : "-",
         parent_name: student.parent.name,
       };
@@ -1141,11 +1145,196 @@ export const submitStudentData = async (studentData, setLoading) => {
       title: "Oops...",
       text: error.response
         ? error.response.data.error === "P2002"
-          ? `Data yang anda masukkan bertabrakan dengan data lain!`
+          ? `RFID ${studentData.rfid} already exists!`
           : "Something went wrong!"
         : "Something went wrong!",
     });
   } finally {
     setLoading(false);
+  }
+};
+
+export const updateStudentData = async (studentData, id, setLoading) => {
+  // setLoading(true);
+  let parentExist = false;
+
+  try {
+    await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+        studentData.parent_nid
+      }`
+    );
+    parentExist = true;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      parentExist = false;
+    } else {
+      parentExist = false;
+    }
+  }
+
+  // Prepare student data
+  const formattedData = {
+    rfid: studentData.rfid,
+    name: studentData.name,
+    class_id: Number(studentData.class),
+    gender: studentData.gender,
+    birth_of_place: studentData.birth_of_place || null,
+    birth_of_date: studentData.birth_of_date
+      ? new Date(studentData.birth_of_date).toISOString()
+      : null,
+    parent_nid: studentData.parent_nid,
+  };
+
+  // Prepare parent data only if parent_type is not "exist"
+  const formatParentData =
+    studentData.parent_type !== "exist"
+      ? {
+          nid: studentData.parent_nid,
+          name: studentData.parent_name,
+          gender: studentData.parent_gender,
+          birth_of_place: studentData.parent_birth_of_place || null,
+          birth_of_date: studentData.parent_birth_of_date
+            ? new Date(studentData.parent_birth_of_date).toISOString()
+            : null,
+          phone_num: studentData.phone_num || null,
+          address: studentData.address || null,
+        }
+      : null;
+
+  const formatUserData =
+    studentData.parent_type !== "exist"
+      ? {
+          nid: studentData.parent_nid,
+          name: studentData.parent_name,
+          username: studentData.username,
+          password: studentData.password,
+          role: "parent",
+        }
+      : null;
+
+  const promises = [];
+
+  // Handle parent data update/creation based on conditions
+  if (studentData.parent_type !== "exist") {
+    // Only create or update parent if not exist
+    if (studentData.isnew) {
+      promises.push(
+        axios.post(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
+          formatParentData
+        )
+      );
+      promises.push(
+        axios.post(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
+          formatUserData
+        )
+      );
+    } else {
+      if (parentExist) {
+        promises.push(
+          axios.put(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+              studentData.parent_nid
+            }`,
+            formatParentData
+          )
+        );
+      } else {
+        // If the parent does not exist and is not new, update the parent anyway
+        promises.push(
+          axios.put(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+              studentData.default_nid
+            }`,
+            formatParentData
+          )
+        );
+        promises.push(
+          axios.put(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
+              studentData.default_nid
+            }`,
+            formatUserData
+          )
+        );
+      }
+    }
+  }
+
+  // Always include the student update
+  promises.push(
+    axios.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`,
+      formattedData
+    )
+  );
+
+  try {
+    await Promise.all(promises);
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Data successfully updated!",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating student:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: error.response
+        ? error.response.data.error === "P2002"
+          ? `RFID ${studentData.rfid} already exists!`
+          : "Something went wrong!"
+        : "Something went wrong!",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+export const deleteStudent = async (id, setData) => {
+  const confirmDelete = await Swal.fire({
+    title: "Are you sure?",
+    text: `Data yang dihapus tidak dapat dikembalikan!`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Ya, Hapus!",
+    cancelButtonText: "Cancel",
+  });
+
+  if (confirmDelete.isConfirmed) {
+    try {
+      const count = await axios.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/students/count/${
+          id.parent_nid
+        }`
+      );
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id.rfid}`
+      );
+      if (count.data.count === 1) {
+        await axios.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id.parent_nid}`
+        );
+      }
+      setData((prevData) => prevData.filter((item) => item.rfid !== id.rfid));
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Data successfully deleted!",
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong! Please try again.",
+      });
+      console.error("Error deleting student:", error);
+    }
   }
 };

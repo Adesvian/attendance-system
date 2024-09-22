@@ -10,6 +10,7 @@ function TextInput({
   onChange,
   className,
   required = false,
+  readOnly = false,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,6 +29,7 @@ function TextInput({
         onChange={onChange}
         className={`input input-bordered w-full bg-white text-gray-900 ${className}`}
         required={required}
+        readOnly={readOnly}
       />
       {type === "password" && (
         <button

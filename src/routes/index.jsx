@@ -8,6 +8,7 @@ const DashboardTeacher = lazy(() => import("../pages/guru/dashboard-teacher"));
 const Student = lazy(() => import("../pages/admin/student"));
 const ViewStudent = lazy(() => import("../pages/admin/view-student"));
 const CreateStudent = lazy(() => import("../pages/admin/create-student"));
+const EditStudent = lazy(() => import("../pages/admin/edit-student"));
 const Teacher = lazy(() => import("../pages/admin/teacher"));
 const ViewTeacher = lazy(() => import("../pages/admin/view-teacher"));
 const CreateTeacher = lazy(() => import("../pages/admin/create-teacher"));
@@ -69,6 +70,12 @@ const routes = [
     name: "Detail Siswa",
     role: ["admin"],
     component: ViewStudent,
+  },
+  {
+    path: "/data-siswa/edit-siswa/:id",
+    name: "Edit Siswa",
+    role: ["admin"],
+    component: EditStudent,
   },
   {
     path: "/teacher",

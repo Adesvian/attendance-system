@@ -31,48 +31,54 @@ function ViewStudent() {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        const student = await axios.get(
+        const studentResponse = await axios.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`
         );
-        const user = await axios.get(
+
+        const userResponse = await axios.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
-            student.data.data.parent_nid
+            studentResponse.data.data.parent_nid
           }`
         );
 
-        const response = {
-          ...student.data.data,
-          username: user.data.data.username,
-        };
-        const formatData = (data) => {
-          if (data === null || typeof data !== "object") {
-            return "";
-          }
+        const student = studentResponse.data.data;
+        const user = userResponse.data.data;
 
+        const response = {
+          rfid: student.rfid,
+          name: student.name,
+          class: student.class.name,
+          gender: student.gender,
+          birth_of_place: student.birth_of_place,
+          birth_of_date:
+            student.birth_of_date === null
+              ? ""
+              : new Date(student.birth_of_date).toISOString().split("T")[0],
+          username: user.username,
+          parent_nid: student.parent.nid,
+          parent_name: student.parent.name,
+          parent_gender: student.parent.gender,
+          parent_birth_of_place: student.parent.birth_of_place,
+          parent_birth_of_date:
+            student.parent.birth_of_date === null
+              ? ""
+              : new Date(student.parent.birth_of_date)
+                  .toISOString()
+                  .split("T")[0],
+          phone_num: student.parent.phone_num, // Get phone number from parent object
+          address: student.parent.address, // Get address from parent object
+        };
+
+        const formatData = (data) => {
           const formattedData = {};
           for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-              const value = data[key];
-
-              if (value === null) {
-                formattedData[key] = "";
-              } else if (typeof value === "object") {
-                formattedData[key] = formatData(value);
-              } else if (key.includes("birth_of_date")) {
-                formattedData[key] = new Date(value)
-                  .toISOString()
-                  .split("T")[0];
-              } else {
-                formattedData[key] = value;
-              }
-            }
+            formattedData[key] = data[key] === null ? "" : data[key];
           }
           return formattedData;
         };
 
         const formattedData = formatData(response);
 
-        console.log(formattedData);
         setStudentData(formattedData);
       } catch (error) {
         console.error("Error fetching student data:", error);
@@ -207,7 +213,7 @@ function ViewStudent() {
                   type="text"
                   label="Kelas"
                   onChange={() => {}}
-                  value={studentData.class.name}
+                  value={studentData.class}
                   className="dark:bg-base-300 dark:text-dark-text"
                   readOnly
                 />
@@ -276,7 +282,7 @@ function ViewStudent() {
                   type="text"
                   label="Nama"
                   onChange={() => {}}
-                  value={studentData.name}
+                  value={studentData.parent_name}
                   className="dark:bg-base-300 dark:text-dark-text"
                   readOnly
                 />
@@ -299,7 +305,7 @@ function ViewStudent() {
                   type="text"
                   label="Tempat Lahir Wali"
                   onChange={() => {}}
-                  value={studentData.birth_of_place}
+                  value={studentData.parent_birth_of_place}
                   className="dark:bg-base-300 dark:text-dark-text"
                   readOnly
                 />
@@ -319,7 +325,7 @@ function ViewStudent() {
                   type="date"
                   label="Tempat Lahir"
                   onChange={() => {}}
-                  value={studentData.birth_of_date}
+                  value={studentData.parent_birth_of_date}
                   className="dark:bg-base-300 dark:text-dark-text"
                   readOnly
                 />
@@ -340,7 +346,7 @@ function ViewStudent() {
                   type="text"
                   label="Jenis Kelamin"
                   onChange={() => {}}
-                  value={studentData.gender}
+                  value={studentData.parent_gender}
                   className="dark:bg-base-300 dark:text-dark-text"
                   readOnly
                 />

@@ -69,7 +69,7 @@ function EditTeacher() {
     } else if (name === "nid") {
       setTeacherData({
         ...teacherData,
-        [name]: value === "" ? "" : Number(value),
+        [name]: value === "" ? "" : String(value),
       });
     } else {
       setTeacherData({
