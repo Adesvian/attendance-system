@@ -6,12 +6,18 @@ import axios from "axios";
 import { Button } from "@mui/material";
 import TableDataManager from "../../components/table/table";
 import { MdOutlineAdd } from "react-icons/md";
+import moment from "moment";
+import { fetchStudentData } from "../../app/api/v1/admin-services";
 
-function Siswa() {
+function Student() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
+
+  const handleView = (row) => {
+    navigate(`/data-siswa/view-siswa/${row.rfid}`);
+  };
 
   const handleEdit = (row) => {
     console.log("Edit clicked for: ", row);
@@ -24,45 +30,14 @@ function Siswa() {
     // Implementasi logika hapus di sini
   };
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
-      );
-      const parentsResponse = await axios.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`
-      );
-
-      const parentsMap = {};
-      parentsResponse.data.forEach((parent) => {
-        parentsMap[parent.nid] = parent.name;
-      });
-
-      const updatedData = response.data.map((student) => {
-        return {
-          ...student,
-          profile: `assets/icon/${
-            student.gender === "Perempuan" ? "girl" : "boy"
-          }-icon.png`,
-          type: student.type === "teacher_class" ? "Guru Kelas" : "Guru Mapel",
-          parent_name: parentsMap[student.parent_nid] || "Tidak Diketahui",
-        };
-      });
-
-      setData(updatedData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    fetchStudentData(setData);
     setColumns([
       { field: "profile", header: "Profile" },
       { field: "rfid", header: "RFID" },
       { field: "name", header: "Name" },
       { field: "class", header: "Kelas" },
-      { field: "gender", header: "Jenis Kelamin" },
+      { field: "ttl", header: "Tempat Tgl. Lahir" },
       { field: "parent_name", header: "Orang Tua" },
       { field: "action", header: "Action" },
     ]);
@@ -77,15 +52,16 @@ function Siswa() {
               variant="contained"
               className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
               startIcon={<MdOutlineAdd />}
-              onClick={() => navigate("/teacher/create-teacher")}
+              onClick={() => navigate("/data-siswa/create-siswa")}
             >
-              Tambah Data Guru
+              Tambah Data Siswa
             </Button>
           </div>
 
           <TableDataManager
             data={data}
             columns={columns}
+            handleAct0={handleView}
             handleAct1={handleEdit}
             handleAct2={handleDelete}
           />
@@ -95,4 +71,4 @@ function Siswa() {
   );
 }
 
-export default Siswa;
+export default Student;

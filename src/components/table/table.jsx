@@ -134,12 +134,15 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                         <div className="flex justify-center gap-x-1">
                           {isUserTable ? (
                             <>
-                              <SingleButton
-                                className="p-3 rounded-md flex gap-x-2 items-center border-none bg-sky-500 hover:bg-sky-600 text-white"
-                                onClick={() => props.handleAct0(row)}
-                              >
-                                <MdRemoveRedEye />
-                              </SingleButton>
+                              {/* if props has handleAct0 show button */}
+                              {props.handleAct0 && (
+                                <SingleButton
+                                  className="p-3 rounded-md flex gap-x-2 items-center border-none bg-sky-500 hover:bg-sky-600 text-white"
+                                  onClick={() => props.handleAct0(row)}
+                                >
+                                  <MdRemoveRedEye />
+                                </SingleButton>
+                              )}
                               <SingleButton
                                 className="p-3 rounded-md flex gap-x-2 items-center border-none bg-amber-500 hover:bg-amber-600 text-white"
                                 onClick={() => props.handleAct1(row)}

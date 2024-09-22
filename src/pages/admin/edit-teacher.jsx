@@ -21,20 +21,32 @@ function EditTeacher() {
     type: "Class Teacher",
     class: 0,
     address: "",
+    username: "",
+    password: "",
   });
 
   useEffect(() => {
     const fetchTeacherData = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`
-        );
+        const [teacher, user] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`),
+          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`),
+        ]);
+        const response = {
+          teacher: teacher.data.data,
+          user: user.data.data,
+        };
         const formattedData = {
-          ...response.data.data,
-          birth_of_date: new Date(response.data.data.birth_of_date)
-            .toISOString()
-            .split("T")[0],
-          class_id: String(response.data.data.class_id),
+          ...response.teacher,
+          username: response.user.username,
+          password: "",
+          birth_of_date:
+            response.teacher.birth_of_date === null
+              ? ""
+              : new Date(response.teacher.birth_of_date)
+                  .toISOString()
+                  .split("T")[0],
+          class_id: String(response.teacher.class_id),
         };
         setTeacherData(formattedData);
       } catch (error) {
@@ -69,12 +81,7 @@ function EditTeacher() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await updateTeacherData(
-      teacherData,
-      id,
-      setTeacherData,
-      setLoading
-    );
+    const success = await updateTeacherData(teacherData, id, setLoading);
     if (success) {
       navigate("/teacher");
     }
@@ -144,7 +151,6 @@ function EditTeacher() {
                   label="Tempat Lahir"
                   value={teacherData.birth_of_place}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -163,7 +169,6 @@ function EditTeacher() {
                   label="Tempat Lahir"
                   value={teacherData.birth_of_date}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -257,7 +262,45 @@ function EditTeacher() {
                   label="Alamat"
                   value={teacherData.address}
                   onChange={handleChange}
-                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Username :
+              </label>
+              <div className="mt-2">
+                <TextInput
+                  id="username"
+                  name="username"
+                  type="text"
+                  label="Username"
+                  value={teacherData.username}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Password :
+              </label>
+              <div className="mt-2">
+                <TextInput
+                  id="password"
+                  name="password"
+                  type="password"
+                  label="Password"
+                  value={teacherData.password}
+                  onChange={handleChange}
                 />
               </div>
             </div>

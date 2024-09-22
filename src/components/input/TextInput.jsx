@@ -7,10 +7,10 @@ function TextInput({
   type,
   label,
   value = "",
-  onChange = () => {},
-  required,
+  onChange,
+  className,
+  required = false,
 }) {
-  // Default value set to empty string
   const [showPassword, setShowPassword] = useState(false);
 
   const handleTogglePassword = () => {
@@ -20,14 +20,14 @@ function TextInput({
   return (
     <div className="relative mb-4">
       <input
-        type={showPassword && type === "password" ? "text" : type}
         id={id}
-        value={value} // Controlled input
         name={name}
-        onChange={onChange}
-        required={required}
+        type={showPassword && type === "password" ? "text" : type}
         placeholder={label}
-        className="input input-bordered w-full bg-white text-gray-900"
+        value={value}
+        onChange={onChange}
+        className={`input input-bordered w-full bg-white text-gray-900 ${className}`}
+        required={required}
       />
       {type === "password" && (
         <button

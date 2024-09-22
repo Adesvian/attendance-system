@@ -36,7 +36,6 @@ function CreateClassSchedule() {
     const success = await submitScheduleData(
       scheduleData,
       setLoading,
-      setScheduleData,
       navigate
     );
     if (success) {

@@ -38,12 +38,7 @@ function EditClassSchedule() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await updateSchedule(
-      scheduleData,
-      id,
-      setScheduleData,
-      setLoading
-    );
+    const success = await updateSchedule(scheduleData, id, setLoading);
     if (success) {
       navigate("/data-jadwal");
     }

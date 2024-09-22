@@ -43,12 +43,7 @@ function EditSubject() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await updateSubject(
-      subjectData,
-      id,
-      setsubjectData,
-      setLoading
-    );
+    const success = await updateSubject(subjectData, id, setLoading);
     if (success) {
       navigate("/data-mapel");
     }

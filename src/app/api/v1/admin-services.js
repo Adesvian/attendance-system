@@ -259,8 +259,10 @@ export const fetchDataClassOption = async (
         })),
       ]);
 
-      setSelectedSubject(uniqueSubject[0].id);
-      setSelectedClass(uniqueClass[0]);
+      if (uniqueClass.length > 0 || uniqueSubject.length > 0) {
+        setSelectedSubject(uniqueSubject[0].id);
+        setSelectedClass(uniqueClass[0]);
+      }
     } else {
       setClassOptions([
         { value: "", label: "Pilih Kelas" },
@@ -526,10 +528,13 @@ export const fetchTeachers = async (setData) => {
           teacher.type === "Class Teacher"
             ? `Wali Kelas ${teacher.class_id}`
             : "Guru Mapel",
-        ttl: `${teacher.birth_of_place}, ${moment(teacher.birth_of_date).format(
-          "DD/MM/YY"
-        )}`,
-        address: teacher.address,
+        ttl:
+          teacher.birth_of_place || teacher.birth_of_date
+            ? `${teacher.birth_of_place},${moment(teacher.birth_of_date).format(
+                "DD/MM/YY"
+              )}`
+            : "-",
+        address: teacher.address ? teacher.address : "-",
       };
     });
 
@@ -539,43 +544,41 @@ export const fetchTeachers = async (setData) => {
   }
 };
 
-export const submitTeacherData = async (
-  teacherData,
-  setTeacherData,
-  setLoading
-) => {
+export const submitTeacherData = async (teacherData, setLoading) => {
   setLoading(true);
-  console.log(teacherData);
 
-  const formattedData = {
+  const formattedTeacherData = {
     nid: String(teacherData.nid),
     name: teacherData.name,
     gender: teacherData.gender,
     birth_of_place: teacherData.birth_of_place,
-    birth_of_date: new Date(teacherData.birth_of_date).toISOString(),
+    birth_of_date: teacherData.birth_of_date
+      ? new Date(teacherData.birth_of_date).toISOString()
+      : null,
     type: teacherData.type,
     class_id: teacherData.class,
     address: teacherData.address,
   };
-  console.log(formattedData);
+
+  const formattedUserData = {
+    nid: String(teacherData.nid),
+    name: teacherData.name,
+    username: teacherData.username,
+    password: teacherData.password,
+    role: "teacher",
+  };
 
   try {
-    await axios.post(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`,
-      formattedData
-    );
-
-    // Reset teacher data
-    setTeacherData({
-      nid: "",
-      name: "",
-      gender: "Laki-Laki",
-      birth_of_place: "",
-      birth_of_date: "",
-      type: "Class Teacher",
-      class: 1,
-      address: "",
-    });
+    await Promise.all([
+      axios.post(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`,
+        formattedTeacherData
+      ),
+      axios.post(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
+        formattedUserData
+      ),
+    ]);
 
     Swal.fire({
       icon: "success",
@@ -604,43 +607,41 @@ export const submitTeacherData = async (
   }
 };
 
-export const updateTeacherData = async (
-  teacherData,
-  id,
-  setTeacherData,
-  setLoading
-) => {
-  setLoading(true);
+export const updateTeacherData = async (teacherData, id, setLoading) => {
+  // setLoading(true);
 
-  const formattedData = {
+  const formatTeacherData = {
     nid: String(teacherData.nid),
     name: teacherData.name,
     gender: teacherData.gender,
     birth_of_place: teacherData.birth_of_place,
-    birth_of_date: new Date(teacherData.birth_of_date).toISOString(),
+    birth_of_date: teacherData.birth_of_date
+      ? new Date(teacherData.birth_of_date).toISOString()
+      : null,
     type: teacherData.type,
     class_id: Number(teacherData.class_id),
     address: teacherData.address,
   };
-  console.log(formattedData);
+
+  const formatUserData = {
+    nid: String(teacherData.nid),
+    name: teacherData.name,
+    username: teacherData.username,
+    password: teacherData.password,
+    role: "teacher",
+  };
 
   try {
-    await axios.put(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`,
-      formattedData
-    );
-
-    // Reset teacher data
-    setTeacherData({
-      nid: "",
-      name: "",
-      gender: "Laki-Laki",
-      birth_of_place: "",
-      birth_of_date: "",
-      type: "Class Teacher",
-      class: 1,
-      address: "",
-    });
+    await Promise.all([
+      axios.put(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`,
+        formatTeacherData
+      ),
+      axios.put(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`,
+        formatUserData
+      ),
+    ]);
 
     Swal.fire({
       icon: "success",
@@ -683,9 +684,12 @@ export const deleteTeacher = async (nid, setData) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${nid}`
-      );
+      await Promise.all([
+        axios.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${nid}`
+        ),
+        axios.delete(`${import.meta.env.VITE_BASE_URL_BACKEND}/users/${nid}`),
+      ]);
 
       // Update the data state to remove the deleted item
       setData((prevData) => prevData.filter((teacher) => teacher.nid !== nid));
@@ -726,11 +730,7 @@ export const fetchSubjects = async (setData) => {
   }
 };
 
-export const submitSubjectData = async (
-  subjectData,
-  setSubjectData,
-  setLoading
-) => {
+export const submitSubjectData = async (subjectData, setLoading) => {
   setLoading(true);
   const formattedData = {
     name: subjectData.name,
@@ -743,19 +743,13 @@ export const submitSubjectData = async (
       formattedData
     );
 
-    // Reset subject data
-    setSubjectData({
-      name: "",
-      category_id: 1,
-    });
-
     Swal.fire({
       icon: "success",
       title: "Success!",
       text: "Data successfully added!",
     });
 
-    return true; // Indicate success
+    return true;
   } catch (error) {
     Swal.fire({
       icon: "error",
@@ -766,18 +760,13 @@ export const submitSubjectData = async (
           : "Something went wrong!"
         : "Something went wrong!",
     });
-    return false; // Indicate failure
+    return false;
   } finally {
     setLoading(false);
   }
 };
 
-export const updateSubject = async (
-  subjectData,
-  id,
-  setSubjectData,
-  setLoading
-) => {
+export const updateSubject = async (subjectData, id, setLoading) => {
   setLoading(true);
 
   const formattedData = {
@@ -791,19 +780,13 @@ export const updateSubject = async (
       formattedData
     );
 
-    // Reset subject data
-    setSubjectData({
-      name: "",
-      category_id: 1,
-    });
-
     Swal.fire({
       icon: "success",
       title: "Success!",
       text: "Data successfully updated!",
     });
 
-    return true; // Indicate success
+    return true;
   } catch (error) {
     Swal.fire({
       icon: "error",
@@ -885,12 +868,7 @@ export const fetchSchedules = async (setData) => {
   }
 };
 
-export const submitScheduleData = async (
-  scheduleData,
-  setLoading,
-  setScheduleData,
-  navigate
-) => {
+export const submitScheduleData = async (scheduleData, setLoading) => {
   setLoading(true);
 
   const { teacher_nid, class_id, subject_id, day, start_time, end_time } =
@@ -917,15 +895,6 @@ export const submitScheduleData = async (
       text: "Class schedule successfully created!",
     });
 
-    setScheduleData({
-      teacher_nid: [],
-      class_name: 1,
-      subject_name: [],
-      day: "senin",
-      start_time: "",
-      end_time: "",
-    });
-
     return true;
   } catch (error) {
     console.error("Error creating class schedule:", error);
@@ -943,12 +912,7 @@ export const submitScheduleData = async (
   }
 };
 
-export const updateSchedule = async (
-  scheduleData,
-  id,
-  setScheduleData,
-  setLoading
-) => {
+export const updateSchedule = async (scheduleData, id, setLoading) => {
   setLoading(true);
 
   const { teacher_nid, class_id, subject_id, day, start_time, end_time } =
@@ -973,15 +937,6 @@ export const updateSchedule = async (
       icon: "success",
       title: "Success!",
       text: "Data successfully updated!",
-    });
-
-    setScheduleData({
-      teacher_nid: [],
-      class_name: 1,
-      subject_name: [],
-      day: "senin",
-      start_time: "",
-      end_time: "",
     });
 
     return true;
@@ -1038,5 +993,159 @@ export const deleteClassSchedule = async (id, setData) => {
       });
       console.error("Error deleting subject:", error);
     }
+  }
+};
+
+export const handleChangeParentData = (
+  studentData,
+  parentData,
+  name,
+  value
+) => {
+  const newData = { ...studentData, [name]: value };
+
+  if (
+    name === "parent_nid" ||
+    (name === "parent_exist" && newData.parent_type === "exist")
+  ) {
+    const parentExist = parentData.find((parent) => parent.nid === value);
+
+    if (parentExist) {
+      newData.parent_nid = parentExist.nid;
+      newData.parent_name = parentExist.name;
+      newData.parent_gender = parentExist.gender;
+      newData.parent_birth_of_place = parentExist.birth_of_place;
+      newData.parent_birth_of_date = parentExist.birth_of_date;
+      newData.phone_num = parentExist.phone_num;
+      newData.address = parentExist.address;
+    }
+  } else if (name === "parent_type" && value === "new") {
+    newData.parent_exist = "";
+    newData.parent_nid = "";
+    newData.parent_name = "";
+    newData.parent_gender = "Laki-Laki";
+    newData.parent_birth_of_place = "";
+    newData.parent_birth_of_date = "";
+    newData.phone_num = "";
+    newData.address = "";
+    newData.username = "";
+    newData.password = "";
+  }
+
+  return newData;
+};
+
+export const fetchStudentData = async (setData) => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
+    );
+
+    const updatedData = response.data.data.map((student) => {
+      return {
+        ...student,
+        profile: `assets/icon/${
+          student.gender === "Perempuan" ? "girl" : "boy"
+        }-icon.png`,
+        rfid: student.rfid,
+        name: student.name,
+        class: student.class.name,
+        ttl:
+          student.birth_of_place || student.birth_of_date
+            ? `${student.birth_of_place}, ${moment(
+                student.birth_of_date
+              ).format("DD/MM/YY")}`
+            : "-",
+        parent_name: student.parent.name,
+      };
+    });
+
+    setData(updatedData);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const submitStudentData = async (studentData, setLoading) => {
+  // setLoading(true);
+
+  const formatStudentData = {
+    rfid: studentData.rfid,
+    name: studentData.name,
+    class_id: studentData.class,
+    gender: studentData.gender,
+    birth_of_place: studentData.birth_of_place
+      ? studentData.birth_of_place
+      : null,
+    birth_of_date: studentData.birth_of_date
+      ? new Date(studentData.birth_of_date).toISOString()
+      : null,
+    parent_nid: studentData.parent_nid,
+  };
+
+  let formatUserData = null;
+  let formatParentData = null;
+  if (studentData.parent_type === "new") {
+    formatUserData = {
+      nid: studentData.parent_nid,
+      name: studentData.parent_name,
+      username: studentData.username,
+      password: studentData.password,
+      role: "parent",
+    };
+    formatParentData = {
+      nid: studentData.parent_nid,
+      name: studentData.parent_name,
+      gender: studentData.parent_gender,
+      birth_of_place: studentData.parent_birth_of_place
+        ? studentData.parent_birth_of_place
+        : null,
+      birth_of_date: studentData.parent_birth_of_date
+        ? new Date(studentData.parent_birth_of_date).toISOString()
+        : null,
+      phone_num: studentData.phone_num ? studentData.phone_num : null,
+      address: studentData.address ? studentData.address : null,
+    };
+  }
+
+  const promises = [
+    formatParentData
+      ? axios.post(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
+          formatParentData
+        )
+      : null,
+    formatUserData
+      ? axios.post(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
+          formatUserData
+        )
+      : null,
+    axios.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students`,
+      formatStudentData
+    ),
+  ].filter(Boolean);
+  try {
+    await Promise.all(promises);
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Data successfully created!",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error creating student:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: error.response
+        ? error.response.data.error === "P2002"
+          ? `Data yang anda masukkan bertabrakan dengan data lain!`
+          : "Something went wrong!"
+        : "Something went wrong!",
+    });
+  } finally {
+    setLoading(false);
   }
 };

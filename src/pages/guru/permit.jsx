@@ -125,6 +125,10 @@ function Permit() {
         ];
         const classParams = uniqueClass.join(",");
 
+        if (classParams.length === 0) {
+          setData([]);
+          return;
+        }
         const response = await axios.get(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
