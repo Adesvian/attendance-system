@@ -19,6 +19,8 @@ function CreateTeacher() {
     type: "Class Teacher",
     class: 1,
     address: "",
+    username: "",
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -45,11 +47,7 @@ function CreateTeacher() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await submitTeacherData(
-      teacherData,
-      setTeacherData,
-      setLoading
-    );
+    const success = await submitTeacherData(teacherData, setLoading);
     if (success) {
       navigate("/teacher");
     }
@@ -119,7 +117,6 @@ function CreateTeacher() {
                   label="Tempat Lahir"
                   value={teacherData.birth_of_place}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -138,7 +135,6 @@ function CreateTeacher() {
                   label="Tempat Lahir"
                   value={teacherData.birth_of_date}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -231,6 +227,46 @@ function CreateTeacher() {
                   type="text"
                   label="Alamat"
                   value={teacherData.address}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Username :
+              </label>
+              <div className="mt-2">
+                <TextInput
+                  id="username"
+                  name="username"
+                  type="text"
+                  label="Username"
+                  value={teacherData.username}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Password :
+              </label>
+              <div className="mt-2">
+                <TextInput
+                  id="password"
+                  name="password"
+                  type="password"
+                  label="Password"
+                  value={teacherData.password}
                   onChange={handleChange}
                   required
                 />

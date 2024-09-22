@@ -24,11 +24,7 @@ function CreateTeacher() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await submitSubjectData(
-      subjectData,
-      setsubjectData,
-      setLoading
-    );
+    const success = await submitSubjectData(subjectData, setLoading);
     if (success) {
       navigate("/data-mapel");
     }

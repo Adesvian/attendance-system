@@ -4,13 +4,11 @@ import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import TextInput from "../../components/input/TextInput";
 import axios from "axios";
-import bcrypt from "bcrypt";
 
 function ViewTeacher() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true); // Initialize as loading
+  const [loading, setLoading] = useState(true);
   const [teacherData, setTeacherData] = useState({
     nid: "",
     name: "",
@@ -26,6 +24,7 @@ function ViewTeacher() {
 
   useEffect(() => {
     const fetchTeacherData = async () => {
+      setLoading(true);
       try {
         const [teacher, user] = await Promise.all([
           axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`),
@@ -35,17 +34,21 @@ function ViewTeacher() {
           teacher: teacher.data.data,
           user: {
             username: user.data.data.username,
-            password: user.data.data.password,
           },
         };
         const formattedData = {
           ...response.teacher,
-          birth_of_date: new Date(response.teacher.birth_of_date)
-            .toISOString()
-            .split("T")[0],
-          class: String(response.teacher.class_id),
+          birth_of_date:
+            response.teacher.birth_of_date == null
+              ? ""
+              : new Date(response.teacher.birth_of_date)
+                  .toISOString()
+                  .split("T")[0],
+          class:
+            response.teacher.type === "Class Teacher"
+              ? String(response.teacher.class_id)
+              : null,
           username: response.user.username,
-          password: await bcrypt.hash(response.user.password, 10),
         };
         setTeacherData(formattedData);
       } catch (error) {
@@ -56,20 +59,39 @@ function ViewTeacher() {
     };
 
     fetchTeacherData();
-    dispatch(setPageTitle({ title: "View Teacher" }));
-  }, [id, dispatch]);
-
-  if (loading) return <div>Loading...</div>;
+    dispatch(setPageTitle({ title: "Detail Guru" }));
+  }, []);
 
   return (
     <div className="grid lg:grid-cols-1 md:grid-cols-1 grid-cols-1 gap-6 mt-5">
       <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-5 px-10 font-poppins">
-        {/* NIK Guru */}
-        <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
+        <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
+          <div className="sm:col-span-6">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
+            >
+              Username :
+            </label>
+            <div className="mt-2">
+              <TextInput
+                id="username"
+                name="username"
+                type="text"
+                label="Username"
+                value={teacherData.username}
+                onChange={() => {}}
+                className="dark:bg-base-300 dark:text-dark-text"
+                readOnly
+              />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
           <div className="sm:col-span-3">
             <label
               htmlFor="nid"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               NIK Guru :
             </label>
@@ -80,14 +102,16 @@ function ViewTeacher() {
                 type="text"
                 label="NIK"
                 value={teacherData.nid}
-                disabled
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
               />
             </div>
           </div>
           <div className="sm:col-span-3">
             <label
               htmlFor="name"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               Nama Guru :
             </label>
@@ -98,7 +122,9 @@ function ViewTeacher() {
                 type="text"
                 label="Nama"
                 value={teacherData.name}
-                disabled
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
               />
             </div>
           </div>
@@ -107,7 +133,7 @@ function ViewTeacher() {
           <div className="sm:col-span-3">
             <label
               htmlFor="birth_of_place"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               Tempat Lahir Guru :
             </label>
@@ -118,14 +144,16 @@ function ViewTeacher() {
                 type="text"
                 label="Tempat Lahir"
                 value={teacherData.birth_of_place}
-                disabled
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
               />
             </div>
           </div>
           <div className="sm:col-span-2">
             <label
               htmlFor="birth_of_date"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               Tanggal Lahir Guru :
             </label>
@@ -136,53 +164,52 @@ function ViewTeacher() {
                 type="date"
                 label="Tanggal Lahir"
                 value={teacherData.birth_of_date}
-                disabled
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
               />
             </div>
           </div>
           <div className="sm:col-span-1">
             <label
               htmlFor="gender"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               Jenis Kelamin :
             </label>
             <div className="mt-2">
-              <select
-                name="gender"
+              <TextInput
                 id="gender"
+                name="gender"
+                type="text"
+                label="Jenis Kelamin"
                 value={teacherData.gender}
-                className="border p-3 rounded-md w-full"
-                disabled
-              >
-                <option value="Laki-Laki">Laki-Laki</option>
-                <option value="Perempuan">Perempuan</option>
-              </select>
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
+              />
             </div>
           </div>
         </div>
-        <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
           <div className="sm:col-span-3">
             <label
               htmlFor="type"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               Tipe Guru :
             </label>
             <div className="mt-2">
-              <select
-                name="type"
+              <TextInput
                 id="type"
+                name="type"
+                type="text"
+                label="Tipe Guru"
                 value={teacherData.type}
-                className="border p-3 rounded-md w-full"
-                disabled
-              >
-                <option value={teacherData.type}>
-                  {teacherData.type === "Class Teacher"
-                    ? "Wali Kelas"
-                    : "Guru Mapel"}
-                </option>
-              </select>
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
+              />
             </div>
           </div>
 
@@ -190,22 +217,21 @@ function ViewTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="class"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
               >
                 Kelas :
               </label>
               <div className="mt-2">
-                <select
-                  name="class"
+                <TextInput
                   id="class"
+                  name="class"
+                  type="text"
+                  label="Kelas"
                   value={teacherData.class}
-                  className="border p-3 rounded-md w-full"
-                  disabled
-                >
-                  <option value={teacherData.class}>
-                    Kelas {teacherData.class}
-                  </option>
-                </select>
+                  className="dark:bg-base-300 dark:text-dark-text"
+                  onChange={() => {}}
+                  readOnly
+                />
               </div>
             </div>
           )}
@@ -215,7 +241,7 @@ function ViewTeacher() {
           <div className="sm:col-span-6">
             <label
               htmlFor="address"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900  dark:text-dark-text"
             >
               Alamat Guru :
             </label>
@@ -226,46 +252,10 @@ function ViewTeacher() {
                 type="text"
                 label="Alamat"
                 value={teacherData.address}
-                disabled
+                className="dark:bg-base-300 dark:text-dark-text"
+                onChange={() => {}}
+                readOnly
               />
-            </div>
-            <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Username :
-                </label>
-                <div className="mt-2">
-                  <TextInput
-                    id="username"
-                    name="username"
-                    type="text"
-                    label="Username"
-                    value={teacherData.username}
-                    disabled
-                  />
-                </div>
-              </div>
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Password :
-                </label>
-                <div className="mt-2">
-                  <TextInput
-                    id="password"
-                    name="password"
-                    type="text"
-                    label="Password"
-                    value={teacherData.password}
-                    disabled
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </div>

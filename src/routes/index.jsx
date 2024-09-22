@@ -5,7 +5,9 @@ const DashboardParent = lazy(() =>
   import("../pages/wali-murid/dashboard-parent")
 );
 const DashboardTeacher = lazy(() => import("../pages/guru/dashboard-teacher"));
-const Siswa = lazy(() => import("../pages/admin/siswa"));
+const Student = lazy(() => import("../pages/admin/student"));
+const ViewStudent = lazy(() => import("../pages/admin/view-student"));
+const CreateStudent = lazy(() => import("../pages/admin/create-student"));
 const Teacher = lazy(() => import("../pages/admin/teacher"));
 const ViewTeacher = lazy(() => import("../pages/admin/view-teacher"));
 const CreateTeacher = lazy(() => import("../pages/admin/create-teacher"));
@@ -54,7 +56,19 @@ const routes = [
     path: "/data-siswa",
     name: "Siswa",
     role: ["admin"],
-    component: Siswa,
+    component: Student,
+  },
+  {
+    path: "/data-siswa/create-siswa",
+    name: "Tambah Siswa",
+    role: ["admin"],
+    component: CreateStudent,
+  },
+  {
+    path: "/data-siswa/view-siswa/:id",
+    name: "Detail Siswa",
+    role: ["admin"],
+    component: ViewStudent,
   },
   {
     path: "/teacher",
