@@ -1,22 +1,46 @@
 import { HiBars3 } from "react-icons/hi2";
 import Avatar from "../components/profile/avatar";
-import Notify from "../components/notification/notification";
 import ToggleTheme from "../components/theme/toggleTheme";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { setSidebar } from "../redux/headerSlice";
+import ChildSelection from "../components/selection/child-selection";
+import axios from "axios";
+import { setChild } from "../redux/headerSlice";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(window.innerWidth > 768);
   const { pageTitle } = useSelector((state) => state.header);
+  const [childrenData, setChildrenData] = useState([]);
+  const user = useSelector((state) => state.auth.parent);
+
+  useEffect(() => {
+    const fetchChildrenData = async () => {
+      if (user) {
+        try {
+          const { data } = await axios.get(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/students?parent=${
+              user.nid
+            }`
+          );
+          setChildrenData(data.data);
+          dispatch(setChild({ child: data.data[0] }));
+        } catch (error) {
+          console.error("Error fetching children data:", error);
+        }
+      }
+    };
+
+    fetchChildrenData();
+  }, []);
 
   useEffect(() => {
     dispatch(setSidebar({ sidebar: open }));
   }, [open, dispatch]);
 
   const toggleSidebar = () => {
-    setOpen((prevOpen) => !prevOpen); // Toggle nilai open
+    setOpen((prevOpen) => !prevOpen);
   };
 
   return (
@@ -32,9 +56,13 @@ const Navbar = () => {
           {pageTitle}
         </h1>
       </div>
-      <div className="gap-x-3">
+      <div className="gap-x-4 lg:pr-8">
+        {user != null && (
+          <>
+            <ChildSelection children={childrenData} />
+          </>
+        )}
         <ToggleTheme />
-        <Notify />
         <Avatar />
       </div>
     </div>

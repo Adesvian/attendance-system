@@ -238,7 +238,7 @@ const TableComponent = forwardRef(
             <div className="text-center text-gray-500">
               {type === "logs-table"
                 ? "Tabel kosong. Tidak ada data."
-                : "Tabel kosong. Pilih tanggal dan kelas untuk menampilkan data."}
+                : "Tabel kosong. Pilih tanggal dan opsi untuk menampilkan data."}
             </div>
           )}
         </ThemeProvider>

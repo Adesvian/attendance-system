@@ -10,9 +10,19 @@ function LeftSidebar() {
   const sideBar = useSelector((state) => state.header.sideBar);
   const user = useSelector((state) => state.auth.token);
 
+  // Decode the user role safely
+  let userRole = null;
+  if (user) {
+    try {
+      userRole = decodeJWT(user).role;
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }
+
   // Filter sidebar routes based on user role
   const filteredRoutes = sidebar_routes.filter((menu) =>
-    menu.role.includes(decodeJWT(user).role)
+    userRole ? menu.role.includes(userRole) : false
   );
 
   // Sidebar width classes
@@ -31,7 +41,7 @@ function LeftSidebar() {
 
   return (
     <div
-      className={`${sidebarClasses} h-screen overflow-y-auto duration-300 bg-gray-200 dark:bg-base-200 drop-shadow-md `}
+      className={`${sidebarClasses} h-screen overflow-y-auto duration-300 bg-gray-200 dark:bg-base-200 drop-shadow-md`}
     >
       <div className="p-2">
         <div className="flex flex-col items-center">
@@ -67,7 +77,7 @@ function LeftSidebar() {
                     to={menu.path}
                     className={
                       active
-                        ? "bg-gray-200  text-black font-semibold"
+                        ? "bg-gray-200 text-black font-semibold"
                         : "font-normal"
                     }
                   >
@@ -77,7 +87,7 @@ function LeftSidebar() {
                       {cloneElement(menu.icon, {
                         className: `flex-shrink-0 ${
                           sideBar ? "w-6 h-6" : "w-8 h-8"
-                        } `,
+                        }`,
                       })}
                       <span className={`${sideBar ? "" : "hidden"}`}>
                         {menu.name}

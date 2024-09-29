@@ -23,6 +23,10 @@ export const fetchDataDashboard = async (setData) => {
       axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`),
     ]);
 
+    const whatsapp = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/get-whatsapp-creds`
+    );
+
     const attendanceRate =
       (attendance.data.data.filter((a) => a.method === 1001).length /
         students.data.data.length) *
@@ -42,6 +46,10 @@ export const fetchDataDashboard = async (setData) => {
       ).length,
       late: attendance.data.data.filter((a) => a.status === 201).length,
       attendance: attendance.data.data,
+      whatsapp:
+        whatsapp.data.data.length > 0
+          ? whatsapp.data.data[0].status
+          : "No Device",
     }));
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -448,7 +456,13 @@ export const generateColumns = (selectedDate) => {
   return cols;
 };
 
-export const exportPdf = async (data, selectedDate, selectedClass, user) => {
+export const exportPdf = async (
+  data,
+  selectedDate,
+  selectedClass,
+  user,
+  parent_user
+) => {
   try {
     // Import jsPDF and jsPDF-AutoTable modules
     const { default: jsPDF } = await import("jspdf");
@@ -482,7 +496,9 @@ export const exportPdf = async (data, selectedDate, selectedClass, user) => {
     const text = doc.splitTextToSize(
       `Download Time : ${moment().format(
         "DD-MM-YYYY HH:mm:ss"
-      )}\nUser Download : ${user ? user.name : "admin"}\n`,
+      )}\nUser Download : ${
+        parent_user ? parent_user.name : user ? user.name : "admin"
+      }\n`,
       pageWidth - 35
     );
     doc.text(text, 40, 60);
@@ -1241,6 +1257,14 @@ export const updateStudentData = async (studentData, id, setLoading) => {
             formatParentData
           )
         );
+        promises.push(
+          axios.put(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
+              studentData.parent_nid
+            }`,
+            formatUserData
+          )
+        );
       } else {
         // If the parent does not exist and is not new, update the parent anyway
         promises.push(
@@ -1270,7 +1294,6 @@ export const updateStudentData = async (studentData, id, setLoading) => {
       formattedData
     )
   );
-
   try {
     await Promise.all(promises);
     Swal.fire({
@@ -1335,6 +1358,155 @@ export const deleteStudent = async (id, setData) => {
         text: "Something went wrong! Please try again.",
       });
       console.error("Error deleting student:", error);
+    }
+  }
+};
+
+export const functionOpenQR = async (QRModal, data) => {
+  console.log(data);
+  if (QRModal.current) {
+    QRModal.current.showModal();
+    const formatData = {
+      session: data,
+      scan: true,
+    };
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/create-session`,
+        formatData
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
+export const functionCloseQR = async (
+  QRModal,
+  data,
+  fetchStopSession = false
+) => {
+  if (QRModal.current) {
+    QRModal.current.close();
+  }
+
+  if (fetchStopSession) {
+    const formatData = {
+      session: data,
+    };
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/stop-session`,
+        formatData
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
+export const ConnnectSession = async (setLoading, setIsConnected, data) => {
+  setLoading(true);
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/start-session`,
+      { number: data }
+    );
+    if (response.data.success) {
+      setIsConnected(false);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+export const DisconnectSession = async (setLoading, setIsConnected, data) => {
+  setLoading(true);
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/stop-session`,
+      { number: data }
+    );
+    if (response.data.success) {
+      setIsConnected(false);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+export const SubmitSession = async (event, setLoading, socket, data) => {
+  event.preventDefault();
+
+  let finalWaNum = data.number;
+  if (finalWaNum.startsWith("08")) {
+    finalWaNum = "62" + finalWaNum.slice(1);
+  }
+
+  const updatedData = { ...data, number: finalWaNum };
+  setLoading(true);
+
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/create-whatsapp-creds`,
+      updatedData
+    );
+    if (response.data.success) {
+      socket.emit("new-data", updatedData);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+export const DeleteSession = async (setLoading, setData, data) => {
+  setLoading(true);
+  const confirmDelete = await Swal.fire({
+    title: "Are you sure?",
+    text: "Jika Sesi di hapus maka tidak ada notifikasi ke orang tua siwa!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Ya, Hapus!",
+    cancelButtonText: "Cancel",
+  });
+
+  if (confirmDelete.isConfirmed) {
+    try {
+      const response = await axios.delete(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/delete-whatsapp-creds/${data}`
+      );
+      if (response.data.success) {
+        setData({
+          number: "",
+          name: "",
+          status: "Pending",
+        });
+      }
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: `Session has been deleted.`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      setLoading(false);
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong! Please try again.",
+      });
+      console.error("Error deleting subject:", error);
+    } finally {
+      setLoading(false);
     }
   }
 };

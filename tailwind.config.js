@@ -22,6 +22,9 @@ export default {
           accent: "#E8C5E5",
           secondaccent: "#F19ED2",
         },
+        boxShadow: {
+          custom: "0 0 0 4px oklch(1 0 0) inset, 0 0 0 4px oklch(1 0 0) inset",
+        },
       },
     },
   },

@@ -74,7 +74,7 @@ function CreateClassSchedule() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="teacher_nid"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Guru:
               </label>
@@ -101,7 +101,7 @@ function CreateClassSchedule() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="subject_id"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Nama Mata Pelajaran:
               </label>
@@ -129,7 +129,7 @@ function CreateClassSchedule() {
           <div className="mt-5 grid grid-cols-1">
             <label
               htmlFor="class_id"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
             >
               Hari:
             </label>
@@ -154,7 +154,7 @@ function CreateClassSchedule() {
           <div className="mt-5 grid grid-cols-1">
             <label
               htmlFor="day"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
             >
               Hari:
             </label>
@@ -179,7 +179,7 @@ function CreateClassSchedule() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="start_time"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Jam Mulai:
               </label>
@@ -196,7 +196,7 @@ function CreateClassSchedule() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="end_time"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Jam Selesai:
               </label>
@@ -219,7 +219,7 @@ function CreateClassSchedule() {
               type="submit"
               className={`px-4 py-2 ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
-              } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+              } bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none flex items-center justify-center`}
               disabled={loading}
             >
               {loading && (

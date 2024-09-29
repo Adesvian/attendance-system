@@ -42,7 +42,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Nama Mata Pelajaran :
               </label>
@@ -61,7 +61,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="category_id"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Category Mapel :
               </label>
@@ -81,13 +81,13 @@ function CreateTeacher() {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-5">
             <SingleButton
               btnTitle={loading ? "loading" : "Submit"} // Change title based on loading state
               type="submit"
               className={`px-4 py-2 ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
-              } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+              } bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none flex items-center justify-center`}
               disabled={loading}
             >
               {loading && (

@@ -4,7 +4,7 @@ import TextInput from "../../components/input/TextInput";
 import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { checkAuthCookies, login } from "./login";
+import { checkAuthCookies, login } from "../user/login-utils";
 
 function LoginForm() {
   const navigate = useNavigate();

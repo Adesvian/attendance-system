@@ -1,8 +1,5 @@
 import axios from "axios";
 import moment from "moment";
-// 1725850237
-// 1725849937
-// 1725854437
 export const fetchAttendanceChartData = async (
   chartData,
   setAttendancesData

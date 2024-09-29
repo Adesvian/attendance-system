@@ -347,11 +347,11 @@ function EditStudent() {
             {studentData.parent_type === "exist" && (
               <div className="flex justify-end mt-5">
                 <SingleButton
-                  btnTitle={loading ? "loading" : "Submit"}
+                  btnTitle={loading ? "loading" : "Edit"}
                   type="submit"
                   className={`px-4 py-2 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
-                  } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+                  } bg-amber-500 text-white rounded-md hover:bg-amber-600 focus:outline-none flex items-center justify-center`}
                   disabled={loading}
                 >
                   {loading && (
@@ -561,11 +561,11 @@ function EditStudent() {
               </div>
               <div className="flex justify-end mt-5">
                 <SingleButton
-                  btnTitle={loading ? "loading" : "Submit"} // Change title based on loading state
+                  btnTitle={loading ? "loading" : "Edit"}
                   type="submit"
                   className={`px-4 py-2 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
-                  } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+                  } bg-amber-500 text-white rounded-md hover:bg-amber-600 focus:outline-none flex items-center justify-center`}
                   disabled={loading}
                 >
                   {loading && (

@@ -23,10 +23,13 @@ const CreateClassSchedule = lazy(() =>
 const EditClassSchedule = lazy(() =>
   import("../pages/admin/edit-class-schedule")
 );
-const Permit = lazy(() => import("../pages/guru/permit"));
+const Permit = lazy(() => import("../pages/permit"));
 const CreatePermit = lazy(() => import("../pages/wali-murid/create-permit"));
 const RecapAbsensi = lazy(() => import("../pages/recap-absen"));
 const LogKehadiran = lazy(() => import("../pages/log-kehadiran"));
+const Whatsapp = lazy(() => import("../pages/admin/whatsapp-configuration"));
+const TimeSetting = lazy(() => import("../pages/admin/time"));
+const Profile = lazy(() => import("../pages/user-profile"));
 
 const routes = [
   {
@@ -146,14 +149,32 @@ const routes = [
   {
     path: "/permit",
     name: "Ketidakhadiran",
-    role: ["teacher"],
+    role: ["teacher", "parent"],
     component: Permit,
   },
   {
     path: "/permit/create-permit",
     name: "Tambah Permit",
-    role: ["teacher"],
+    role: ["parent"],
     component: CreatePermit,
+  },
+  {
+    path: "/whatsapp-configuration",
+    name: "Whatsapp Configuration",
+    role: ["admin"],
+    component: Whatsapp,
+  },
+  {
+    path: "/time-setting",
+    name: "Time Setting",
+    role: ["admin"],
+    component: TimeSetting,
+  },
+  {
+    path: "/user-profile",
+    name: "User Profile",
+    role: ["admin", "teacher", "parent"],
+    component: Profile,
   },
 ];
 

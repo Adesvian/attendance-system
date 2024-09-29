@@ -12,6 +12,7 @@ const RecentAttendance = ({
   initialSortOrder = "desc",
 }) => {
   const user = useSelector((state) => state.auth.teacher);
+  const parent = useSelector((state) => state.auth.parent);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,8 +37,8 @@ const RecentAttendance = ({
     <div className="bg-white h-[32rem] overflow-y-auto dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-dark-text p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="text-2xl font-bold">Recent Presence</div>
-          <p className="text-sm mt-2">Last attendance from today</p>
+          <div className="text-2xl font-bold">Logs Recent Presence</div>
+          <p className="text-sm mt-2">Kehadiran terkini pada hari ini</p>
         </div>
         <div className="stat-figure flex-shrink-0 rounded-[22px] p-4 bg-indigo-200 text-indigo-600">
           <BsClipboardCheck className="w-7 h-7" />
@@ -95,13 +96,20 @@ const RecentAttendance = ({
                   <h2 className="text-sm font-medium leading-snug pb-0.5">
                     {attendance.student.name}{" "}
                     <span className="text-gray-400">
-                      dari {attendance.student.class.name} has{" "}
+                      dari {attendance.student.class.name} telah{" "}
                       {!attendance.method ? (
-                        <span className="text-green-500">tapped in</span>
+                        <span className="text-green-500">
+                          Tap Kartu{" "}
+                          {parent && (
+                            <span className="text-gray-400">
+                              di pelajaran {attendance.subject.name}
+                            </span>
+                          )}
+                        </span>
                       ) : attendance.method === 1001 ? (
-                        <span className="text-green-500">checked in</span>
+                        <span className="text-green-500">check in</span>
                       ) : (
-                        <span className="text-red-500">checked out</span>
+                        <span className="text-red-500">check out</span>
                       )}
                     </span>
                   </h2>

@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPageTitle } from "../../redux/headerSlice";
+import { setPageTitle } from "../redux/headerSlice";
 import Button from "@mui/material/Button";
-import TableDataManager from "../../components/table/table";
+import TableDataManager from "../components/table/table";
 import Swal from "sweetalert2";
-import CustomSelect from "../../components/input/Select";
+import CustomSelect from "../components/input/Select";
 import { MdOutlineAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
+import { fetchPermitDataParent } from "../app/api/v1/parent-services";
+import { fetchPermitDataTeacher } from "../app/api/v1/teacher-services";
 
-function PermitParent() {
+function Permit() {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.teacher);
+  const user = useSelector((state) => state.auth.teacher);
+  const parent_user = useSelector((state) => state.auth.parent);
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,10 +24,6 @@ function PermitParent() {
   const navigate = useNavigate();
 
   const handleAccept = (row) => {
-    const dateToEpoch = (dateString) => {
-      const date = new Date(dateString);
-      return Math.floor(date.getTime() / 1000);
-    };
     Swal.fire({
       title: "Apakah anda yakin?",
       text: `Menerima izin tidak hadir untuk ${row.name}?`,
@@ -37,13 +36,11 @@ function PermitParent() {
       if (result.isConfirmed) {
         axios
           .put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/ParentsudpateStatus/${
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-udpate-status/${
               row.id
             }`,
             {
-              ...row,
-              date: dateToEpoch(row.date),
-              status: "Accepted",
+              status: 200,
             }
           )
           .then(() => {
@@ -71,10 +68,6 @@ function PermitParent() {
   };
 
   const handleReject = (row) => {
-    const dateToEpoch = (dateString) => {
-      const date = new Date(dateString);
-      return Math.floor(date.getTime() / 1000);
-    };
     Swal.fire({
       title: "Apakah anda yakin?",
       text: `Menolak izin tidak hadir untuk ${row.name}?`,
@@ -87,13 +80,11 @@ function PermitParent() {
       if (result.isConfirmed) {
         axios
           .put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/permitsudpateStatus/${
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-udpate-status/${
               row.id
             }`,
             {
-              ...row,
-              date: dateToEpoch(row.date),
-              status: "Rejected",
+              status: 400,
             }
           )
           .then(() => {
@@ -122,21 +113,17 @@ function PermitParent() {
   });
 
   useEffect(() => {
+    dispatch(setPageTitle({ title: "Ketidakhadiran" }));
+
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `${
-            import.meta.env.VITE_BASE_URL_BACKEND
-          }/permits?class=${encodeURIComponent(user.class)}`
-        );
-        const convertedData = response.data
-          .map((item) => ({
-            ...item,
-            date: moment(item.date * 1000).format("YYYY-MM-DD"),
-          }))
-          .sort((a, b) => b.id - a.id);
-
-        setData(convertedData);
+        let fetchedData;
+        if (parent_user) {
+          fetchedData = await fetchPermitDataParent(parent_user);
+        } else {
+          fetchedData = await fetchPermitDataTeacher(user);
+        }
+        setData(fetchedData);
       } catch (err) {
         setError(err);
       } finally {
@@ -146,14 +133,17 @@ function PermitParent() {
 
     fetchData();
 
-    setColumns([
+    const newColumns = [
       { field: "name", header: "Name" },
       { field: "class", header: "Kelas" },
       { field: "reason", header: "Alasan" },
       { field: "attachment", header: "Lampiran" },
-      { field: "date", header: "Date" },
+      { field: "date", header: "Tanggal" },
       { field: "status", header: "Status" },
-      {
+    ];
+
+    if (!parent_user && user.class != null) {
+      newColumns.push({
         field: "action",
         header: "Action",
         render: (row) =>
@@ -175,24 +165,26 @@ function PermitParent() {
               </Button>
             </div>
           ),
-      },
-    ]);
-    dispatch(setPageTitle({ title: "Ketidakhadiran" }));
-  }, []);
+      });
+    }
 
+    setColumns(newColumns);
+  }, [dispatch, parent_user, user]);
   return (
     <div className="grid lg:grid-cols-1 md:grid-cols-1 grid-cols-1 gap-6 mt-5">
       <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 font-poppins">
-        <div className="flex lg:justify-end">
-          <Button
-            variant="contained"
-            className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
-            startIcon={<MdOutlineAdd />}
-            onClick={() => navigate("/permit/create-permit")}
-          >
-            Buat Surat Izin
-          </Button>
-        </div>
+        {parent_user && (
+          <div className="flex mb-4 lg:absolute lg:right-10 ">
+            <Button
+              variant="contained"
+              className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
+              startIcon={<MdOutlineAdd />}
+              onClick={() => navigate("/permit/create-permit")}
+            >
+              Buat Surat Izin
+            </Button>
+          </div>
+        )}
         <span className="text-sm">Filter by Status :</span>
         <CustomSelect
           value={filter}
@@ -217,4 +209,4 @@ function PermitParent() {
   );
 }
 
-export default PermitParent;
+export default Permit;

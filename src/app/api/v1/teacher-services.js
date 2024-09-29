@@ -1,5 +1,8 @@
 import axios from "axios";
 import moment from "moment";
+import jsPDF from "jspdf";
+import autotable from "jspdf-autotable";
+import exp from "constants";
 
 export const fetchDataDashboard = async (
   setData,
@@ -21,13 +24,28 @@ export const fetchDataDashboard = async (
       `class-schedule?teacherid=${user.nid}`
     );
 
+    // Mendapatkan hari ini
+    const today = new Date();
+    const daysOfWeek = [
+      "minggu",
+      "senin",
+      "selasa",
+      "rabu",
+      "kamis",
+      "jumat",
+      "sabtu",
+    ];
+    const todayDay = daysOfWeek[today.getDay()];
+
+    // Filter kelas berdasarkan hari ini
+    const todaysClasses = classes.data.filter((item) => item.day === todayDay);
+
     const uniqueClass = [...new Set(classes.data.map((item) => item.class_id))];
     const uniqueSubject = [
       ...new Set(classes.data.map((item) => item.subject_id)),
     ];
 
     const classParams = uniqueClass.join(",");
-
     const [chartdata, attendance, students, permits] = await Promise.all([
       user.class != null
         ? fetchDataFromApi(`attendance?class=${classParams}`)
@@ -59,10 +77,42 @@ export const fetchDataDashboard = async (
     const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
     const todayEnd = Math.floor(new Date().setHours(23, 59, 59, 999) / 1000);
 
-    const attendanceRate =
-      (attendance.data.filter((a) => a.method === 1001).length /
-        students.data.length) *
-      100;
+    const studentCounts = await Promise.all(
+      todaysClasses.map(async (classItem) => {
+        const studentData = await fetchDataFromApi(
+          `students?class=${classItem.class_id}`
+        );
+        return studentData.data.length;
+      })
+    );
+
+    const totalStudentsToday = studentCounts.reduce(
+      (acc, count) => acc + count,
+      0
+    );
+
+    // Hitung attendance rate
+    let attendanceRate;
+    if (user.class !== null) {
+      const presentCount = attendance.data.filter(
+        (a) => a.method === 1001
+      ).length;
+      const totalStudents = students.data.length;
+      // Cek untuk kondisi 1/0
+      if (totalStudents === 0) {
+        attendanceRate = 0; // Atau bisa diatur sesuai kebutuhan
+      } else {
+        attendanceRate = (presentCount / totalStudents) * 100;
+      }
+    } else {
+      const totalAttendanceToday = attendance.data.length; // Total kehadiran hari ini
+      // Cek untuk kondisi 0/0
+      if (totalStudentsToday === 0) {
+        attendanceRate = 0; // Atau bisa diatur sesuai kebutuhan
+      } else {
+        attendanceRate = (totalAttendanceToday / totalStudentsToday) * 100;
+      }
+    }
 
     setData((prevData) => ({
       ...prevData,
@@ -359,5 +409,326 @@ export const fetchDataSubjectAttendanceRecords = async (
     }
   } else {
     setData([]);
+  }
+};
+
+export const exportPdf = async (fn, user) => {
+  const data = fn.current;
+  if (data) {
+    try {
+      const pdf = new jsPDF();
+
+      pdf.setFontSize(18);
+      pdf.text("Logs Records #" + moment().format("DD-MM-YYYY"), 14, 22);
+      pdf.setFontSize(11);
+      pdf.setTextColor(100);
+
+      const pageSize = pdf.internal.pageSize;
+      const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+      const text = pdf.splitTextToSize(
+        "Download Time : " +
+          moment().format("DD-MM-YYYY HH:mm:ss") +
+          "\n" +
+          "User Download : " +
+          (user ? user.name : "admin") +
+          "\n",
+        pageWidth - 35,
+        {}
+      );
+      pdf.text(text, 14, 30);
+
+      let i = 1;
+      const tableElement = data.cloneNode(true); // Clone the table to avoid modifying the original
+
+      // Update the header to replace 'Profile' with 'ID'
+      const headerCells = tableElement.querySelectorAll("th");
+      headerCells.forEach((cell) => {
+        if (cell.innerText === "Profile") {
+          cell.innerText = "ID";
+        }
+      });
+
+      // Update the table rows to replace profile with id
+      const tableRows = tableElement.querySelectorAll("tbody tr");
+      tableRows.forEach((row) => {
+        const profileCell = row.querySelector("td");
+        if (profileCell) {
+          profileCell.innerText = i++;
+        }
+      });
+
+      autotable(pdf, { html: tableElement, startY: 40 });
+
+      pdf.save(`Logs-Records-${moment().format("DD-MM-YYYY")}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF: ", error);
+    }
+  } else {
+    console.error("Table ref is not available.");
+  }
+};
+
+export const exportCSV = async (fn) => {
+  const data = fn.current;
+  if (data) {
+    try {
+      const { unparse } = await import("papaparse");
+      const { saveAs } = await import("file-saver");
+
+      let rows = [];
+      let headers = [];
+
+      // Get table header
+      const headerCells = data.querySelectorAll("th");
+      headerCells.forEach((cell) => {
+        let headerText = cell.innerText;
+        // Replace 'Profile' with 'ID'
+        if (headerText === "Profile") {
+          headerText = "ID";
+        }
+        headers.push(headerText);
+      });
+
+      // Add headers to rows
+      rows.push(headers);
+
+      // Get table body rows
+      let i = 1;
+      const tableRows = data.querySelectorAll("tbody tr");
+      tableRows.forEach((row) => {
+        const rowData = [];
+        row.querySelectorAll("td").forEach((cell, index) => {
+          let cellText = cell.innerText;
+          // Replace profile data with incremented ID
+          if (index === 0) {
+            cellText = i++;
+          }
+          rowData.push(cellText);
+        });
+        rows.push(rowData);
+      });
+
+      // Convert rows to CSV format using PapaParse
+      const csv = unparse(rows);
+
+      // Create a blob and save as CSV file
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      saveAs(blob, `Logs-Records-${moment().format("DD-MM-YYYY")}.csv`);
+    } catch (error) {
+      console.error("Error exporting CSV: ", error);
+    }
+  } else {
+    console.error("Table ref is not available.");
+  }
+};
+
+export const exportExcel = async (fn) => {
+  const data = fn.current;
+  if (data) {
+    try {
+      // Import libraries dynamically
+      const { utils, writeFile } = await import("xlsx");
+
+      let rows = [];
+      let headers = [];
+
+      // Get table header
+      const headerCells = data.querySelectorAll("th");
+      headerCells.forEach((cell) => {
+        let headerText = cell.innerText;
+        // Replace 'Profile' with 'ID'
+        if (headerText === "Profile") {
+          headerText = "ID";
+        }
+        headers.push(headerText);
+      });
+
+      // Add headers to rows
+      rows.push(headers);
+
+      // Get table body rows
+      let i = 1;
+      const tableRows = data.querySelectorAll("tbody tr");
+      tableRows.forEach((row) => {
+        const rowData = [];
+        row.querySelectorAll("td").forEach((cell, index) => {
+          let cellText = cell.innerText;
+          // Replace profile data with incremented ID
+          if (index === 0) {
+            cellText = i++;
+          }
+          rowData.push(cellText);
+        });
+        rows.push(rowData);
+      });
+
+      // Create a new worksheet
+      const worksheet = utils.aoa_to_sheet(rows);
+
+      // Create a new workbook and append the worksheet
+      const workbook = utils.book_new();
+      utils.book_append_sheet(workbook, worksheet, "Logs Records");
+
+      // Write the workbook to an Excel file
+      writeFile(workbook, `Logs-Records-${moment().format("DD-MM-YYYY")}.xlsx`);
+    } catch (error) {
+      console.error("Error exporting Excel: ", error);
+    }
+  } else {
+    console.error("Table ref is not available.");
+  }
+};
+
+export const fetchPermitDataTeacher = async (user) => {
+  try {
+    const { data: classes } = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
+        user.nid
+      }`
+    );
+
+    const uniqueClass = [...new Set(classes.data.map((item) => item.class_id))];
+    const classParams = uniqueClass.join(",");
+
+    if (classParams.length === 0) {
+      return [];
+    }
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/permits?class=${
+        user.class != null ? user.class.id : classParams
+      }`
+    );
+
+    const convertedData = await Promise.all(
+      response.data.data.map(async (item) => {
+        const studentResponse = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${
+            item.student_rfid
+          }`
+        );
+        const student = studentResponse.data;
+
+        return {
+          ...item,
+          name: student.data.name,
+          class: "Kelas " + item.class_id,
+          status:
+            item.status === 300
+              ? "Pending"
+              : item.status === 200
+              ? "Accepted"
+              : "Rejected",
+          date: moment(item.date * 1000).format("YYYY-MM-DD"),
+        };
+      })
+    );
+
+    return convertedData;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchAttendanceData = async (user) => {
+  try {
+    const attendanceResponse = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance?class=${
+        user?.class?.id || ""
+      }`
+    );
+
+    const updatedData = attendanceResponse.data.data.map((record) => ({
+      ...record,
+      profile: `assets/icon/${
+        record.student.gender === "Perempuan" ? "girl" : "boy"
+      }-icon.png`,
+      student_name: record.student.name,
+      class: record.student.class.name,
+      status:
+        record.method === 1002 && record.status === 200
+          ? "Checked Out"
+          : record.status === 200
+          ? "On Time"
+          : "Late",
+      method: record.method === 1001 ? "Check-In" : "Check-Out",
+      time: moment.unix(record.date).local().format("DD-MM-YYYY HH:mm:ss"),
+      unixTime: record.date,
+    }));
+
+    return updatedData.sort((a, b) => b.unixTime - a.unixTime);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+export const fetchSubjectAttendanceData = async (user) => {
+  try {
+    let subattendance, classes;
+
+    if (user) {
+      classes = await axios.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
+          user.nid
+        }`
+      );
+      const uniquesClass = [
+        ...new Set(classes.data.data.map((item) => item.class_id)),
+      ];
+      const classParams = uniquesClass.join(",");
+      const uniqueSubject = [
+        ...new Set(classes.data.data.map((item) => item.subject_id)),
+      ];
+      const subjectParams = uniqueSubject.join(",");
+
+      subattendance = await axios.get(
+        `${
+          import.meta.env.VITE_BASE_URL_BACKEND
+        }/subject-attendance?class=${classParams}&subject=${subjectParams}`
+      );
+    } else {
+      classes = await axios.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
+      );
+      const classParams = ""; // Define classParams if needed
+      const subjectParams = ""; // Define subjectParams if needed
+
+      subattendance = await axios.get(
+        `${
+          import.meta.env.VITE_BASE_URL_BACKEND
+        }/subject-attendance?class=${classParams}&subject=${subjectParams}`
+      );
+    }
+
+    const classSubjectMap = classes.data.data.map((item) => ({
+      class_id: item.class_id,
+      subject_id: item.subject_id,
+    }));
+
+    const records = subattendance.data.data.filter((attendance) => {
+      return classSubjectMap.some(
+        (taught) =>
+          taught.class_id === attendance.class_id &&
+          taught.subject_id === attendance.subject_id
+      );
+    });
+
+    const updatedData = records.map((record) => ({
+      ...record,
+      profile: `assets/icon/${
+        record.student.gender === "Perempuan" ? "girl" : "boy"
+      }-icon.png`,
+      student_name: record.student.name,
+      class: record.student.class.name,
+      subject: record.subject.name,
+      time: moment.unix(record.date).local().format("DD-MM-YYYY HH:mm:ss"),
+      unixTime: record.date,
+    }));
+
+    return updatedData.sort((a, b) => b.unixTime - a.unixTime);
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 };

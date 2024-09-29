@@ -9,7 +9,6 @@ import { BsClipboardCheck, BsClipboardX } from "react-icons/bs";
 import { GrSchedules } from "react-icons/gr";
 import { MdOutlineWatchLater, MdPendingActions } from "react-icons/md";
 import RecentAttendance from "../../features/activity/recent";
-import axios from "axios";
 import { fetchDataDashboard } from "../../app/api/v1/teacher-services";
 
 function DashboardTeacher() {

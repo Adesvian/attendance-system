@@ -137,20 +137,20 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                               {/* if props has handleAct0 show button */}
                               {props.handleAct0 && (
                                 <SingleButton
-                                  className="p-3 rounded-md flex gap-x-2 items-center border-none bg-sky-500 hover:bg-sky-600 text-white"
+                                  className="py-4 bg-sky-500 hover:bg-sky-600 text-white"
                                   onClick={() => props.handleAct0(row)}
                                 >
                                   <MdRemoveRedEye />
                                 </SingleButton>
                               )}
                               <SingleButton
-                                className="p-3 rounded-md flex gap-x-2 items-center border-none bg-amber-500 hover:bg-amber-600 text-white"
+                                className="py-4 bg-amber-500 hover:bg-amber-600 text-white"
                                 onClick={() => props.handleAct1(row)}
                               >
                                 <MdEdit />
                               </SingleButton>
                               <SingleButton
-                                className="p-3 rounded-md flex gap-x-2 items-center border-none bg-rose-500 hover:bg-rose-600 text-white"
+                                className="py-4 bg-rose-500 hover:bg-rose-600 text-white"
                                 onClick={() => props.handleAct2(row)}
                               >
                                 <MdDelete />

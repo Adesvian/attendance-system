@@ -25,6 +25,7 @@ function Dashboard() {
     onTime: 0,
     late: 0,
     attendance: [],
+    whatsapp: "",
   });
 
   useEffect(() => {
@@ -103,7 +104,7 @@ function Dashboard() {
             <SiWhatsapp className="bg-green-200 text-green-600 w-16 h-16 rounded-[22px] p-4" />
           }
           Title="Whatsapp"
-          Value="Inactive"
+          Value={data.whatsapp}
         />
       </div>
       <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 lg:gap-6 md:gap-x-5 gap-y-4 mt-5 mb-5">

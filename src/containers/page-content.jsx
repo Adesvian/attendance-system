@@ -6,6 +6,7 @@ import SuspenseContent from "./suspense-content";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import { decodeJWT } from "../app/api/v1/auth";
+import { getCookie } from "../features/user/login-utils";
 // import { fetchCookies } from "../redux/authSlice";
 
 const Page404 = lazy(() => import("../pages/utils/404"));
@@ -16,24 +17,24 @@ function PageContent() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const filteredRoutes = routes.filter((route) =>
-    route.role.includes(decodeJWT(userToken).role)
-  );
+  const filteredRoutes = userToken
+    ? routes.filter((route) => route.role.includes(decodeJWT(userToken).role))
+    : [];
 
-  function getCookie(name) {
-    const cookieString = document.cookie;
-    const cookies = cookieString.split("; ");
+  // function getCookie(name) {
+  //   const cookieString = document.cookie;
+  //   const cookies = cookieString.split("; ");
 
-    for (let cookie of cookies) {
-      const [cookieName, cookieValue] = cookie.split("=");
+  //   for (let cookie of cookies) {
+  //     const [cookieName, cookieValue] = cookie.split("=");
 
-      if (cookieName === name) {
-        return cookieValue;
-      }
-    }
+  //     if (cookieName === name) {
+  //       return cookieValue;
+  //     }
+  //   }
 
-    return null;
-  }
+  //   return null;
+  // }
 
   useEffect(() => {
     const checkSession = async () => {

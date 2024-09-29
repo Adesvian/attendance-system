@@ -7,9 +7,18 @@ export const fetchTeacherData = createAsyncThunk(
   "auth/fetchTeacherData",
   async (nid) => {
     const response = await axios.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${encodeURIComponent(
-        nid
-      )}`
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${nid}`
+    );
+    return response.data.data;
+  }
+);
+
+// Thunk untuk fetch data orang tua
+export const fetchParentData = createAsyncThunk(
+  "auth/fetchParentData",
+  async (nid) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${nid}`
     );
     return response.data.data;
   }
@@ -54,9 +63,16 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     teacher: null,
+    parent: null,
     token: null,
   },
-  reducers: {},
+  reducers: {
+    resetAuth: (state) => {
+      state.teacher = null;
+      state.parent = null;
+      state.token = null;
+    },
+  },
   extraReducers: (builder) => {
     // Handle fetchTeacherData
     builder
@@ -66,6 +82,16 @@ const authSlice = createSlice({
       .addCase(fetchTeacherData.rejected, (state, action) => {
         console.error("Failed to fetch teacher data:", action.error.message);
         state.teacher = null;
+      });
+
+    // Handle fetchParentData
+    builder
+      .addCase(fetchParentData.fulfilled, (state, action) => {
+        state.parent = action.payload;
+      })
+      .addCase(fetchParentData.rejected, (state, action) => {
+        console.error("Failed to fetch parent data:", action.error.message);
+        state.parent = null;
       });
 
     // Handle fetchCookies
@@ -79,5 +105,7 @@ const authSlice = createSlice({
       });
   },
 });
+
+export const { resetAuth } = authSlice.actions;
 
 export default authSlice.reducer;

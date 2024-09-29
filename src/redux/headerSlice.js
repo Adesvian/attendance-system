@@ -6,6 +6,7 @@ export const headerSlice = createSlice({
     pageTitle: "Home",
     sideBar: true,
     theme: "light",
+    child: [],
   },
   reducers: {
     setPageTitle: (state, action) => {
@@ -17,9 +18,13 @@ export const headerSlice = createSlice({
     setTheme: (state, action) => {
       state.theme = action.payload.theme;
     },
+    setChild: (state, action) => {
+      state.child = action.payload.child;
+    },
   },
 });
 
-export const { setPageTitle, setSidebar, setTheme } = headerSlice.actions;
+export const { setPageTitle, setSidebar, setTheme, setChild } =
+  headerSlice.actions;
 
 export default headerSlice.reducer;

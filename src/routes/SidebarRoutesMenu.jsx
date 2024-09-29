@@ -39,7 +39,7 @@ const sidebar_routes = [
   {
     path: "/permit",
     name: "Ketidakhadiran",
-    role: ["teacher"],
+    role: ["teacher", "parent"],
     icon: <PiUserCircleMinus className={iconClasses} />,
   },
   {
@@ -89,7 +89,7 @@ const sidebar_routes = [
     ],
   },
   {
-    path: "/whatsapp",
+    path: "/whatsapp-configuration",
     name: "Whatsapp Configuration",
     role: ["admin"],
     icon: <PiWhatsappLogoLight className={iconClasses} />,

@@ -16,12 +16,17 @@ import {
 } from "../app/api/v1/admin-services";
 import { fetchDataSubjectAttendanceRecords } from "../app/api/v1/teacher-services";
 
+import { fetchChildDataAttendanceRecords } from "../app/api/v1/parent-services";
+
 const holidays = [
   // { date: "02-09-2024", description: "Independence Day" },
   // { date: "16-09-2024", description: "Holiday Event" },
 ];
 const RecapAbsensi = () => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.teacher);
+  const parent_user = useSelector((state) => state.auth.parent);
+  const child = useSelector((state) => state.header.child);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -30,7 +35,6 @@ const RecapAbsensi = () => {
   const [cleared, setCleared] = useState(false);
   const [data, setData] = useState([]);
   const dt = useRef(null);
-  const dispatch = useDispatch();
 
   const handleDateChange = (event) => {
     setSelectedDate(event);
@@ -84,7 +88,7 @@ const RecapAbsensi = () => {
   const columns = generateColumns(selectedDate);
 
   const handlePDFExport = async () => {
-    await exportPdf(data, selectedDate, selectedClass, user);
+    await exportPdf(data, selectedDate, selectedClass, user, parent_user);
   };
 
   useEffect(() => {
@@ -92,34 +96,28 @@ const RecapAbsensi = () => {
   }, []);
 
   useEffect(() => {
-    if (user == null || user.class != null) {
-      fetchDataAttendanceRecords(
-        selectedDate,
-        selectedClass,
-        holidays,
-        setData
-      );
+    if (parent_user != null) {
+      fetchChildDataAttendanceRecords(selectedDate, child, holidays, setData);
     } else {
-      fetchDataSubjectAttendanceRecords(
-        selectedDate,
-        selectedClass,
-        selectedSubject,
-        user,
-        holidays,
-        setData
-      );
+      if (user == null || user.class != null) {
+        fetchDataAttendanceRecords(
+          selectedDate,
+          selectedClass,
+          holidays,
+          setData
+        );
+      } else {
+        fetchDataSubjectAttendanceRecords(
+          selectedDate,
+          selectedClass,
+          selectedSubject,
+          user,
+          holidays,
+          setData
+        );
+      }
     }
-  }, [selectedDate, selectedClass, selectedSubject]);
-
-  // useEffect(() => {
-  //   if (cleared) {
-  //     const timeout = setTimeout(() => {
-  //       setCleared(false);
-  //     }, 1500);
-
-  //     return () => clearTimeout(timeout);
-  //   }
-  // }, [cleared]);
+  }, [selectedDate, selectedClass, selectedSubject, child]);
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -135,6 +133,7 @@ const RecapAbsensi = () => {
         return "";
     }
   };
+
   return (
     <>
       <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
@@ -150,19 +149,23 @@ const RecapAbsensi = () => {
                 handleDateChange={handleDateChange}
                 setCleared={setCleared}
               />
-              <CustomSelect
-                value={selectedClass}
-                size="medium"
-                onChange={handleClassChange}
-                options={classOptions}
-              />
-              {user != null && user.class == null && (
-                <CustomSelect
-                  value={selectedSubject}
-                  size="medium"
-                  onChange={handleSubjectChange}
-                  options={SubjectOptions}
-                />
+              {parent_user == null && (
+                <>
+                  <CustomSelect
+                    value={selectedClass}
+                    size="medium"
+                    onChange={handleClassChange}
+                    options={classOptions}
+                  />
+                  {user != null && user.class == null && (
+                    <CustomSelect
+                      value={selectedSubject}
+                      size="medium"
+                      onChange={handleSubjectChange}
+                      options={SubjectOptions}
+                    />
+                  )}
+                </>
               )}
             </div>
             <ExportButtonsComponent

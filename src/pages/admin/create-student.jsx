@@ -78,7 +78,7 @@ function CreateStudent() {
   };
 
   useEffect(() => {
-    const socket = io("http://localhost:3001");
+    const socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
     socket.on("rfidData", (data) => {
       setStudentData((prevData) => ({
         ...prevData,
@@ -115,7 +115,7 @@ function CreateStudent() {
               <div className="sm:col-span-3">
                 <label
                   htmlFor="rfid"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   RFID Siswa :
                 </label>
@@ -127,6 +127,7 @@ function CreateStudent() {
                     label="Tap card on reader"
                     value={studentData.rfid}
                     onChange={handleChange}
+                    className="bg-[#F2F2F2]"
                     readOnly
                     required
                   />
@@ -135,7 +136,7 @@ function CreateStudent() {
               <div className="sm:col-span-3">
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text bg-indi"
                 >
                   Nama Siswa :
                 </label>
@@ -156,7 +157,7 @@ function CreateStudent() {
               <div className="sm:col-span-3">
                 <label
                   htmlFor="birth_of_place"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   Tempat Lahir Siswa :
                 </label>
@@ -174,7 +175,7 @@ function CreateStudent() {
               <div className="sm:col-span-1">
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   Tanggal Lahir Siswa :
                 </label>
@@ -193,7 +194,7 @@ function CreateStudent() {
               <div className="sm:col-span-1">
                 <label
                   htmlFor="gender"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   Jenis Kelamin :
                 </label>
@@ -211,10 +212,10 @@ function CreateStudent() {
                   </select>
                 </div>
               </div>
-              <div className="sm:col-span-1">
+              <div className="sm:col-span-1 mt-3 lg:mt-0">
                 <label
                   htmlFor="class"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   Kelas :
                 </label>
@@ -238,10 +239,10 @@ function CreateStudent() {
               </div>
             </div>
             <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
-              <div className="sm:col-span-6">
+              <div className="sm:col-span-6 mt-3 lg:mt-0">
                 <label
                   htmlFor="parent_type"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   Wali Murid :
                 </label>
@@ -263,7 +264,7 @@ function CreateStudent() {
                 <div className="sm:col-span-6">
                   <label
                     htmlFor="parent_exist"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Pilih Wali Murid :
                   </label>
@@ -294,7 +295,7 @@ function CreateStudent() {
                   type="submit"
                   className={`px-4 py-2 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
-                  } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+                  } bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none flex items-center justify-center`}
                   disabled={loading}
                 >
                   {loading && (
@@ -313,7 +314,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="parent_nid"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     NIK Wali Murid :
                   </label>
@@ -332,7 +333,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="parent_name"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Nama Wali Murid :
                   </label>
@@ -354,7 +355,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="parent_birth_of_place"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Tempat Lahir Wali :
                   </label>
@@ -372,7 +373,7 @@ function CreateStudent() {
                 <div className="sm:col-span-1">
                   <label
                     htmlFor="parent_birth_of_date"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Tanggal Lahir Wali :
                   </label>
@@ -391,7 +392,7 @@ function CreateStudent() {
                 <div className="sm:col-span-1">
                   <label
                     htmlFor="parent_gender"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Jenis Kelamin :
                   </label>
@@ -415,7 +416,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="phone_num"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     No Whatsapp Wali :
                   </label>
@@ -433,7 +434,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="address"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Alamat Siswa :
                   </label>
@@ -453,7 +454,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="username"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Username :
                   </label>
@@ -472,7 +473,7 @@ function CreateStudent() {
                 <div className="sm:col-span-3">
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                   >
                     Password :
                   </label>
@@ -495,7 +496,7 @@ function CreateStudent() {
                   type="submit"
                   className={`px-4 py-2 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
-                  } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+                  } bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none flex items-center justify-center`}
                   disabled={loading}
                 >
                   {loading && (

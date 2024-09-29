@@ -1,16 +1,24 @@
 import axios from "axios";
 import { decrypt, decodeJWT } from "../../app/api/v1/auth";
 
+export const getCookie = (name) => {
+  const cookieString = document.cookie;
+  const cookies = cookieString.split("; ");
+
+  for (let cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.split("=");
+
+    if (cookieName === name) {
+      return decodeURIComponent(cookieValue);
+    }
+  }
+
+  return null;
+};
+
 export const checkAuthCookies = async (setErrorMessage, navigate) => {
   try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/get-cookies`,
-      {
-        withCredentials: true,
-      }
-    );
-
-    const authToken = response.data._USER_AUTH_RAMADHAN;
+    const authToken = getCookie("_USER_AUTH_RAMADHAN");
 
     if (authToken) {
       try {

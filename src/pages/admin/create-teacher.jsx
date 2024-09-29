@@ -65,7 +65,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="nid"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 NIK Guru :
               </label>
@@ -84,7 +84,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Nama Guru :
               </label>
@@ -105,7 +105,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="birth_of_place"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Tempat Lahir Guru :
               </label>
@@ -123,7 +123,7 @@ function CreateTeacher() {
             <div className="sm:col-span-2">
               <label
                 htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Tanggal Lahir Guru :
               </label>
@@ -141,7 +141,7 @@ function CreateTeacher() {
             <div className="sm:col-span-1">
               <label
                 htmlFor="gender"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Jenis Kelamin :
               </label>
@@ -164,7 +164,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="type"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Tipe Guru :
               </label>
@@ -187,7 +187,7 @@ function CreateTeacher() {
               <div className="sm:col-span-3">
                 <label
                   htmlFor="class"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
                 >
                   Kelas :
                 </label>
@@ -216,7 +216,7 @@ function CreateTeacher() {
             <div className="sm:col-span-6">
               <label
                 htmlFor="address"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Alamat Guru :
               </label>
@@ -237,7 +237,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="username"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Username :
               </label>
@@ -256,7 +256,7 @@ function CreateTeacher() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
               >
                 Password :
               </label>
@@ -280,7 +280,7 @@ function CreateTeacher() {
               type="submit"
               className={`px-4 py-2 ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
-              } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none flex items-center justify-center`}
+              } bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none flex items-center justify-center`}
               disabled={loading}
             >
               {loading && (

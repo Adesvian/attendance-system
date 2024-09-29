@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { fetchCookies, fetchTeacherData } from "../redux/authSlice";
+import {
+  fetchCookies,
+  fetchParentData,
+  fetchTeacherData,
+} from "../redux/authSlice";
 import { decodeJWT } from "../app/api/v1/auth";
 import SuspenseContent from "../containers/suspense-content";
 
 function ProtectedRoute() {
   const dispatch = useDispatch();
   const [cookies, setCookies] = useState(null);
-  const [teacher, setTeacher] = useState(null);
+  const [auth, setAuth] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,14 +24,33 @@ function ProtectedRoute() {
         if (result && Object.keys(result).length > 0) {
           setCookies(result);
           if (decodeJWT(result).role !== "admin") {
-            const teacherResult = await dispatch(
-              fetchTeacherData(decodeJWT(result).nid)
-            ).unwrap();
-            if (teacherResult && Object.keys(teacherResult).length > 0) {
-              setTeacher(teacherResult);
+            const { role, nid } = decodeJWT(result);
+            if (role === "teacher") {
+              try {
+                const teacherResult = await dispatch(
+                  fetchTeacherData(nid)
+                ).unwrap();
+                if (teacherResult && Object.keys(teacherResult).length > 0) {
+                  setAuth(teacherResult);
+                } else {
+                  setAuth(false);
+                }
+              } catch (error) {
+                console.error("Error fetching teacher data:", error);
+                setAuth(false);
+              }
             } else {
-              setTeacher(false);
+              const parentResult = await dispatch(
+                fetchParentData(nid)
+              ).unwrap();
+              if (parentResult && Object.keys(parentResult).length > 0) {
+                setAuth(parentResult);
+              } else {
+                setAuth(false);
+              }
             }
+          } else {
+            setAuth(false);
           }
         } else {
           setCookies(false);
