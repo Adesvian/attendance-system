@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        "login-svg": "url('/login.svg')",
+        "login-svg": "url('/curve-line.svg')",
       },
       colors: {
         dark: {

@@ -97,7 +97,7 @@ function LogKehadiran() {
   }, [dispatch, user]);
 
   return (
-    <div role="tablist" className="tabs tabs-lifted tabs-lg">
+    <div role="tablist" className="tabs tabs-bordered tabs-md lg:tabs-lg">
       {tabs.map((tab) => (
         <React.Fragment key={tab.id}>
           <input
@@ -115,11 +115,11 @@ function LogKehadiran() {
           />
           <div
             role="tabpanel"
-            className={`tab-content bg-white dark:bg-base-100 rounded-box p-6 ${
+            className={`tab-content bg-white dark:bg-base-100 rounded-box ${
               activeTab === tab.id ? "" : "hidden"
             }`}
           >
-            <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 lg:-mt-10">
+            <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 mt-3 lg:-mt-10">
               <div className="flex justify-end gap-x-1 lg:relative lg:right-[23rem] lg:top-[3rem]">
                 {tab.exportFunction(tab.ref)}
               </div>

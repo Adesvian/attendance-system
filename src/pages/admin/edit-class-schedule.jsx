@@ -245,7 +245,7 @@ function EditClassSchedule() {
             <SingleButton
               btnTitle={loading ? "Loading..." : "Edit"}
               type="submit"
-              className={`px-4 py-2 ${
+              className={`px-7 py-2 ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
               } bg-amber-500 text-white rounded-md hover:bg-amber-600 focus:outline-none flex items-center justify-center`}
               disabled={loading}

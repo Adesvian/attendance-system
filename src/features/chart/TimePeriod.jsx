@@ -14,7 +14,7 @@ function PeriodButtons({ activeButton, setActiveButton }) {
 
   return (
     <div className="my-2">
-      <div className="flex space-x-2 mb-2 w-fit bg-gray-200/50 dark:bg-base-200 p-2 rounded-md lg:float-none float-right">
+      <div className="flex space-x-2 mb-2 w-fit bg-gray-100 dark:bg-base-200 p-2 lg:float-none float-right">
         {["Day", "Month", "Year"].map((period) => (
           <SingleButton
             key={period}

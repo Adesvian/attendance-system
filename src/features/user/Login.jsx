@@ -33,16 +33,16 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-login-svg bg-cover">
-      <div className="bg-white py-12 px-16 rounded-md shadow-md w-full max-w-md font-poppins relative">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Log in</h2>
-          <span className="text-sm text-gray-600">
-            Please enter your details
+    <div className="flex items-center justify-center min-h-screen bg-login-svg bg-gray-100 bg-cover">
+      <div className="bg-white py-12 px-12 rounded-md shadow-md w-full max-w-sm sm:max-w-md h-screen md:h-auto flex flex-col justify-center">
+        <div className="mb-6 text-center z-10">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Login</h2>
+          <span className="text-sm text-gray-500">
+            Selamat Datang! Silahkan login menggunakan akun anda
           </span>
         </div>
 
-        <form onSubmit={submitForm}>
+        <form onSubmit={submitForm} className="flex flex-col">
           <TextInput
             id="username"
             type="text"
@@ -66,13 +66,14 @@ function LoginForm() {
           )}
           <SingleButton
             type="submit"
-            className="btn bg-blue-500 hover:bg-blue-600 w-full border-none text-white"
+            className="btn bg-green-900 hover:bg-green-800 w-full border-none text-white z-10"
             btnTitle="Login"
+            disabled={loading}
           />
         </form>
 
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md">
+          <div className="absolute inset-0 flex items-center justify-center rounded-md">
             <span className="loading loading-spinner text-primary"></span>
           </div>
         )}

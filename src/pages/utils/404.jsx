@@ -11,11 +11,11 @@ function Page404() {
   }, []);
   return (
     <>
-      <div className="hero h-4/5 bg-gray-300 dark:bg-base-200 mt-32">
-        <div className="hero-content text-accent text-center">
+      <div className="hero bg-gray-300 dark:bg-base-200 ">
+        <div className="hero-content text-accent text-center h-[37rem]">
           <div className="max-w-md">
-            <FaFaceFrown className="h-48 w-48 inline-block" />
-            <h1 className="text-5xl font-bold">404 - Not Found</h1>
+            <FaFaceFrown className="h-24 lg:h-48 w-24 lg:w-48 inline-block" />
+            <h1 className="text-3xl lg:text-5xl font-bold">404 - Not Found</h1>
           </div>
         </div>
       </div>

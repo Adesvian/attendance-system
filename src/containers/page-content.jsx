@@ -51,11 +51,11 @@ function PageContent() {
             background:
               "#fff url(https://static.vecteezy.com/system/resources/previews/042/056/318/non_2x/8bit-pixel-art-night-sky-game-space-landscape-vector.jpg) no-repeat center center / cover",
             backdrop: `
-              rgba(0,0,123,0.4)
-            `,
+                rgba(0,0,123,0.4)
+              `,
             html: `
-                <img src="/assets/icon/waiting-pixel.gif" class="w-48 h-auto ml-7 lg:ml-36" />
-            `,
+                  <img src="/assets/icon/waiting-pixel.gif" class="w-48 h-auto ml-7 lg:ml-36" />
+              `,
           }).then(() => {
             navigate("/login", { replace: true });
           });
@@ -70,23 +70,27 @@ function PageContent() {
   }, [location, dispatch, navigate]);
   return (
     <>
-      <div className="w-full lg:flex-1 overflow-y-auto h-screen ">
+      <div className="w-full lg:flex-1 overflow-y-auto h-screen bg-gray-100 dark:bg-base-300">
         <Navbar />
-        <div className="flex-1 overflow-y-auto md:pt-4 pt-4 px-6 bg-gray-300 dark:bg-base-300">
-          <Suspense fallback={<SuspenseContent />}>
-            <Routes>
-              {filteredRoutes.map((route, key) => (
-                <Route
-                  key={key}
-                  path={route.path}
-                  element={<route.component />}
-                />
-              ))}
+        <div className="flex-1 overflow-y-auto md:pt-4 pt-4 px-6 bg-gray-100 dark:bg-base-300">
+          <div className="grid lg:grid-cols-1 md:grid-cols-1 grid-cols-1 gap-6 my-5">
+            <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4">
+              <Suspense fallback={<SuspenseContent />}>
+                <Routes>
+                  {filteredRoutes.map((route, key) => (
+                    <Route
+                      key={key}
+                      path={route.path}
+                      element={<route.component />}
+                    />
+                  ))}
 
-              {/* Redirecting unknown url to 404 page */}
-              <Route path="*" element={<Page404 />} />
-            </Routes>
-          </Suspense>
+                  {/* Redirecting unknown url to 404 page */}
+                  <Route path="*" element={<Page404 />} />
+                </Routes>
+              </Suspense>
+            </div>
+          </div>
         </div>
       </div>
     </>

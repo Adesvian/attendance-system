@@ -39,6 +39,14 @@ const getTheme = (theme) => {
           },
         },
       },
+      MuiTableCell: {
+        styleOverrides: {
+          head: {
+            backgroundColor: isDarkTheme ? "#f7f7f7" : "#f7f7f7",
+            color: "#52565A",
+          },
+        },
+      },
       MuiPagination: {
         styleOverrides: {
           root: {

@@ -89,14 +89,16 @@ export const updateChartData = (period, setChart, data) => {
       });
     } else if (period === "Day") {
       return kelasUnik.map((kelas) => {
-        return filteredData
-          .filter(
-            (item) => moment(item.tanggal, "DD-MM-YYYY").date() === currentDate
-          )
-          .reduce((sum, item) => {
-            const dataItem = item.data.find((d) => d.name === kelas);
-            return sum + (dataItem ? dataItem.data : 0);
-          }, 0);
+        const todayData = filteredData.filter(
+          (item) =>
+            moment(item.tanggal, "DD-MM-YYYY").date() === currentDate &&
+            moment(item.tanggal, "DD-MM-YYYY").month() === currentMonth
+        );
+
+        return todayData.reduce((sum, item) => {
+          const dataItem = item.data.find((d) => d.name === kelas);
+          return sum + (dataItem ? dataItem.data : 0);
+        }, 0);
       });
     } else {
       return [];

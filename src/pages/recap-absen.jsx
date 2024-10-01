@@ -136,55 +136,47 @@ const RecapAbsensi = () => {
 
   return (
     <>
-      <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
-        <div
-          className={`bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white  col-span-2 ${
-            data && data.length > 0 ? "max-h-[80vh] overflow-auto" : ""
-          }`}
-        >
-          <div className="sticky top-0 bg-white rounded-md dark:bg-base-100 pl-4 pt-4 pr-4 pb-0.5">
-            <div className="flex gap-x-3 mb-4 font-poppins">
-              <DatePickerComponent
-                selectedDate={selectedDate}
-                handleDateChange={handleDateChange}
-                setCleared={setCleared}
+      <div className="sticky top-0 bg-white rounded-md dark:bg-base-100 pl-4 pt-4 pr-4 pb-0.5">
+        <div className="flex gap-x-3 mb-4 font-poppins">
+          <DatePickerComponent
+            selectedDate={selectedDate}
+            handleDateChange={handleDateChange}
+            setCleared={setCleared}
+          />
+          {parent_user == null && (
+            <>
+              <CustomSelect
+                value={selectedClass}
+                size="medium"
+                onChange={handleClassChange}
+                options={classOptions}
               />
-              {parent_user == null && (
-                <>
-                  <CustomSelect
-                    value={selectedClass}
-                    size="medium"
-                    onChange={handleClassChange}
-                    options={classOptions}
-                  />
-                  {user != null && user.class == null && (
-                    <CustomSelect
-                      value={selectedSubject}
-                      size="medium"
-                      onChange={handleSubjectChange}
-                      options={SubjectOptions}
-                    />
-                  )}
-                </>
+              {user != null && user.class == null && (
+                <CustomSelect
+                  value={selectedSubject}
+                  size="medium"
+                  onChange={handleSubjectChange}
+                  options={SubjectOptions}
+                />
               )}
-            </div>
-            <ExportButtonsComponent
-              exportCSV={handleCSVExport}
-              exportExcel={handleExcelExport}
-              exportPdf={handlePDFExport}
-            />
-          </div>
-
-          <div className="px-4 pb-5 bg-white dark:bg-base-100">
-            <TableComponent
-              ref={dt}
-              data={data}
-              columns={columns}
-              getStatusClass={getStatusClass}
-              type="recap"
-            />
-          </div>
+            </>
+          )}
         </div>
+        <ExportButtonsComponent
+          exportCSV={handleCSVExport}
+          exportExcel={handleExcelExport}
+          exportPdf={handlePDFExport}
+        />
+      </div>
+
+      <div className="px-4 pb-5 bg-white dark:bg-base-100">
+        <TableComponent
+          ref={dt}
+          data={data}
+          columns={columns}
+          getStatusClass={getStatusClass}
+          type="recap"
+        />
       </div>
     </>
   );

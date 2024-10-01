@@ -27,7 +27,7 @@ function TextInput({
         placeholder={label}
         value={value}
         onChange={onChange}
-        className={`input input-bordered w-full bg-white text-gray-900 ${className}`}
+        className={`input input-bordered w-full dark:text-dark-text bg-white dark:bg-base-300 text-gray-900 ${className}`}
         required={required}
         readOnly={readOnly}
       />

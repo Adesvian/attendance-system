@@ -1,19 +1,20 @@
 import axios from "axios";
 import moment from "moment";
+
 export const fetchAttendanceChartData = async (
   chartData,
   setAttendancesData
 ) => {
-  const status = chartData ? true : false;
+  const status = !!chartData; // Convert to boolean
   try {
     const response = await axios.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`
     );
     const attendanceData = chartData ? chartData : response.data.data;
 
-    // Mengelompokkan data berdasarkan tanggal
+    // Grouping data by date (day and year)
     const groupedData = attendanceData.reduce((acc, curr) => {
-      const date = moment.unix(curr.date).format("DD-MM-YYYY");
+      const date = moment.unix(curr.date).format("YYYY-MM-DD");
       const className = curr.student.class.name;
 
       if (!acc[date]) {
@@ -28,7 +29,6 @@ export const fetchAttendanceChartData = async (
       return acc;
     }, {});
 
-    // Memformat data ke dalam struktur yang diinginkan
     const formattedDataAttendances = Object.keys(groupedData).map((date) => {
       const formattedClasses = groupedData[date].reduce((acc, curr) => {
         const classData = acc.find((item) => item.name === curr.name);
@@ -40,7 +40,6 @@ export const fetchAttendanceChartData = async (
         return acc;
       }, []);
 
-      // Mengurutkan data berdasarkan kelas
       formattedClasses.sort((a, b) => {
         const classOrder = [
           "Kelas 1",
@@ -53,7 +52,10 @@ export const fetchAttendanceChartData = async (
         return classOrder.indexOf(a.name) - classOrder.indexOf(b.name);
       });
 
-      return { tanggal: date, data: formattedClasses };
+      return {
+        tanggal: moment(date).format("DD-MM-YYYY"),
+        data: formattedClasses,
+      };
     });
 
     setAttendancesData(formattedDataAttendances);

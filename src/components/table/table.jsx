@@ -118,11 +118,7 @@ function TableDataManager({ data, columns, isUserTable = true, ...props }) {
                     <TableCell
                       key={colIndex}
                       align="center"
-                      className={`text-[14px] p-[8px] w-[9px] whitespace-normal ${
-                        index % 2 === 0
-                          ? "bg-gray-100 dark:text-dark-text dark:bg-base-200"
-                          : "bg-white dark:bg-base-300"
-                      }`}
+                      className={`text-[14px] p-[8px] w-[9px] whitespace-normal bg-white dark:bg-base-300`}
                     >
                       {col.field === "profile" ? (
                         <div className="avatar">

@@ -27,7 +27,7 @@ function LeftSidebar() {
 
   // Sidebar width classes
   const sidebarClasses = sideBar
-    ? "lg:w-64 w-fit" // Expanded on desktop and mobile
+    ? "lg:w-64 w-full" // Expanded on desktop and mobile
     : "lg:w-24 w-0"; // Collapsed on desktop, hidden on mobile
 
   // Image and title classes
@@ -41,15 +41,13 @@ function LeftSidebar() {
 
   return (
     <div
-      className={`${sidebarClasses} h-screen overflow-y-auto duration-300 bg-gray-200 dark:bg-base-200 drop-shadow-md`}
+      className={`${sidebarClasses} h-screen overflow-y-auto duration-300 bg-gray-100 dark:bg-base-200 drop-shadow-md`}
     >
       <div className="p-2">
         <div className="flex flex-col items-center">
           <img
-            src="https://fingerspot-dev.s3.ap-southeast-1.amazonaws.com/fingerspot-dev/landing/1/1/content_features/5_20200309093631_rRctc2xU.png"
-            className={`cursor-pointer duration-300 ${imageClasses} ${
-              sideBar ? "drop-shadow-[-10px_-3px_0px_rgba(0,0,0,0.7)]" : ""
-            }`}
+            src="/assets/school-logo-background.png"
+            className={`cursor-pointer duration-300 ${imageClasses} `}
             alt="Sidebar Logo"
           />
           <h1
@@ -67,7 +65,7 @@ function LeftSidebar() {
                 key={index}
                 className={`rounded-md text-base-200 dark:text-dark-text text-sm mt-2 ${
                   sideBar ? "" : "lg:block hidden"
-                } ${active ? "bg-gray-300 dark:bg-gray-200 text-black" : ""}`}
+                } ${active ? "bg-gray-200 dark:bg-gray-200 text-black" : ""}`}
               >
                 {menu.submenu ? (
                   <SidebarSubMenu {...menu} />
@@ -82,7 +80,7 @@ function LeftSidebar() {
                     }
                   >
                     <div
-                      className={`${linkContainerClasses} hover:bg-gray-300 hover:text-black`}
+                      className={`${linkContainerClasses} hover:bg-gray-200 hover:text-black`}
                     >
                       {cloneElement(menu.icon, {
                         className: `flex-shrink-0 ${
