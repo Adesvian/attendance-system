@@ -547,7 +547,7 @@ export const fetchTeachers = async (setData) => {
         ttl:
           teacher.birth_of_place || teacher.birth_of_date
             ? `${teacher.birth_of_place},${moment(teacher.birth_of_date).format(
-                "DD/MM/YY"
+                " DD MMM YYYY"
               )}`
             : "-",
         address: teacher.address ? teacher.address : "-",
@@ -1072,7 +1072,7 @@ export const fetchStudentData = async (setData) => {
           student.birth_of_place || student.birth_of_date
             ? `${student.birth_of_place}, ${
                 student.birth_of_date
-                  ? moment(student.birth_of_date).format("DD/MM/YY")
+                  ? moment(student.birth_of_date).format("DD MMM YYYY")
                   : ""
               }`
             : "-",
@@ -1508,5 +1508,187 @@ export const DeleteSession = async (setLoading, setData, data) => {
     } finally {
       setLoading(false);
     }
+  }
+};
+
+export const fetchThresholdData = async (
+  setCheckInTime,
+  setCheckOutEntries,
+  setDefaultCheckOutTime,
+  setAvailableClasses
+) => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold`
+    );
+    const data = response.data.data;
+
+    // Set Check-In Time
+    const defaultCheckInEntry = data.find(
+      (entry) => entry.class_id === 1 && entry.method === 1001
+    );
+
+    if (defaultCheckInEntry) {
+      const checkInTime = moment.utc(defaultCheckInEntry.time).format("HH:mm");
+      setCheckInTime(checkInTime);
+    }
+
+    // Set Check-Out Entries
+    const checkOutEntries = data
+      .filter((entry) => entry.method === 1002 && entry.custom_time !== null)
+      .map((entry) => ({
+        class: entry.class_id,
+        time: moment.utc(entry.time).format("HH:mm"),
+      }));
+
+    setCheckOutEntries(checkOutEntries);
+
+    // Set Default Check-Out Time
+    const defaultCheckOutEntry = data.find(
+      (entry) => entry.method === 1002 && entry.custom_time === null
+    );
+
+    if (defaultCheckOutEntry) {
+      const checkOutTime = moment
+        .utc(defaultCheckOutEntry.time)
+        .format("HH:mm");
+      setDefaultCheckOutTime(checkOutTime);
+    }
+
+    // Set Available Classes
+    const optionRemain = data
+      .filter((entry) => entry.method === 1002 && entry.custom_time == null)
+      .map((entry) => entry.class_id);
+
+    setAvailableClasses(optionRemain);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+
+export const CheckInSubmit = async (checkInTime) => {
+  try {
+    await axios.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-in`,
+      {
+        time: checkInTime,
+      }
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: `Waktu check-in berhasil di set pada pukul ${checkInTime}.`,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    console.error("Error submitting check-in:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Terdapat kesalahan dengan server.",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  }
+};
+
+export const DefaultCheckOutSubmit = async (defaultCheckOutTime) => {
+  try {
+    await axios.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-out`,
+      {
+        time: defaultCheckOutTime,
+      }
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: `Waktu check-out berhasil di set pada pukul ${defaultCheckOutTime}.`,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    console.error("Error submitting check-out:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Terdapat kesalahan dengan server.",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  }
+};
+
+export const EachClassCheckOutSubmit = async (classEntry) => {
+  try {
+    await axios.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-out/${
+        classEntry.class
+      }`,
+      {
+        time: classEntry.time,
+      }
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: `Waktu custom check-out berhasil diatur.`,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    console.error("Error submitting check-out:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Terdapat kesalahan dengan server.",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  }
+};
+
+export const DeleteCheckOut = async (
+  index,
+  checkOutEntries,
+  setCheckOutEntries,
+  setAvailableClasses
+) => {
+  const entryToDelete = checkOutEntries[index];
+  const updatedEntries = checkOutEntries.filter((_, i) => i !== index);
+
+  try {
+    await axios.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-out/${
+        entryToDelete.class
+      }`,
+      {
+        time: "13:00:00",
+      }
+    );
+
+    setCheckOutEntries(updatedEntries);
+    setAvailableClasses((prev) => [...prev, entryToDelete.class]);
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: `Waktu check-out untuk Kelas ${entryToDelete.class} telah diatur ulang ke waktu default.`,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    console.error("Error submitting check-out:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Terdapat kesalahan dengan server.",
+      showConfirmButton: false,
+      timer: 1500,
+    });
   }
 };

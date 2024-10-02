@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
-import { Button } from "@mui/material";
-import { MdOutlineAdd } from "react-icons/md";
 import TableDataManager from "../../components/table/table"; // Ensure the file name and path are correct
 import { useNavigate } from "react-router-dom";
 import {
   deleteClassSchedule,
   fetchSchedules,
 } from "../../app/api/v1/admin-services";
+import SearchAndButton from "../../components/input/header-search";
 
 function ClassSchedule() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleEdit = (row) => {
     navigate(`/data-jadwal/edit-jadwal/${row.id}`);
@@ -40,22 +40,19 @@ function ClassSchedule() {
 
   return (
     <>
-      <div className="flex lg:justify-end">
-        <Button
-          variant="contained"
-          className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
-          startIcon={<MdOutlineAdd />}
-          onClick={() => navigate("/data-jadwal/create-jadwal")}
-        >
-          Tambah Jadwal Guru
-        </Button>
-      </div>
+      <SearchAndButton
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        buttonLabel="Tambah Jadwal Guru"
+        onButtonClick={() => navigate("/data-jadwal/create-jadwal")}
+      />
 
       <TableDataManager
         data={data}
         columns={columns}
         handleAct1={handleEdit}
         handleAct2={handleDelete}
+        searchQuery={searchQuery}
       />
     </>
   );

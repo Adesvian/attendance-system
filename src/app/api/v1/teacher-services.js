@@ -2,7 +2,6 @@ import axios from "axios";
 import moment from "moment";
 import jsPDF from "jspdf";
 import autotable from "jspdf-autotable";
-import exp from "constants";
 
 export const fetchDataDashboard = async (
   setData,
@@ -321,7 +320,7 @@ export const fetchDataSubjectAttendanceRecords = async (
           const currentDate = moment(selectedDate)
             .date(index + 1)
             .startOf("day");
-          const dayOfWeek = currentDate.day(); // 0 = Minggu, 6 = Sabtu
+          const dayOfWeek = currentDate.day();
           const isHoliday = holidayDates.some((holidayDate) =>
             holidayDate.isSame(currentDate, "day")
           );
@@ -378,7 +377,6 @@ export const fetchDataSubjectAttendanceRecords = async (
           return currentDate.day() === 0 || currentDate.day() === 6;
         }).length;
 
-        // Hitung hari efektif (hari di mana ada jadwal mengajar dan bukan libur/akhir pekan)
         const effectiveDays = Array.from(
           { length: moment(selectedDate).daysInMonth() },
           (_, i) => {
@@ -427,7 +425,7 @@ export const exportPdf = async (fn, user) => {
       const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
       const text = pdf.splitTextToSize(
         "Download Time : " +
-          moment().format("DD-MM-YYYY HH:mm:ss") +
+          moment().format("DD MMM YYYY HH:mm:ss") +
           "\n" +
           "User Download : " +
           (user ? user.name : "admin") +
@@ -652,7 +650,7 @@ export const fetchAttendanceData = async (user) => {
           ? "On Time"
           : "Late",
       method: record.method === 1001 ? "Check-In" : "Check-Out",
-      time: moment.unix(record.date).local().format("DD-MM-YYYY HH:mm:ss"),
+      time: moment.unix(record.date).local().format("DD MMM YYYY HH:mm:ss"),
       unixTime: record.date,
     }));
 
@@ -691,8 +689,8 @@ export const fetchSubjectAttendanceData = async (user) => {
       classes = await axios.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
       );
-      const classParams = ""; // Define classParams if needed
-      const subjectParams = ""; // Define subjectParams if needed
+      const classParams = "";
+      const subjectParams = "";
 
       subattendance = await axios.get(
         `${
@@ -722,7 +720,7 @@ export const fetchSubjectAttendanceData = async (user) => {
       student_name: record.student.name,
       class: record.student.class.name,
       subject: record.subject.name,
-      time: moment.unix(record.date).local().format("DD-MM-YYYY HH:mm:ss"),
+      time: moment.unix(record.date).local().format("DD MMM YYYY HH:mm:ss"),
       unixTime: record.date,
     }));
 

@@ -6,11 +6,13 @@ import { MdOutlineAdd } from "react-icons/md";
 import TableDataManager from "../../components/table/table";
 import { useNavigate } from "react-router-dom";
 import { deleteSubject, fetchSubjects } from "../../app/api/v1/admin-services";
+import SearchAndButton from "../../components/input/header-search";
 function Subject() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleEdit = (row) => {
     navigate(`/data-mapel/edit-mapel/${row.id}`);
@@ -34,22 +36,19 @@ function Subject() {
 
   return (
     <>
-      <div className="flex lg:justify-end">
-        <Button
-          variant="contained"
-          className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
-          startIcon={<MdOutlineAdd />}
-          onClick={() => navigate("/data-mapel/create-mapel")}
-        >
-          Tambah Data Mapel
-        </Button>
-      </div>
+      <SearchAndButton
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        buttonLabel="Tambah Data Mapel"
+        onButtonClick={() => navigate("/data-mapel/create-mapel")}
+      />
 
       <TableDataManager
         data={data}
         columns={columns}
         handleAct1={handleEdit}
         handleAct2={handleDelete}
+        searchQuery={searchQuery}
       />
     </>
   );

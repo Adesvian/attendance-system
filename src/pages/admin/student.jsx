@@ -2,21 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { Button } from "@mui/material";
 import TableDataManager from "../../components/table/table";
-import { MdOutlineAdd } from "react-icons/md";
-import moment from "moment";
 import {
   deleteStudent,
   fetchStudentData,
 } from "../../app/api/v1/admin-services";
+import SearchAndButton from "../../components/input/header-search";
 
 function Student() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleView = (row) => {
     navigate(`/data-siswa/view-siswa/${row.rfid}`);
@@ -34,7 +32,7 @@ function Student() {
   useEffect(() => {
     fetchStudentData(setData);
     setColumns([
-      { field: "profile", header: "Profile" },
+      { field: "profile", header: "Gender" },
       { field: "rfid", header: "RFID" },
       { field: "name", header: "Name" },
       { field: "class", header: "Kelas" },
@@ -46,16 +44,12 @@ function Student() {
   }, []);
   return (
     <>
-      <div className="flex lg:justify-end">
-        <Button
-          variant="contained"
-          className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
-          startIcon={<MdOutlineAdd />}
-          onClick={() => navigate("/data-siswa/create-siswa")}
-        >
-          Tambah Data Siswa
-        </Button>
-      </div>
+      <SearchAndButton
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        buttonLabel="Tambah Data Siswa"
+        onButtonClick={() => navigate("/data-siswa/create-siswa")}
+      />
 
       <TableDataManager
         data={data}
@@ -63,6 +57,7 @@ function Student() {
         handleAct0={handleView}
         handleAct1={handleEdit}
         handleAct2={handleDelete}
+        searchQuery={searchQuery}
       />
     </>
   );
