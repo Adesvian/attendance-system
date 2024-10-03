@@ -23,7 +23,7 @@ function BarChart({ chartData }) {
   }, [activeButton, data]);
 
   return (
-    <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 p-4 col-span-2 border">
+    <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 p-4 col-span-2 border dark:border-[#2B3039] dark:border-[2px]">
       <div className="md:flex md:justify-between ">
         <div className="text-2xl font-bold text-base-200 dark:text-dark-text lg:my-4">
           Total Attendance{" "}

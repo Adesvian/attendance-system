@@ -64,67 +64,101 @@ export const fetchChildDataAttendanceRecords = async (
       );
     });
 
-    const formattedData = () => {
-      const attendance = Array(daysInMonth).fill("-");
+    const attendance = Array(daysInMonth).fill("-");
 
-      // Set weekend and holiday statuses
-      for (let index = 0; index < daysInMonth; index++) {
-        const currentDate = moment(selectedDate)
-          .date(index + 1)
-          .startOf("day");
-        const isWeekend = currentDate.day() === 0 || currentDate.day() === 6;
-        const isHoliday = holidayDates.some((holidayDate) =>
-          holidayDate.isSame(currentDate, "day")
-        );
+    // Tandai hari libur dan akhir pekan
+    for (let index = 0; index < daysInMonth; index++) {
+      const currentDate = moment(selectedDate)
+        .date(index + 1)
+        .startOf("day");
+      const isWeekend = currentDate.day() === 0 || currentDate.day() === 6;
+      const isHoliday = holidayDates.some((holidayDate) =>
+        holidayDate.isSame(currentDate, "day")
+      );
 
-        if (isHoliday || isWeekend) {
-          attendance[index] = methodMap["libur"];
+      if (isHoliday || isWeekend) {
+        attendance[index] = methodMap["libur"];
+      }
+    }
+
+    // Proses kehadiran
+    filteredData.forEach((record) => {
+      attendance[moment(record.date, "YYYY-MM-DD").date() - 1] =
+        methodMap[record.method] || "-";
+    });
+
+    // Proses permit
+    processedPermits.forEach((permit) => {
+      if (permit.student_rfid === child.rfid) {
+        const permitDate = moment(permit.date, "YYYY-MM-DD");
+
+        // Tandai 3 hari permit
+        for (let i = 0; i < 3; i++) {
+          const permitDay = permitDate.clone().add(i, "days");
+
+          if (
+            permitDay.month() === selectedMonth &&
+            permitDay.year() === selectedYear
+          ) {
+            const permitIndex = permitDay.date() - 1;
+
+            // Jika sudah ada kehadiran atau sudah ditandai sebagai libur, lewati penandaan
+            if (
+              attendance[permitIndex] === "H" ||
+              attendance[permitIndex] === methodMap["libur"]
+            ) {
+              continue; // Keberadaan hadir dan libur harus diprioritaskan
+            }
+
+            // Cek kehadiran sehari setelah permit
+            const nextDay = permitDay.clone().add(1, "days");
+            const nextDayIndex = nextDay.date() - 1;
+
+            if (attendance[nextDayIndex] === "H") {
+              // Tandai hanya hari pertama dengan izin
+              attendance[permitIndex] =
+                methodMap[permit.reason.toLowerCase()] || "-";
+              break; // Keluar dari loop setelah menandai
+            } else {
+              // Jika tidak ada kehadiran sehari setelahnya, tetap gunakan logika sebelumnya
+              attendance[permitIndex] = holidayDates.some((holidayDate) =>
+                holidayDate.isSame(permitDay, "day")
+              )
+                ? methodMap["libur"] // Tetap tandai sebagai libur jika permit jatuh pada hari libur
+                : methodMap[permit.reason.toLowerCase()] || "-";
+            }
+          }
         }
       }
+    });
 
-      // Update attendance with records
-      filteredData.forEach((record) => {
-        if (record.student_rfid === child.rfid) {
-          attendance[moment(record.date, "YYYY-MM-DD").date() - 1] =
-            methodMap[record.method] || "-";
-        }
-      });
+    // Periksa tanggal sebelum hari ini untuk status alfa
+    attendance.forEach((status, index) => {
+      const currentDate = moment(selectedDate)
+        .date(index + 1)
+        .startOf("day");
+      if (currentDate.isBefore(today) && status === "-") {
+        attendance[index] = methodMap["alfa"];
+      }
+    });
 
-      // Update attendance with permits
-      processedPermits.forEach((permit) => {
-        if (permit.student_rfid === child.rfid) {
-          attendance[moment(permit.date, "YYYY-MM-DD").date() - 1] =
-            methodMap[permit.reason.toLowerCase()] || "-";
-        }
-      });
+    const hadir = attendance.filter((status) => status === "H").length;
+    const absen = attendance.filter((status) => status === "A").length;
+    const izin = attendance.filter((status) => status === "I").length;
+    const sakit = attendance.filter((status) => status === "S").length;
 
-      // Mark absent for past dates
-      attendance.forEach((status, index) => {
+    const effectiveDays =
+      daysInMonth -
+      holidayDates.length -
+      attendance.filter((_, index) => {
         const currentDate = moment(selectedDate)
           .date(index + 1)
           .startOf("day");
-        if (currentDate.isBefore(today) && status === "-") {
-          attendance[index] = methodMap["alfa"];
-        }
-      });
+        return currentDate.day() === 0 || currentDate.day() === 6;
+      }).length;
 
-      // Calculate counts and percentage
-      const hadir = attendance.filter((status) => status === "H").length;
-      const absen = attendance.filter((status) => status === "A").length;
-      const izin = attendance.filter((status) => status === "I").length;
-      const sakit = attendance.filter((status) => status === "S").length;
-
-      const effectiveDays =
-        daysInMonth -
-        holidayDates.length -
-        attendance.filter((_, index) => {
-          const currentDate = moment(selectedDate)
-            .date(index + 1)
-            .startOf("day");
-          return currentDate.day() === 0 || currentDate.day() === 6;
-        }).length;
-
-      return {
+    setData([
+      {
         name: child.name,
         attendance,
         hadir,
@@ -134,9 +168,8 @@ export const fetchChildDataAttendanceRecords = async (
         percentage: effectiveDays
           ? ((hadir / effectiveDays) * 100).toFixed(1)
           : "0.0",
-      };
-    };
-    setData([formattedData()]);
+      },
+    ]);
   } catch (error) {
     console.error("Error fetching data:", error);
     setData([]);
@@ -277,6 +310,7 @@ export const fetchPermitDataParent = async (parentUser) => {
         parentUser.nid
       }`
     );
+
     const convertedData = await Promise.all(
       response.data.data.map(async (item) => {
         const studentResponse = await axios.get(
@@ -300,6 +334,19 @@ export const fetchPermitDataParent = async (parentUser) => {
         };
       })
     );
+
+    // Mengurutkan data berdasarkan status dan tanggal terkini
+    convertedData.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+
+      // Urutkan berdasarkan status (Pending lebih dahulu)
+      if (a.status === "Pending" && b.status !== "Pending") return -1;
+      if (a.status !== "Pending" && b.status === "Pending") return 1;
+
+      // Jika status sama, urutkan berdasarkan tanggal (terkini dahulu)
+      return dateB - dateA;
+    });
 
     return convertedData;
   } catch (error) {
@@ -363,7 +410,6 @@ export const SubmitFormPermit = async (
       if (response.status === 201) {
         // Menampilkan SweetAlert dengan timer
         Swal.fire({
-          position: "top-end",
           icon: "success",
           title: "Izin berhasil diajukan.",
           showConfirmButton: false,
@@ -391,7 +437,6 @@ export const SubmitFormPermit = async (
       console.error("Error submitting permit:", error);
       // Menampilkan alert error dengan timer
       Swal.fire({
-        position: "top-end",
         icon: "error",
         title: "Gagal mengirim izin. Silakan coba lagi.",
         showConfirmButton: false,

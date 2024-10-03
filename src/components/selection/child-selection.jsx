@@ -13,7 +13,9 @@ function ChildSelection({ children }) {
     <div className="dropdown dropdown-end">
       <SingleButton
         btnTitle="Pilih Anak"
-        className={"bg-white h-9 drop-shadow-md rounded-md text-dark-base"}
+        className={
+          "bg-white dark:bg-gray-700 h-9 drop-shadow-md rounded-md text-dark-base dark:text-dark-text"
+        }
       />
       <ul
         tabIndex={0}

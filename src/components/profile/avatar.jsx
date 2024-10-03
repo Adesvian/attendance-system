@@ -13,11 +13,12 @@ function Avatar() {
   };
 
   const handleLogout = async () => {
+    dispatch(resetAuth());
+    localStorage.clear();
     try {
       await axios.delete(`${baseURL_BE}/logout`, {
         withCredentials: true,
       });
-      dispatch(resetAuth());
       navigate("/login");
     } catch (error) {
       console.error(error);

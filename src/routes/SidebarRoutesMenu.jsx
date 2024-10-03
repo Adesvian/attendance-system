@@ -4,15 +4,16 @@ import {
   PiUser,
   PiWhatsappLogoLight,
   PiTimerLight,
-  PiUserCircleMinus,
   PiBook,
 } from "react-icons/pi";
 import {
   LiaClipboardListSolid,
   LiaClipboardCheckSolid,
   LiaDatabaseSolid,
+  LiaEnvelopeOpenTextSolid,
 } from "react-icons/lia";
 import { GrSchedules } from "react-icons/gr";
+import { IoCalendarOutline } from "react-icons/io5";
 
 const iconClasses = `h-6 w-6`;
 const submenuIconClasses = `h-5 w-5`;
@@ -37,10 +38,17 @@ const sidebar_routes = [
     icon: <HiOutlineSquares2X2 className={iconClasses} />,
   },
   {
+    path: "/schedule-teacher",
+    name: "Jadwal Mengajar",
+    role: ["teacher"],
+    icon: <IoCalendarOutline className={iconClasses} />,
+  },
+
+  {
     path: "/permit",
     name: "Ketidakhadiran",
     role: ["teacher", "parent"],
-    icon: <PiUserCircleMinus className={iconClasses} />,
+    icon: <LiaEnvelopeOpenTextSolid className={iconClasses} />,
   },
   {
     path: "",

@@ -38,7 +38,8 @@ function Threshold() {
 
   const handleAddCheckOut = () => {
     const classToAdd =
-      selectedClass || (availableClasses.length > 0 ? availableClasses[0] : "");
+      parseInt(selectedClass) ||
+      (availableClasses.length > 0 ? parseInt(availableClasses[0]) : "");
     if (classToAdd) {
       setCheckOutEntries((prevEntries) => [
         ...prevEntries,
@@ -108,7 +109,7 @@ function Threshold() {
           <div className="flex gap-2">
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
-              Jika siswa melakukan check-in, diatas waktu yang ditetapkan, maka
+              Jika siswa melakukan check-in diatas waktu yang ditetapkan, maka
               kehadiran tersebut di catat sebagai{" "}
               <span className="text-red-700 dark:text-red-500 font-bold">
                 "Keterlamabatan"
@@ -161,7 +162,7 @@ function Threshold() {
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
               Jika siswa melakukan check-out sebelum waktu yang ditetapkan, maka
-              tidak akan di catat dalam sistem.
+              tidak akan tercatat dalam sistem.
             </p>
           </div>
           <div className="grid grid-cols-8 gap-x-6 mb-6 mt-5">
@@ -185,7 +186,7 @@ function Threshold() {
               </SingleButton>
             </div>
           </div>
-          <div className="divider mb-10">Atur Waktu Untuk Setiap Kelas</div>
+          <div className="divider my-16">Atur Waktu Untuk Setiap Kelas</div>
           {/* Class Selection Dropdown */}
           <div className="flex gap-2 ">
             <span className="text-red-500 dark:text-red-300">*</span>
@@ -197,8 +198,8 @@ function Threshold() {
           <div className="flex gap-2">
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
-              Jika kelas yang diatur tidak ada dalam list, maka kelas tersebut
-              mengikuti waktu check-out default.
+              Jika kelas yang diatur tidak ada dalam list, maka waktu check-out
+              kelas tersebut mengikuti waktu check-out default.
             </p>
           </div>
           <div className="flex gap-x-2 mb-6 mt-5">

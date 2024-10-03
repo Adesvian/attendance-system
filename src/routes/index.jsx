@@ -5,6 +5,7 @@ const DashboardParent = lazy(() =>
   import("../pages/wali-murid/dashboard-parent")
 );
 const DashboardTeacher = lazy(() => import("../pages/guru/dashboard-teacher"));
+const schedule = lazy(() => import("../pages/guru/schedule"));
 const Student = lazy(() => import("../pages/admin/student"));
 const ViewStudent = lazy(() => import("../pages/admin/view-student"));
 const CreateStudent = lazy(() => import("../pages/admin/create-student"));
@@ -49,6 +50,12 @@ const routes = [
     name: "Dashboard",
     role: ["teacher"],
     component: DashboardTeacher,
+  },
+  {
+    path: "/schedule-teacher",
+    name: "Jadwal Mengajar",
+    role: ["teacher"],
+    component: schedule,
   },
   {
     path: "/log-absensi",

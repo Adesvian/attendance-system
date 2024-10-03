@@ -35,9 +35,11 @@ function LoginForm() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-login-svg bg-gray-100 bg-cover">
       <div className="bg-white py-12 px-12 rounded-md shadow-md w-full max-w-sm sm:max-w-md h-screen md:h-auto flex flex-col justify-center">
-        <div className="mb-6 text-center z-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Login</h2>
-          <span className="text-sm text-gray-500">
+        <div className="mb-6 z-10">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+            Login
+          </h2>
+          <span className="block text-sm text-gray-500 w-max">
             Selamat Datang! Silahkan login menggunakan akun anda
           </span>
         </div>
@@ -49,6 +51,7 @@ function LoginForm() {
             label="Username"
             value={creds.username}
             onChange={handleChange}
+            className={"!bg-white"}
             required
           />
           <TextInput
@@ -57,6 +60,7 @@ function LoginForm() {
             label="Password"
             value={creds.password}
             onChange={handleChange}
+            className={"!bg-white"}
             required
           />
           {errorMessage && (

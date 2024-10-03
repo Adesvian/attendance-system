@@ -151,6 +151,7 @@ export const fetchDataAttendanceRecords = async (
     const formattedData = students.data.data.map((student) => {
       const attendance = Array(daysInMonth).fill("-");
 
+      // Tandai hari libur dan akhir pekan
       for (let index = 0; index < daysInMonth; index++) {
         const currentDate = moment(selectedDate)
           .date(index + 1)
@@ -160,9 +161,12 @@ export const fetchDataAttendanceRecords = async (
           holidayDate.isSame(currentDate, "day")
         );
 
-        if (isHoliday || isWeekend) attendance[index] = methodMap["libur"];
+        if (isHoliday || isWeekend) {
+          attendance[index] = methodMap["libur"];
+        }
       }
 
+      // Proses kehadiran
       filteredData
         .filter((record) => record.student_rfid === student.rfid)
         .forEach(
@@ -171,14 +175,52 @@ export const fetchDataAttendanceRecords = async (
               methodMap[record.method] || "-")
         );
 
+      // Proses permit
       processedPermits
         .filter((permit) => permit.student_rfid === student.rfid)
-        .forEach(
-          (permit) =>
-            (attendance[moment(permit.date, "YYYY-MM-DD").date() - 1] =
-              methodMap[permit.reason.toLowerCase()] || "-")
-        );
+        .forEach((permit) => {
+          const permitDate = moment(permit.date, "YYYY-MM-DD");
 
+          // Tandai 3 hari permit
+          for (let i = 0; i < 3; i++) {
+            const permitDay = permitDate.clone().add(i, "days");
+
+            if (
+              permitDay.month() === selectedMonth &&
+              permitDay.year() === selectedYear
+            ) {
+              const permitIndex = permitDay.date() - 1;
+
+              // Jika sudah ada kehadiran atau sudah ditandai sebagai libur, lewati penandaan
+              if (
+                attendance[permitIndex] === "H" ||
+                attendance[permitIndex] === methodMap["libur"]
+              ) {
+                continue; // Keberadaan hadir dan libur harus diprioritaskan
+              }
+
+              // Cek kehadiran sehari setelah permit
+              const nextDay = permitDay.clone().add(1, "days");
+              const nextDayIndex = nextDay.date() - 1;
+
+              if (attendance[nextDayIndex] === "H") {
+                // Tandai hanya hari pertama dengan izin
+                attendance[permitIndex] =
+                  methodMap[permit.reason.toLowerCase()] || "-";
+                break; // Keluar dari loop setelah menandai
+              } else {
+                // Jika tidak ada kehadiran sehari setelahnya, tetap gunakan logika sebelumnya
+                attendance[permitIndex] = holidayDates.some((holidayDate) =>
+                  holidayDate.isSame(permitDay, "day")
+                )
+                  ? methodMap["libur"] // Tetap tandai sebagai libur jika permit jatuh pada hari libur
+                  : methodMap[permit.reason.toLowerCase()] || "-";
+              }
+            }
+          }
+        });
+
+      // Periksa tanggal sebelum hari ini untuk status alfa
       attendance.forEach((status, index) => {
         const currentDate = moment(selectedDate)
           .date(index + 1)

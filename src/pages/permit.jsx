@@ -11,6 +11,7 @@ import axios from "axios";
 import moment from "moment";
 import { fetchPermitDataParent } from "../app/api/v1/parent-services";
 import { fetchPermitDataTeacher } from "../app/api/v1/teacher-services";
+import SearchAndButton from "../components/input/header-search";
 
 function Permit() {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ function Permit() {
   const [loading, setLoading] = useState(true);
   const [columns, setColumns] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const handleAccept = (row) => {
@@ -134,7 +136,7 @@ function Permit() {
     fetchData();
 
     const newColumns = [
-      { field: "name", header: "Name" },
+      { field: "name", header: "Nama" },
       { field: "class", header: "Kelas" },
       { field: "reason", header: "Alasan" },
       { field: "attachment", header: "Lampiran" },
@@ -171,40 +173,33 @@ function Permit() {
     setColumns(newColumns);
   }, [dispatch, parent_user, user]);
   return (
-    <div className="grid lg:grid-cols-1 md:grid-cols-1 grid-cols-1 gap-6 mt-5">
-      <div className="bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-4 font-poppins">
-        {parent_user && (
-          <div className="flex mb-4 lg:absolute lg:right-10 ">
-            <Button
-              variant="contained"
-              className="dark:bg-indigo-700 lg:flex-none flex-auto whitespace-nowrap"
-              startIcon={<MdOutlineAdd />}
-              onClick={() => navigate("/permit/create-permit")}
-            >
-              Buat Surat Izin
-            </Button>
-          </div>
-        )}
-        <span className="text-sm">Filter by Status :</span>
-        <CustomSelect
-          value={filter}
-          onChange={handleFilterChange}
-          options={[
-            { value: "All", label: "All" },
-            { value: "Pending", label: "Pending" },
-            { value: "Accepted", label: "Accepted" },
-            { value: "Rejected", label: "Rejected" },
-          ]}
-        />
+    <div className="p-2 font-poppins">
+      <SearchAndButton
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        buttonLabel="Buat Surat Izin"
+        onButtonClick={() => navigate("/permit/create-permit")}
+      />
+      <span className="text-sm">Filter by Status :</span>
+      <CustomSelect
+        value={filter}
+        onChange={handleFilterChange}
+        options={[
+          { value: "All", label: "All" },
+          { value: "Pending", label: "Pending" },
+          { value: "Accepted", label: "Accepted" },
+          { value: "Rejected", label: "Rejected" },
+        ]}
+      />
 
-        <TableDataManager
-          data={filteredData}
-          columns={columns}
-          isUserTable={false}
-          handleAct1={handleAccept}
-          handleAct2={handleReject}
-        />
-      </div>
+      <TableDataManager
+        data={filteredData}
+        columns={columns}
+        isUserTable={false}
+        handleAct1={handleAccept}
+        handleAct2={handleReject}
+        searchQuery={searchQuery}
+      />
     </div>
   );
 }
