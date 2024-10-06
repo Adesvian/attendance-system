@@ -13,7 +13,6 @@ import { fetchDataDashboard } from "../../app/api/v1/admin-services";
 
 function Dashboard() {
   const dispatch = useDispatch();
-
   const [data, setData] = useState({
     student: 0,
     subject: 0,
@@ -31,7 +30,7 @@ function Dashboard() {
   useEffect(() => {
     dispatch(setPageTitle({ title: "Dashboard" }));
     fetchDataDashboard(setData);
-  }, [dispatch]);
+  }, []);
 
   return (
     <>

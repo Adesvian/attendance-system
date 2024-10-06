@@ -20,7 +20,9 @@ import {
   functionCloseQR,
   functionOpenQR,
   SubmitSession,
+  updateNotification,
 } from "../../app/api/v1/admin-services";
+import { MdOutlineMessage } from "react-icons/md";
 
 const socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
 
@@ -36,6 +38,7 @@ function WhatsappConfiguration() {
     number: "",
     name: "",
     status: "Pending",
+    greet_template: "",
   });
   let QrCount = 0;
 
@@ -49,6 +52,13 @@ function WhatsappConfiguration() {
 
   const handleConnect = async () => {
     ConnnectSession(setIsConnected, setLoading, data.number);
+  };
+
+  const handleGreetSubmit = async (event) => {
+    event.preventDefault();
+    document.getElementById("modal_greet").close();
+    const greet = event.target.custom_greet.value;
+    updateNotification(setLoading, greet, data.number);
   };
 
   const handleDisconnect = async () => {
@@ -116,16 +126,16 @@ function WhatsappConfiguration() {
       }
     });
 
-    socket.on("whatsapp-status", (data) => {
-      console.log(data);
-    });
-
     socket.on("connected-creds", async (data) => {
       try {
+        const status_connected = {
+          status: "active",
+        };
         await axios.put(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
-          }/update-whatsapp-creds/${data}`
+          }/update-whatsapp-creds/${data}`,
+          status_connected
         );
         setData((prevData) => ({
           ...prevData,
@@ -236,13 +246,13 @@ function WhatsappConfiguration() {
           </div>
         </form>
       ) : (
-        <div className="flex flex-col md:flex-row gap-4 mt-5 p-5 shadow-md rounded-md bg-gray-50 dark:bg-base-200 lg:px-10">
+        <div className="flex flex-col md:flex-row gap-4 mt-5 p-5 rounded-md lg:px-10">
           <div className="flex flex-col items-center self-center">
             <img src="../../assets/phone.png" alt="device" className="w-24" />
           </div>
           <div className="flex flex-col w-full md:w-3/4 font-medium gap-y-2">
             <div className="flex items-center">
-              <FaRegUser className="w-5 text-gray-600 mr-3" />
+              <FaRegUser className="w-5 text-gray-600 dark:text-gray-300 mr-3" />
               <p>{data.name}</p>
             </div>
             <div className="flex items-center">
@@ -308,6 +318,17 @@ function WhatsappConfiguration() {
               {data.status !== "pending" && (
                 <>
                   <SingleButton
+                    btnTitle="Custom Notification"
+                    type="button"
+                    className="bg-gray-600 text-white hover:bg-gray-700"
+                    onClick={() =>
+                      document.getElementById("modal_greet").showModal()
+                    }
+                  >
+                    <MdOutlineMessage className="mr-2" />
+                  </SingleButton>
+
+                  <SingleButton
                     btnTitle="Connect"
                     type="button"
                     className="bg-green-600 text-white hover:bg-green-700"
@@ -337,6 +358,54 @@ function WhatsappConfiguration() {
           </div>
         </div>
       )}
+      <dialog id="modal_greet" className="modal">
+        <div className="modal-box bg-white dark:bg-gray-800 w-11/12 max-w-5xl h-3/4 lg:h-1/2 max-h-5xl">
+          <form onSubmit={handleGreetSubmit} className="flex flex-col h-full">
+            {/* Tombol Close */}
+            <button
+              type="button"
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              onClick={() => document.getElementById("modal_greet").close()} // Menutup modal
+            >
+              ✕
+            </button>
+            <h3 className="font-bold text-lg mb-2">Set Custom Notification</h3>
+            <textarea
+              name="custom_greet"
+              placeholder="Enter your custom greeting here"
+              className="w-full h-60 p-2 border border-gray-300 dark:bg-gray-800 rounded"
+              value={data.greet_template}
+              onChange={(e) => {
+                setData({
+                  ...data,
+                  greet_template: e.target.value,
+                });
+              }}
+            />
+            <div className="flex gap-2 mt-2">
+              <span className="text-red-500">*</span>
+              <span className="italic text-xs lg:text-sm">
+                Gunakan Variabel ini:
+                {"{nama}, {waktu}, {metode}, {status}"}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-red-500">*</span>{" "}
+              <span className="text-xs lg:text-sm">
+                Gunakan *...* untuk membuat tulisan bold
+              </span>
+            </div>
+            <div className="mt-auto flex justify-end">
+              <button
+                type="submit"
+                className="btn bg-indigo-500 text-white border-none hover:bg-indigo-600"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
+        </div>
+      </dialog>
     </div>
   );
 }

@@ -5,7 +5,7 @@ export const fetchAttendanceChartData = async (
   chartData,
   setAttendancesData
 ) => {
-  const status = !!chartData; // Convert to boolean
+  const status = !!chartData;
   try {
     const response = await axios.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`

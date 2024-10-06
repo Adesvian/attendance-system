@@ -27,13 +27,19 @@ function LogKehadiran() {
   const [columns, setColumns] = useState([]);
   const [columns2, setColumns2] = useState([]);
   const [activeTab, setActiveTab] = useState(
-    parent_user ? "attendance" : user.class ? "attendance" : "subject"
+    parent_user
+      ? "attendance"
+      : !user
+      ? "attendance"
+      : user.class
+      ? "attendance"
+      : "subject"
   );
   const [searchQuery, setSearchQuery] = useState("");
 
   // Determine tabs based on user.class
   const tabs =
-    parent_user || user.class
+    parent_user || !user || user.class
       ? [
           {
             id: "attendance",

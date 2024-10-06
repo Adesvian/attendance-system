@@ -28,7 +28,7 @@ function Permit() {
   const handleAccept = (row) => {
     Swal.fire({
       title: "Apakah anda yakin?",
-      text: `Menerima izin tidak hadir untuk ${row.name}?`,
+      text: `Menerima izin tidak hadir untuk ${row.name}? (Izin berlaku selama 3 hari sejak izin diterima)`,
       icon: "info",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
