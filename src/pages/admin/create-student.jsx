@@ -110,7 +110,7 @@ function CreateStudent() {
     <>
       <div
         role="alert"
-        className="alert bg-gray-200 dark:bg-base-300 text-gray-600 dark:text-white border-none "
+        className="alert bg-gray-200 dark:bg-base-300 text-gray-500 dark:text-white border-none "
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
