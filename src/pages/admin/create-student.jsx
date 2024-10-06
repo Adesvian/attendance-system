@@ -108,6 +108,25 @@ function CreateStudent() {
   }, []);
   return (
     <>
+      <div
+        role="alert"
+        className="alert bg-gray-200 dark:bg-base-300 text-gray-600 dark:text-white border-none "
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          className="stroke-info h-6 w-6 shrink-0"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+        <span>Silahkan Tempelkan kartu RFID ke reader untuk membaca kartu</span>
+      </div>
       <form onSubmit={handleSubmit}>
         <div className="p-2 font-poppins">
           <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">

@@ -11,7 +11,7 @@ function Page404() {
   }, []);
   return (
     <>
-      <div className="hero bg-gray-300 dark:bg-base-200 ">
+      <div className="hero bg-white dark:bg-base-200 ">
         <div className="hero-content text-accent text-center h-[37rem]">
           <div className="max-w-md">
             <FaFaceFrown className="h-24 lg:h-48 w-24 lg:w-48 inline-block" />

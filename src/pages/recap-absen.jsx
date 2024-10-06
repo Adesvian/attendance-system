@@ -136,7 +136,7 @@ const RecapAbsensi = () => {
 
   return (
     <>
-      <div className="sticky top-0 bg-white rounded-md dark:bg-base-100 pl-4 pt-4 pr-4 pb-0.5">
+      <div className="sticky top-0 bg-white rounded-md dark:bg-base-100 pl-4 pt-4 pr-4 pb-0.5 ">
         <div className="flex gap-x-3 mb-4 font-poppins">
           <DatePickerComponent
             selectedDate={selectedDate}

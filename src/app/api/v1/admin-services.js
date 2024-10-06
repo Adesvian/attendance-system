@@ -1553,6 +1553,40 @@ export const DeleteSession = async (setLoading, setData, data) => {
   }
 };
 
+export const updateNotification = async (setLoading, greet, number) => {
+  setLoading(true);
+  try {
+    const response = await axios.put(
+      `${
+        import.meta.env.VITE_BASE_URL_BACKEND
+      }/update-whatsapp-creds/${number}`,
+      {
+        greet_template: greet,
+      }
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Greeting template has been updated.",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+
+    setLoading(false);
+  } catch (error) {
+    console.error("Error:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Failed to update the greeting template.",
+      showConfirmButton: true,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 export const fetchThresholdData = async (
   setCheckInTime,
   setCheckOutEntries,

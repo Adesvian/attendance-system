@@ -16,10 +16,7 @@ import getTheme from "./theme/tableTheme";
 
 // Comparator functions for sorting
 const parseDate = (dateString) => {
-  const [datePart, timePart] = dateString.split(" ");
-  const [day, month, year] = datePart.split("-").map(Number);
-  const [hours, minutes] = timePart.split(":").map(Number);
-  return new Date(year, month - 1, day, hours, minutes);
+  return new Date(dateString);
 };
 
 const descendingComparator = (a, b, orderBy) => {
@@ -101,7 +98,6 @@ const TableComponent = forwardRef(
         );
       }
 
-      // Jika type bukan 'logs-table', tampilkan seluruh data tanpa sorting dan pagination
       return formattedData;
     }, [formattedData, order, orderBy, page, rowsPerPage, type]);
 
