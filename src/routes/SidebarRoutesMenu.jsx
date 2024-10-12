@@ -14,6 +14,7 @@ import {
 } from "react-icons/lia";
 import { GrSchedules } from "react-icons/gr";
 import { IoCalendarOutline } from "react-icons/io5";
+import { CiCalendarDate } from "react-icons/ci";
 
 const iconClasses = `h-6 w-6`;
 const submenuIconClasses = `h-5 w-5`;
@@ -50,6 +51,7 @@ const sidebar_routes = [
     role: ["teacher", "parent"],
     icon: <LiaEnvelopeOpenTextSolid className={iconClasses} />,
   },
+
   {
     path: "",
     icon: <HiOutlineClipboard className={iconClasses} />,
@@ -93,6 +95,11 @@ const sidebar_routes = [
         path: "/data-jadwal",
         name: "Manajemen Data Jadwal",
         icon: <GrSchedules className={submenuIconClasses} />,
+      },
+      {
+        path: "/holidays",
+        name: "Manajemen Events",
+        icon: <CiCalendarDate className={iconClasses} />,
       },
     ],
   },

@@ -204,8 +204,8 @@ function CreateTeacher() {
                   <option value="2">Kelas 2</option>
                   <option value="3">Kelas 3</option>
                   <option value="4">Kelas 4</option>
-                  <option value="3">Kelas 5</option>
-                  <option value="4">Kelas 6</option>
+                  <option value="5">Kelas 5</option>
+                  <option value="6">Kelas 6</option>
                 </select>
               </div>
             </div>

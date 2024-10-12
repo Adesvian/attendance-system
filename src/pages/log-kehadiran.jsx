@@ -108,6 +108,7 @@ function LogKehadiran() {
       { field: "method", header: "Metode" },
       { field: "status", header: "Status" },
       { field: "time", header: "Waktu" },
+      { field: "action", header: "" },
     ]);
     setColumns2([
       { field: "profile", header: "Gender" },
@@ -115,6 +116,7 @@ function LogKehadiran() {
       { field: "class", header: "Kelas" },
       { field: "subject", header: "Mata Pelajaran" },
       { field: "time", header: "Waktu" },
+      { field: "action", header: "" },
     ]);
 
     dispatch(setPageTitle({ title: "Log Kehadiran" }));
@@ -183,6 +185,8 @@ function LogKehadiran() {
                     }
                   }}
                   type="logs-table"
+                  setData={activeTab === "attendance" ? setData : setData2}
+                  tab={activeTab}
                 />
               </div>
             </div>

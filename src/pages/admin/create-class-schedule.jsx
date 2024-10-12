@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import TextInput from "../../components/input/TextInput";
 import SingleButton from "../../components/button/Button";
-import axios from "axios";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 import { submitScheduleData } from "../../app/api/v1/admin-services";
 
 function CreateClassSchedule() {
@@ -48,9 +48,15 @@ function CreateClassSchedule() {
       try {
         const [teacherResponse, classResponse, subjectResponse] =
           await Promise.all([
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
-            axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`),
+            axiosInstance.get(
+              `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`
+            ),
+            axiosInstance.get(
+              `${import.meta.env.VITE_BASE_URL_BACKEND}/classes`
+            ),
+            axiosInstance.get(
+              `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`
+            ),
           ]);
 
         setTeachers(teacherResponse.data.data);

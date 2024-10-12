@@ -12,10 +12,10 @@ function BarChart({ chartData }) {
   const options = BarChartTheme(theme);
   const [activeButton, setActiveButton] = useState("Day");
   const [chart, setChart] = useState({ labels: [], datasets: [] });
-  const [data, sestData] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetchAttendanceChartData(chartData, sestData);
+    fetchAttendanceChartData(chartData, setData);
   }, [chartData]);
 
   useEffect(() => {

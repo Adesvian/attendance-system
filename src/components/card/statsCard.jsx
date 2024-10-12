@@ -6,15 +6,15 @@ function StatsCard({ Title, Value, Icon }) {
   const user = useSelector((state) => state.auth.teacher);
 
   // Daftar judul yang valid untuk menampilkan tooltip
-  const validTitles = [
-    "Presence",
-    "Absent",
-    "On Time",
-    "Late",
+  const validTitles = ["Presence", "Absent", "On Time", "Late"];
+
+  const utils = [
+    "Student",
+    "Class",
+    "Subject",
+    "Schedules",
     "Pending Approval",
   ];
-
-  const utils = ["Student", "Class", "Subject", "Schedules"];
 
   // Cek apakah Title ada di dalam daftar validTitles atau utils
   const showTooltip =
@@ -26,6 +26,7 @@ function StatsCard({ Title, Value, Icon }) {
     Class: "Jumlah kelas yang di pegang saat ini",
     Subject: "Jumlah subject yang di ajarkan saat ini",
     Schedules: "Jumlah jadwal ajar yang anda miliki",
+    "Pending Approval": "Jumlah izin yang menunggu persetujuan",
   };
 
   const getTooltipTitle = () => {

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SidebarSubMenu from "./sidebar-submenu";
 import sidebar_routes from "../routes/SidebarRoutesMenu";
-import { decodeJWT } from "../app/api/v1/auth";
+import { decodeJWT } from "../app/api/auth/auth";
 
 function LeftSidebar() {
   const location = useLocation();

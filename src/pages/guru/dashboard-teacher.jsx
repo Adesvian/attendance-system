@@ -10,6 +10,9 @@ import { GrSchedules } from "react-icons/gr";
 import { MdOutlineWatchLater, MdPendingActions } from "react-icons/md";
 import RecentAttendance from "../../features/activity/recent";
 import { fetchDataDashboard } from "../../app/api/v1/teacher-services";
+import io from "socket.io-client";
+
+let socket;
 
 function DashboardTeacher() {
   const dispatch = useDispatch();
@@ -34,6 +37,19 @@ function DashboardTeacher() {
   useEffect(() => {
     dispatch(setPageTitle({ title: "Dashboard" }));
     fetchDataDashboard(setData, setLoading, setError, user);
+
+    socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
+
+    const handleUpdateRecords = () => {
+      fetchDataDashboard(setData, setLoading, setError, user);
+    };
+
+    socket.on("update-records", handleUpdateRecords);
+
+    return () => {
+      socket.off("update-records", handleUpdateRecords);
+      socket.disconnect();
+    };
   }, []);
 
   return (

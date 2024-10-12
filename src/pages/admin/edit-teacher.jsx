@@ -4,8 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import TextInput from "../../components/input/TextInput";
 import SingleButton from "../../components/button/Button";
 import { setPageTitle } from "../../redux/headerSlice";
-import axios from "axios";
 import { updateTeacherData } from "../../app/api/v1/admin-services";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
 function EditTeacher() {
   const { id } = useParams();
@@ -29,8 +29,12 @@ function EditTeacher() {
     const fetchTeacherData = async () => {
       try {
         const [teacher, user] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`),
-          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`),
+          axiosInstance.get(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`
+          ),
+          axiosInstance.get(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`
+          ),
         ]);
         const response = {
           teacher: teacher.data.data,
@@ -241,8 +245,8 @@ function EditTeacher() {
                   <option value="2">Kelas 2</option>
                   <option value="3">Kelas 3</option>
                   <option value="4">Kelas 4</option>
-                  <option value="3">Kelas 5</option>
-                  <option value="4">Kelas 6</option>
+                  <option value="5">Kelas 5</option>
+                  <option value="6">Kelas 6</option>
                 </select>
               </div>
             </div>

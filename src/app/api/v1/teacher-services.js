@@ -1,7 +1,8 @@
-import axios from "axios";
 import moment from "moment";
 import jsPDF from "jspdf";
 import autotable from "jspdf-autotable";
+import axiosInstance from "../auth/axiosConfig";
+import Swal from "sweetalert2";
 
 export const fetchDataDashboard = async (
   setData,
@@ -13,7 +14,7 @@ export const fetchDataDashboard = async (
     setLoading(true);
 
     const fetchDataFromApi = async (endpoint) => {
-      const { data } = await axios.get(
+      const { data } = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/${endpoint}`
       );
       return data;
@@ -21,6 +22,9 @@ export const fetchDataDashboard = async (
 
     const classes = await fetchDataFromApi(
       `class-schedule?teacherid=${user.nid}`
+    );
+    const teachingDays = Array.from(
+      new Set(classes.data.map((item) => item.day))
     );
 
     // Mendapatkan hari ini
@@ -47,7 +51,9 @@ export const fetchDataDashboard = async (
     const classParams = uniqueClass.join(",");
     const [chartdata, attendance, students, permits] = await Promise.all([
       user.class != null
-        ? fetchDataFromApi(`attendance?class=${classParams}`)
+        ? fetchDataFromApi(
+            `attendance?class=${user.class.id ? user.class.id : classParams}`
+          )
         : fetchDataFromApi(
             `subject-attendance?class=${classParams}&subject=${uniqueSubject}`
           ),
@@ -113,6 +119,27 @@ export const fetchDataDashboard = async (
       }
     }
 
+    let permitData;
+    if (user.class == null) {
+      permitData = permits.data
+        .map((permit) => {
+          const dateObject = new Date(permit.date * 1000);
+          const permitDay = dateObject
+            .toLocaleDateString("id-ID", { weekday: "long" })
+            .toLowerCase();
+          const isTeachingDay = teachingDays.includes(permitDay);
+
+          return isTeachingDay
+            ? {
+                ...permit,
+              }
+            : null;
+        })
+        .filter(Boolean);
+    } else {
+      permitData = permits.data;
+    }
+
     setData((prevData) => ({
       ...prevData,
       student: students.data.length,
@@ -120,8 +147,8 @@ export const fetchDataDashboard = async (
       subject: uniqueSubject.length,
       classschedule: classes.data.length,
       presenceRate: parseFloat(attendanceRate.toFixed(2)),
-      permit: permits.data.filter((permit) => permit.status === 300).length,
-      absent: permits.data.filter(
+      permit: permitData.filter((permit) => permit.status === 300).length,
+      absent: permitData.filter(
         (permit) =>
           permit.status === 200 &&
           permit.date >= todayStart &&
@@ -155,17 +182,17 @@ export const fetchDataSubjectAttendanceRecords = async (
 
   try {
     const [students, classSchedule, permits] = await Promise.all([
-      axios.get(
+      axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/students?class=${selectedClass}`
       ),
-      axios.get(
+      axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
           user.nid
         }`
       ),
-      axios.get(
+      axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/permits?class=${selectedClass}`
@@ -187,7 +214,7 @@ export const fetchDataSubjectAttendanceRecords = async (
       return setData([]);
     }
 
-    const subjectAttendance = await axios.get(
+    const subjectAttendance = await axiosInstance.get(
       `${
         import.meta.env.VITE_BASE_URL_BACKEND
       }/subject-attendance?class=${selectedClass}&subject=${selectedSubject}`
@@ -563,7 +590,7 @@ export const exportExcel = async (fn) => {
 
 export const fetchPermitDataTeacher = async (user) => {
   try {
-    const { data: classes } = await axios.get(
+    const { data: classes } = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
         user.nid
       }`
@@ -571,20 +598,42 @@ export const fetchPermitDataTeacher = async (user) => {
 
     const uniqueClass = [...new Set(classes.data.map((item) => item.class_id))];
     const classParams = uniqueClass.join(",");
+    const teachingDays = classes.data.map((item) => item.day);
 
     if (classParams.length === 0) {
       return [];
     }
 
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/permits?class=${
         user.class != null ? user.class.id : classParams
       }`
     );
 
+    let permitData;
+    if (user.class == null) {
+      permitData = response.data.data
+        .map((permit) => {
+          const dateObject = new Date(permit.date * 1000);
+          const permitDay = dateObject
+            .toLocaleDateString("id-ID", { weekday: "long" })
+            .toLowerCase();
+          const isTeachingDay = teachingDays.includes(permitDay);
+
+          return isTeachingDay
+            ? {
+                ...permit,
+              }
+            : null;
+        })
+        .filter(Boolean);
+    } else {
+      permitData = response.data.data;
+    }
+
     const convertedData = await Promise.all(
-      response.data.data.map(async (item) => {
-        const studentResponse = await axios.get(
+      permitData.map(async (item) => {
+        const studentResponse = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${
             item.student_rfid
           }`
@@ -627,7 +676,7 @@ export const fetchPermitDataTeacher = async (user) => {
 
 export const fetchAttendanceData = async (user) => {
   try {
-    const attendanceResponse = await axios.get(
+    const attendanceResponse = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance?class=${
         user?.class?.id || ""
       }`
@@ -649,6 +698,7 @@ export const fetchAttendanceData = async (user) => {
       method: record.method === 1001 ? "Check-In" : "Check-Out",
       time: moment.unix(record.date).local().format("DD MMM YYYY HH:mm:ss"),
       unixTime: record.date,
+      action: record.id,
     }));
 
     return updatedData.sort((a, b) => b.unixTime - a.unixTime);
@@ -663,7 +713,7 @@ export const fetchSubjectAttendanceData = async (user) => {
     let subattendance, classes;
 
     if (user) {
-      classes = await axios.get(
+      classes = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
           user.nid
         }`
@@ -677,19 +727,19 @@ export const fetchSubjectAttendanceData = async (user) => {
       ];
       const subjectParams = uniqueSubject.join(",");
 
-      subattendance = await axios.get(
+      subattendance = await axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/subject-attendance?class=${classParams}&subject=${subjectParams}`
       );
     } else {
-      classes = await axios.get(
+      classes = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
       );
       const classParams = "";
       const subjectParams = "";
 
-      subattendance = await axios.get(
+      subattendance = await axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/subject-attendance?class=${classParams}&subject=${subjectParams}`
@@ -725,5 +775,48 @@ export const fetchSubjectAttendanceData = async (user) => {
   } catch (error) {
     console.error(error);
     return [];
+  }
+};
+
+export const deleteAttendance = async (id, tab, setData) => {
+  const confirmDelete = await Swal.fire({
+    title: "Are you sure?",
+    text: `Data yang dihapus tidak dapat dikembalikan!`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Ya, Hapus!",
+    cancelButtonText: "Cancel",
+  });
+
+  if (confirmDelete.isConfirmed) {
+    try {
+      if (tab === "attendance") {
+        await axiosInstance.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance/${id}`
+        );
+      } else {
+        await axiosInstance.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/subject-attendance/${id}`
+        );
+      }
+      setData((prevData) => prevData.filter((item) => item.id !== id));
+      // Show success message
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: `Data has been deleted.`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong! Please try again.",
+      });
+      console.error("Error deleting teacher:", error);
+    }
   }
 };

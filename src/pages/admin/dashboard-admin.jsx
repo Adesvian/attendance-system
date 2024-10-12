@@ -10,6 +10,9 @@ import { GrSchedules } from "react-icons/gr";
 import { MdOutlineWatchLater } from "react-icons/md";
 import RecentAttendance from "../../features/activity/recent";
 import { fetchDataDashboard } from "../../app/api/v1/admin-services";
+import io from "socket.io-client";
+
+let socket;
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -24,12 +27,26 @@ function Dashboard() {
     onTime: 0,
     late: 0,
     attendance: [],
+    chartData: [],
     whatsapp: "",
   });
 
   useEffect(() => {
     dispatch(setPageTitle({ title: "Dashboard" }));
     fetchDataDashboard(setData);
+
+    socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
+
+    const handleUpdateRecords = () => {
+      fetchDataDashboard(setData);
+    };
+
+    socket.on("update-records", handleUpdateRecords);
+
+    return () => {
+      socket.off("update-records", handleUpdateRecords);
+      socket.disconnect();
+    };
   }, []);
 
   return (
@@ -107,7 +124,7 @@ function Dashboard() {
         />
       </div>
       <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 lg:gap-6 md:gap-x-5 gap-y-4 mt-5 mb-5">
-        <BarChart />
+        <BarChart chartData={data.chartData} />
         <RecentAttendance
           data={data.attendance}
           initialRowsPerPage={5}

@@ -161,8 +161,23 @@ function Threshold() {
           <div className="flex gap-2">
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
+              Default jam check-out <span className="font-bold">13:00:00</span>.
+              Jam check-out yang di set diatas jam 13:00:00 maka diacatat
+              sebagai custom jam check-out.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-red-500 dark:text-red-300">*</span>
+            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
               Jika siswa melakukan check-out sebelum waktu yang ditetapkan, maka
               tidak akan tercatat dalam sistem.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-red-500 dark:text-red-300">*</span>
+            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
+              Khusus <span className="font-bold">Jumat</span> waktu check-out
+              jam <span className="font-bold">11:15:00</span>
             </p>
           </div>
           <div className="grid grid-cols-8 gap-x-6 mb-6 mt-5">

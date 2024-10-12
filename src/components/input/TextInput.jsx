@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function TextInput({
@@ -13,7 +13,12 @@ function TextInput({
   readOnly = false,
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [minDate, setMinDate] = useState("");
 
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    setMinDate(today);
+  }, []);
   const handleTogglePassword = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
@@ -30,6 +35,7 @@ function TextInput({
         className={`input input-bordered w-full dark:text-dark-text bg-white dark:bg-base-300 text-gray-900 ${className}`}
         required={required}
         readOnly={readOnly}
+        min={type === "date" ? minDate : undefined}
       />
       {type === "password" && (
         <button

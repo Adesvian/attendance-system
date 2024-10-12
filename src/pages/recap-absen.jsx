@@ -19,8 +19,8 @@ import { fetchDataSubjectAttendanceRecords } from "../app/api/v1/teacher-service
 import { fetchChildDataAttendanceRecords } from "../app/api/v1/parent-services";
 
 const holidays = [
-  // { date: "02-09-2024", description: "Independence Day" },
-  // { date: "16-09-2024", description: "Holiday Event" },
+  { date: "01-10-2024", description: "Independence Day" },
+  { date: "02-10-2024", description: "Holiday Event" },
 ];
 const RecapAbsensi = () => {
   const dispatch = useDispatch();
@@ -34,6 +34,7 @@ const RecapAbsensi = () => {
   const [SubjectOptions, setSubjectOptions] = useState([]);
   const [cleared, setCleared] = useState(false);
   const [data, setData] = useState([]);
+  const [holidays, setHolidays] = useState([]);
   const dt = useRef(null);
 
   const handleDateChange = (event) => {
@@ -57,6 +58,18 @@ const RecapAbsensi = () => {
         setSelectedClass,
         setSelectedSubject
       );
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
+        );
+        const formattedHolidays = response.data.data.map((holiday) => ({
+          date: moment(holiday.date).format("DD-MM-YYYY"),
+          description: holiday.description,
+        }));
+        setHolidays(formattedHolidays);
+      } catch (error) {
+        console.error("Error fetching holidays:", error);
+      }
     };
     fetchData();
   }, []);
@@ -73,7 +86,7 @@ const RecapAbsensi = () => {
       { field: "absen", header: "Absen" },
       { field: "izin", header: "Izin" },
       { field: "sakit", header: "Sakit" },
-      { field: "percentage", header: "Kehadiran (%)" }, // Add percentage column
+      { field: "percentage", header: "Kehadiran (%)" },
     ];
     return cols;
   };
@@ -168,8 +181,24 @@ const RecapAbsensi = () => {
           exportPdf={handlePDFExport}
         />
       </div>
-
       <div className="px-4 pb-5 bg-white dark:bg-base-100">
+        <div className="grid grid-cols-3 lg:grid-cols-12 font-poppins text-sm mt-5 lg:text-base lg:mt-0 whitespace-nowrap">
+          <p>
+            <span className="font-bold">H</span> : Hadir
+          </p>
+          <p>
+            <span className="font-bold">A</span> : Absen
+          </p>
+          <p>
+            <span className="font-bold">L</span> : Libur
+          </p>
+          <p>
+            <span className="font-bold">I</span> : Izin
+          </p>
+          <p>
+            <span className="font-bold">S</span> : Sakit
+          </p>
+        </div>
         <TableComponent
           ref={dt}
           data={data}

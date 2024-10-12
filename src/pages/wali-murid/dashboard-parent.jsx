@@ -4,6 +4,7 @@ import { setPageTitle } from "../../redux/headerSlice";
 import axios from "axios";
 import moment from "moment";
 import RecentAttendance from "../../features/activity/recent";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
 const DashboardParent = () => {
   const dispatch = useDispatch();
@@ -33,19 +34,19 @@ const DashboardParent = () => {
     const fetchData = async () => {
       if (child && child.class && child.class.id) {
         try {
-          const schedulePromise = axios.get(
+          const schedulePromise = axiosInstance.get(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?class=${
               child.class.id
             }`
           );
 
-          const attendancePromise = axios.get(
+          const attendancePromise = axiosInstance.get(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today?rfid=${
               child.rfid
             }`
           );
 
-          const subjectAttendancePromise = axios.get(
+          const subjectAttendancePromise = axiosInstance.get(
             `${
               import.meta.env.VITE_BASE_URL_BACKEND
             }/subject-attendance-today?rfid=${child.rfid}`

@@ -6,7 +6,7 @@ import {
   fetchParentData,
   fetchTeacherData,
 } from "../redux/authSlice";
-import { decodeJWT } from "../app/api/v1/auth";
+import { decodeJWT } from "../app/api/auth/auth";
 import SuspenseContent from "../containers/suspense-content";
 
 function ProtectedRoute() {

@@ -5,10 +5,8 @@ import Button from "@mui/material/Button";
 import TableDataManager from "../components/table/table";
 import Swal from "sweetalert2";
 import CustomSelect from "../components/input/Select";
-import { MdOutlineAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import moment from "moment";
+import axiosInstance from "../app/api/auth/axiosConfig";
 import { fetchPermitDataParent } from "../app/api/v1/parent-services";
 import { fetchPermitDataTeacher } from "../app/api/v1/teacher-services";
 import SearchAndButton from "../components/input/header-search";
@@ -36,7 +34,7 @@ function Permit() {
       confirmButtonText: "Ya, terima!",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios
+        axiosInstance
           .put(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-udpate-status/${
               row.id
@@ -80,7 +78,7 @@ function Permit() {
       confirmButtonText: "Ya, tolak!",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios
+        axiosInstance
           .put(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-udpate-status/${
               row.id

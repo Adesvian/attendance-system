@@ -31,6 +31,7 @@ const LogKehadiran = lazy(() => import("../pages/log-kehadiran"));
 const Whatsapp = lazy(() => import("../pages/admin/whatsapp-configuration"));
 const TimeSetting = lazy(() => import("../pages/admin/time"));
 const Profile = lazy(() => import("../pages/user-profile"));
+const holidays = lazy(() => import("../pages/admin/holidays"));
 
 const routes = [
   {
@@ -56,6 +57,12 @@ const routes = [
     name: "Jadwal Mengajar",
     role: ["teacher"],
     component: schedule,
+  },
+  {
+    path: "/holidays",
+    name: "Event Libur",
+    role: ["admin"],
+    component: holidays,
   },
   {
     path: "/log-absensi",

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import TextInput from "../../components/input/TextInput";
-import axios from "axios";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
 function ViewStudent() {
   const { id } = useParams();
@@ -31,11 +31,11 @@ function ViewStudent() {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        const studentResponse = await axios.get(
+        const studentResponse = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`
         );
 
-        const userResponse = await axios.get(
+        const userResponse = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
             studentResponse.data.data.parent_nid
           }`
@@ -65,8 +65,8 @@ function ViewStudent() {
               : new Date(student.parent.birth_of_date)
                   .toISOString()
                   .split("T")[0],
-          phone_num: student.parent.phone_num, // Get phone number from parent object
-          address: student.parent.address, // Get address from parent object
+          phone_num: student.parent.phone_num,
+          address: student.parent.address,
         };
 
         const formatData = (data) => {

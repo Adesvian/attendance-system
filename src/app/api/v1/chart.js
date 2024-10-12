@@ -1,5 +1,5 @@
-import axios from "axios";
 import moment from "moment";
+import axiosInstance from "../auth/axiosConfig";
 
 export const fetchAttendanceChartData = async (
   chartData,
@@ -7,7 +7,7 @@ export const fetchAttendanceChartData = async (
 ) => {
   const status = !!chartData;
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`
     );
     const attendanceData = chartData ? chartData : response.data.data;
@@ -18,27 +18,37 @@ export const fetchAttendanceChartData = async (
       const className = curr.student.class.name;
 
       if (!acc[date]) {
-        acc[date] = [];
+        acc[date] = {};
       }
 
-      acc[date].push({
-        name: className,
-        data: status ? 1 : curr.method === 1001 ? 1 : 0,
-      });
+      if (!acc[date][className]) {
+        acc[date][className] = {
+          data: 0,
+          ontime: 0,
+          late: 0,
+        };
+      }
+
+      acc[date][className].data +=
+        status && curr.method === 1001 ? 1 : curr.method === 1001 ? 1 : 0;
+      acc[date][className].ontime += curr.status === 200 ? 1 : 0;
+      acc[date][className].late += curr.status === 201 ? 1 : 0;
 
       return acc;
     }, {});
 
     const formattedDataAttendances = Object.keys(groupedData).map((date) => {
-      const formattedClasses = groupedData[date].reduce((acc, curr) => {
-        const classData = acc.find((item) => item.name === curr.name);
-        if (classData) {
-          classData.data += curr.data;
-        } else {
-          acc.push(curr);
+      const formattedClasses = Object.keys(groupedData[date]).map(
+        (className) => {
+          const { data, ontime, late } = groupedData[date][className];
+          return {
+            name: className,
+            data,
+            ontime,
+            late,
+          };
         }
-        return acc;
-      }, []);
+      );
 
       formattedClasses.sort((a, b) => {
         const classOrder = [

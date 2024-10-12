@@ -1,5 +1,5 @@
 import axios from "axios";
-import { decrypt, decodeJWT } from "../../app/api/v1/auth";
+import { decrypt, decodeJWT } from "../../app/api/auth/auth";
 
 export const getCookie = (name) => {
   const cookieString = document.cookie;

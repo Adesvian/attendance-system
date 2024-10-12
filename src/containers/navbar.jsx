@@ -5,8 +5,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { setSidebar } from "../redux/headerSlice";
 import ChildSelection from "../components/selection/child-selection";
-import axios from "axios";
 import { setChild } from "../redux/headerSlice";
+import axiosInstance from "../app/api/auth/axiosConfig";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ const Navbar = () => {
     const fetchChildrenData = async () => {
       if (user) {
         try {
-          const { data } = await axios.get(
+          const { data } = await axiosInstance.get(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/students?parent=${
               user.nid
             }`

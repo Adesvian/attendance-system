@@ -9,7 +9,6 @@ import { FaRegTrashAlt, FaRegUser, FaWhatsapp } from "react-icons/fa";
 import { GrStatusGoodSmall } from "react-icons/gr";
 import { BsQrCodeScan } from "react-icons/bs";
 import { AiOutlineDisconnect, AiOutlineLink } from "react-icons/ai";
-import axios from "axios";
 import io from "socket.io-client";
 import { QRCodeSVG } from "qrcode.react";
 import { PiSealCheckFill } from "react-icons/pi";
@@ -23,8 +22,9 @@ import {
   updateNotification,
 } from "../../app/api/v1/admin-services";
 import { MdOutlineMessage } from "react-icons/md";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
-const socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
+let socket;
 
 function WhatsappConfiguration() {
   const dispatch = useDispatch();
@@ -88,7 +88,7 @@ function WhatsappConfiguration() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
+        const response = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/get-whatsapp-creds`
         );
         const fetchedData = response.data.data;
@@ -112,6 +112,8 @@ function WhatsappConfiguration() {
     fetchData();
     dispatch(setPageTitle({ title: "Guru" }));
 
+    socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
+
     socket.on("creds-created", (data) => {
       setData(data);
       setHasData(true);
@@ -131,7 +133,7 @@ function WhatsappConfiguration() {
         const status_connected = {
           status: "active",
         };
-        await axios.put(
+        await axiosInstance.put(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
           }/update-whatsapp-creds/${data}`,

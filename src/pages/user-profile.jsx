@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPageTitle } from "../redux/headerSlice";
 import TextInput from "../components/input/TextInput";
 import SingleButton from "../components/button/Button";
-import Swal from "sweetalert2";
-import axios from "axios";
 import { updatePassword } from "../app/api/v1/parent-services";
 
 function UserProfile() {

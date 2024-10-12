@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import getTheme from "./theme/tableTheme";
-
+import OptionMenu from "./options";
+import { deleteAttendance } from "../../app/api/v1/teacher-services";
 // Comparator functions for sorting
 const parseDate = (dateString) => {
   return new Date(dateString);
@@ -51,14 +52,13 @@ const stableSort = (array, comparator) => {
 };
 
 const TableComponent = forwardRef(
-  ({ data, columns, getStatusClass, type }, ref) => {
+  ({ data, columns, getStatusClass, type, setData, tab }, ref) => {
     const theme = useSelector((state) => state.header.theme);
     const muitheme = getTheme(theme);
     const [order, setOrder] = useState("asc");
     const [orderBy, setOrderBy] = useState(columns[0]?.field || "");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-
     // Format data based on type
     const formattedData = useMemo(() => {
       return type === "logs-table"
@@ -111,8 +111,12 @@ const TableComponent = forwardRef(
       setPage(0);
     };
 
+    const handleDelete = async (id) => {
+      await deleteAttendance(id, tab, setData);
+    };
+
     return (
-      <div className="text-gray-800 dark:text-white mt-5 ">
+      <div className="text-gray-800 dark:text-white mt-5">
         <ThemeProvider theme={muitheme}>
           {type === "logs-table" && (
             <div className="flex justify-end">
@@ -138,98 +142,123 @@ const TableComponent = forwardRef(
             </div>
           )}
           {data.length > 0 ? (
-            <TableContainer
-              component={Paper}
-              className={
-                type === "logs-table" ? "max-h-[32rem] dark:bg-base-300" : ""
-              }
-            >
-              <Table
-                stickyHeader
-                aria-label="sticky table"
-                ref={ref}
-                className="whitespace-nowrap"
+            <div className="overflow-x-auto">
+              {" "}
+              {/* Added overflow-x-auto */}
+              <TableContainer
+                component={Paper}
+                className={
+                  type === "logs-table"
+                    ? "max-h-[32rem] dark:bg-base-300"
+                    : "max-h-[32rem]"
+                }
               >
-                <TableHead>
-                  <TableRow>
-                    {columns.map((col, index) => (
-                      <TableCell
-                        key={index}
-                        align="center"
-                        sortDirection={
-                          type === "logs-table" && orderBy === col.field
-                            ? order
-                            : false
-                        }
-                        className="dark:bg-base-300 bg-base-300"
-                      >
-                        {type === "logs-table" ? (
-                          <TableSortLabel
-                            active={orderBy === col.field}
-                            direction={orderBy === col.field ? order : "asc"}
-                            onClick={() => handleRequestSort(col.field)}
-                            className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
-                            sx={{
-                              "&.Mui-active": {
-                                color: theme === "dark" ? "white" : "inherit",
-                                "& .MuiTableSortLabel-icon": {
+                <Table
+                  stickyHeader
+                  aria-label="sticky table"
+                  ref={ref}
+                  className="whitespace-nowrap table-auto"
+                >
+                  <TableHead>
+                    <TableRow>
+                      {columns.map((col, index) => (
+                        <TableCell
+                          key={index}
+                          align="center"
+                          sortDirection={
+                            type === "logs-table" && orderBy === col.field
+                              ? order
+                              : false
+                          }
+                          className=" dark:bg-base-300 bg-base-300 text-sm md:text-base" // Responsive font size
+                          sx={{
+                            position: "sticky",
+                            left: index === 0 ? 0 : "auto",
+                            zIndex: index === 0 ? 10 : 2,
+                            minWidth: col.field === "name" ? "150px" : "auto",
+                            whiteSpace: "nowrap", // Prevent wrapping of cell content
+                          }}
+                        >
+                          {type === "logs-table" ? (
+                            <TableSortLabel
+                              active={orderBy === col.field}
+                              direction={orderBy === col.field ? order : "asc"}
+                              onClick={() => handleRequestSort(col.field)}
+                              className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
+                              sx={{
+                                "&.Mui-active": {
+                                  color: theme === "dark" ? "white" : "inherit",
+                                  "& .MuiTableSortLabel-icon": {
+                                    color:
+                                      theme === "dark" ? "white" : "inherit",
+                                  },
+                                },
+                                "&:hover": {
                                   color: theme === "dark" ? "white" : "inherit",
                                 },
-                              },
-                              "&:hover": {
                                 color: theme === "dark" ? "white" : "inherit",
-                              },
-                              color: theme === "dark" ? "white" : "inherit",
-                            }}
-                          >
-                            {col.header}
-                          </TableSortLabel>
-                        ) : (
-                          <div>{col.header}</div>
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedRows.map((row, index) => (
-                    <TableRow key={index}>
-                      {columns.map((col, colIndex) => (
-                        <TableCell
-                          key={colIndex}
-                          align="center"
-                          className={` ${
-                            index % 2 === 0
-                              ? "bg-gray-100 dark:text-dark-text dark:bg-base-200"
-                              : "bg-white dark:bg-base-300"
-                          }`}
-                        >
-                          {col.field === "profile" && (
-                            <div className="avatar">
-                              <div className="mask mask-squircle h-12 w-12">
-                                <img
-                                  src={row[col.field]}
-                                  alt="Avatar Tailwind CSS Component"
-                                />
-                              </div>
-                            </div>
-                          )}
-                          {col.field !== "profile" && (
-                            <div
-                              className={`p-2 mr-5 font-medium ${getStatusClass(
-                                row[col.field]
-                              )}`}
+                              }}
                             >
-                              {row[col.field]}
-                            </div>
+                              {col.header}
+                            </TableSortLabel>
+                          ) : (
+                            <div>{col.header}</div>
                           )}
                         </TableCell>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedRows.map((row, index) => (
+                      <TableRow key={index}>
+                        {columns.map((col, colIndex) => (
+                          <TableCell
+                            key={colIndex}
+                            align="center"
+                            className={` ${
+                              index % 2 === 0
+                                ? "bg-gray-100 dark:text-dark-text dark:bg-base-200"
+                                : "bg-white dark:bg-base-300"
+                            } text-sm md:text-base`} // Responsive font size
+                            sx={{
+                              position: colIndex === 0 ? "sticky" : "static",
+                              left: colIndex === 0 ? 0 : "auto",
+                              zIndex: colIndex === 0 ? 5 : "auto",
+                              whiteSpace: "nowrap", // Prevent wrapping of cell content
+                            }}
+                          >
+                            {col.field === "profile" && (
+                              <div className="avatar">
+                                <div className="mask mask-squircle h-12 w-12">
+                                  <img
+                                    src={row[col.field]}
+                                    alt="Avatar Tailwind CSS Component"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            {col.field === "action" && (
+                              <OptionMenu row={row} onDelete={handleDelete} />
+                            )}
+
+                            {col.field !== "profile" &&
+                              col.field !== "action" && (
+                                <div
+                                  className={`p-2 mr-5 font-medium ${getStatusClass(
+                                    row[col.field]
+                                  )}`}
+                                >
+                                  {row[col.field]}
+                                </div>
+                              )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
           ) : (
             <div className="text-center text-gray-500">
               {type === "logs-table"

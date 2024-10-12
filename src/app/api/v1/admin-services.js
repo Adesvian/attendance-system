@@ -1,7 +1,7 @@
-import axios from "axios";
 import moment from "moment";
 import "jspdf-autotable";
 import Swal from "sweetalert2";
+import axiosInstance from "../auth/axiosConfig";
 
 export const fetchDataDashboard = async (setData) => {
   try {
@@ -13,17 +13,25 @@ export const fetchDataDashboard = async (setData) => {
       permits,
       attendance,
       classSchedule,
+      chartData,
     ] = await Promise.all([
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/students`),
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`),
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/permits-today`),
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today`),
-      axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`),
+      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/students`),
+      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`),
+      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
+      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
+      axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-today`
+      ),
+      axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today`
+      ),
+      axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
+      ),
+      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`),
     ]);
 
-    const whatsapp = await axios.get(
+    const whatsapp = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/get-whatsapp-creds`
     );
 
@@ -46,6 +54,7 @@ export const fetchDataDashboard = async (setData) => {
       ).length,
       late: attendance.data.data.filter((a) => a.status === 201).length,
       attendance: attendance.data.data,
+      chartData: chartData.data.data,
       whatsapp:
         whatsapp.data.data.length > 0
           ? whatsapp.data.data[0].status
@@ -62,7 +71,7 @@ export const fetchRecentStudents = async (
   setLoading
 ) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
     );
     const studentMap = response.data.data.map(({ name, gender }) => ({
@@ -87,17 +96,17 @@ export const fetchDataAttendanceRecords = async (
 
   try {
     const [students, attendances, permits] = await Promise.all([
-      axios.get(
+      axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/students?class=${selectedClass}`
       ),
-      axios.get(
+      axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/attendance?class=${selectedClass}`
       ),
-      axios.get(
+      axiosInstance.get(
         `${
           import.meta.env.VITE_BASE_URL_BACKEND
         }/permits?class=${selectedClass}`
@@ -275,7 +284,7 @@ export const fetchDataClassOption = async (
       setClassOptions([{ value: user.class.id, label: user.class.name }]);
       setSelectedClass(user.class.id);
     } else if (user != null) {
-      const { data: classes } = await axios.get(
+      const { data: classes } = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
           user.nid
         }`
@@ -573,7 +582,7 @@ export const exportPdf = async (
 
 export const fetchTeachers = async (setData) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`
     );
     const updatedData = response.data.data.map((teacher) => {
@@ -604,7 +613,6 @@ export const fetchTeachers = async (setData) => {
 
 export const submitTeacherData = async (teacherData, setLoading) => {
   setLoading(true);
-
   const formattedTeacherData = {
     nid: String(teacherData.nid),
     name: teacherData.name,
@@ -614,7 +622,7 @@ export const submitTeacherData = async (teacherData, setLoading) => {
       ? new Date(teacherData.birth_of_date).toISOString()
       : null,
     type: teacherData.type,
-    class_id: teacherData.class,
+    class_id: parseInt(teacherData.class),
     address: teacherData.address,
   };
 
@@ -628,11 +636,11 @@ export const submitTeacherData = async (teacherData, setLoading) => {
 
   try {
     await Promise.all([
-      axios.post(
+      axiosInstance.post(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`,
         formattedTeacherData
       ),
-      axios.post(
+      axiosInstance.post(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
         formattedUserData
       ),
@@ -691,11 +699,11 @@ export const updateTeacherData = async (teacherData, id, setLoading) => {
 
   try {
     await Promise.all([
-      axios.put(
+      axiosInstance.put(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`,
         formatTeacherData
       ),
-      axios.put(
+      axiosInstance.put(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`,
         formatUserData
       ),
@@ -743,10 +751,12 @@ export const deleteTeacher = async (nid, setData) => {
   if (confirmDelete.isConfirmed) {
     try {
       await Promise.all([
-        axios.delete(
+        axiosInstance.delete(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${nid}`
         ),
-        axios.delete(`${import.meta.env.VITE_BASE_URL_BACKEND}/users/${nid}`),
+        axiosInstance.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${nid}`
+        ),
       ]);
 
       // Update the data state to remove the deleted item
@@ -773,7 +783,7 @@ export const deleteTeacher = async (nid, setData) => {
 
 export const fetchSubjects = async (setData) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`
     );
     const dataWIndex = response.data.data.map((item, index) => ({
@@ -796,7 +806,7 @@ export const submitSubjectData = async (subjectData, setLoading) => {
   };
 
   try {
-    await axios.post(
+    await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`,
       formattedData
     );
@@ -833,7 +843,7 @@ export const updateSubject = async (subjectData, id, setLoading) => {
   };
 
   try {
-    await axios.put(
+    await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${id}`,
       formattedData
     );
@@ -875,7 +885,7 @@ export const deleteSubject = async (id, setData) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      await axios.delete(
+      await axiosInstance.delete(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${id}`
       );
 
@@ -903,7 +913,7 @@ export const deleteSubject = async (id, setData) => {
 
 export const fetchSchedules = async (setData) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
     );
 
@@ -942,7 +952,7 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
   };
 
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`,
       schedulePayload
     );
@@ -986,7 +996,7 @@ export const updateSchedule = async (scheduleData, id, setLoading) => {
   };
 
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule/${id}`,
       schedulePayload
     );
@@ -1028,7 +1038,7 @@ export const deleteClassSchedule = async (id, setData) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      await axios.delete(
+      await axiosInstance.delete(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule/${id}`
       );
 
@@ -1097,7 +1107,7 @@ export const handleChangeParentData = (
 
 export const fetchStudentData = async (setData) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
     );
 
@@ -1134,7 +1144,7 @@ export const submitStudentData = async (studentData, setLoading) => {
   const formatStudentData = {
     rfid: studentData.rfid,
     name: studentData.name,
-    class_id: studentData.class,
+    class_id: parseInt(studentData.class),
     gender: studentData.gender,
     birth_of_place: studentData.birth_of_place
       ? studentData.birth_of_place
@@ -1172,18 +1182,18 @@ export const submitStudentData = async (studentData, setLoading) => {
 
   const promises = [
     formatParentData
-      ? axios.post(
+      ? axiosInstance.post(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
           formatParentData
         )
       : null,
     formatUserData
-      ? axios.post(
+      ? axiosInstance.post(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
           formatUserData
         )
       : null,
-    axios.post(
+    axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/students`,
       formatStudentData
     ),
@@ -1217,7 +1227,7 @@ export const updateStudentData = async (studentData, id, setLoading) => {
   let parentExist = false;
 
   try {
-    await axios.get(
+    await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
         studentData.parent_nid
       }`
@@ -1278,13 +1288,13 @@ export const updateStudentData = async (studentData, id, setLoading) => {
     // Only create or update parent if not exist
     if (studentData.isnew) {
       promises.push(
-        axios.post(
+        axiosInstance.post(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
           formatParentData
         )
       );
       promises.push(
-        axios.post(
+        axiosInstance.post(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
           formatUserData
         )
@@ -1292,7 +1302,7 @@ export const updateStudentData = async (studentData, id, setLoading) => {
     } else {
       if (parentExist) {
         promises.push(
-          axios.put(
+          axiosInstance.put(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
               studentData.parent_nid
             }`,
@@ -1300,7 +1310,7 @@ export const updateStudentData = async (studentData, id, setLoading) => {
           )
         );
         promises.push(
-          axios.put(
+          axiosInstance.put(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
               studentData.parent_nid
             }`,
@@ -1310,7 +1320,7 @@ export const updateStudentData = async (studentData, id, setLoading) => {
       } else {
         // If the parent does not exist and is not new, update the parent anyway
         promises.push(
-          axios.put(
+          axiosInstance.put(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
               studentData.default_nid
             }`,
@@ -1318,7 +1328,7 @@ export const updateStudentData = async (studentData, id, setLoading) => {
           )
         );
         promises.push(
-          axios.put(
+          axiosInstance.put(
             `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
               studentData.default_nid
             }`,
@@ -1331,7 +1341,7 @@ export const updateStudentData = async (studentData, id, setLoading) => {
 
   // Always include the student update
   promises.push(
-    axios.put(
+    axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`,
       formattedData
     )
@@ -1374,18 +1384,23 @@ export const deleteStudent = async (id, setData) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      const count = await axios.get(
+      const count = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/students/count/${
           id.parent_nid
         }`
       );
-      await axios.delete(
+      await axiosInstance.delete(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id.rfid}`
       );
       if (count.data.count === 1) {
-        await axios.delete(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id.parent_nid}`
-        );
+        await Promise.all([
+          axiosInstance.delete(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${id.parent_nid}`
+          ),
+          axiosInstance.delete(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id.parent_nid}`
+          ),
+        ]);
       }
       setData((prevData) => prevData.filter((item) => item.rfid !== id.rfid));
       Swal.fire({
@@ -1413,7 +1428,7 @@ export const functionOpenQR = async (QRModal, data) => {
       scan: true,
     };
     try {
-      await axios.post(
+      await axiosInstance.post(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/create-session`,
         formatData
       );
@@ -1437,7 +1452,7 @@ export const functionCloseQR = async (
       session: data,
     };
     try {
-      await axios.post(
+      await axiosInstance.post(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/stop-session`,
         formatData
       );
@@ -1450,7 +1465,7 @@ export const functionCloseQR = async (
 export const ConnnectSession = async (setLoading, setIsConnected, data) => {
   setLoading(true);
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/start-session`,
       { number: data }
     );
@@ -1467,7 +1482,7 @@ export const ConnnectSession = async (setLoading, setIsConnected, data) => {
 export const DisconnectSession = async (setLoading, setIsConnected, data) => {
   setLoading(true);
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/stop-session`,
       { number: data }
     );
@@ -1488,12 +1503,12 @@ export const SubmitSession = async (event, setLoading, socket, data) => {
   if (finalWaNum.startsWith("08")) {
     finalWaNum = "62" + finalWaNum.slice(1);
   }
-
+  data.greet_template = `Assalamualaikum Ayah/Bunda\nKami menginformasikan anak anda *{nama}* baru saja melakukan absensi di sekolah.\n\n*Kehadiran*\t: {metode}\n*Waktu*\t: {waktu}\n*Status*\t:{status}\n\nHormat Kami Admin Ramadhan 🙏`;
   const updatedData = { ...data, number: finalWaNum };
   setLoading(true);
 
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/create-whatsapp-creds`,
       updatedData
     );
@@ -1522,7 +1537,7 @@ export const DeleteSession = async (setLoading, setData, data) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      const response = await axios.delete(
+      const response = await axiosInstance.delete(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/delete-whatsapp-creds/${data}`
       );
       if (response.data.success) {
@@ -1556,7 +1571,7 @@ export const DeleteSession = async (setLoading, setData, data) => {
 export const updateNotification = async (setLoading, greet, number) => {
   setLoading(true);
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${
         import.meta.env.VITE_BASE_URL_BACKEND
       }/update-whatsapp-creds/${number}`,
@@ -1594,7 +1609,7 @@ export const fetchThresholdData = async (
   setAvailableClasses
 ) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold`
     );
     const data = response.data.data;
@@ -1644,7 +1659,7 @@ export const fetchThresholdData = async (
 
 export const CheckInSubmit = async (checkInTime) => {
   try {
-    await axios.put(
+    await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-in`,
       {
         time: checkInTime,
@@ -1672,7 +1687,7 @@ export const CheckInSubmit = async (checkInTime) => {
 
 export const DefaultCheckOutSubmit = async (defaultCheckOutTime) => {
   try {
-    await axios.put(
+    await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-out`,
       {
         time: defaultCheckOutTime,
@@ -1700,7 +1715,7 @@ export const DefaultCheckOutSubmit = async (defaultCheckOutTime) => {
 
 export const EachClassCheckOutSubmit = async (classEntry) => {
   try {
-    await axios.put(
+    await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-out/${
         classEntry.class
       }`,
@@ -1738,7 +1753,7 @@ export const DeleteCheckOut = async (
   const updatedEntries = checkOutEntries.filter((_, i) => i !== index);
 
   try {
-    await axios.put(
+    await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-out/${
         entryToDelete.class
       }`,

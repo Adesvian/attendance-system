@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import TextInput from "../../components/input/TextInput";
-import axios from "axios";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
 function ViewTeacher() {
   const { id } = useParams();
@@ -27,8 +27,12 @@ function ViewTeacher() {
       setLoading(true);
       try {
         const [teacher, user] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`),
-          axios.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`),
+          axiosInstance.get(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`
+          ),
+          axiosInstance.get(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`
+          ),
         ]);
         const response = {
           teacher: teacher.data.data,

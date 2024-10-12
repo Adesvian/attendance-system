@@ -1,6 +1,6 @@
-import axios from "axios";
 import moment from "moment";
 import Swal from "sweetalert2";
+import axiosInstance from "../auth/axiosConfig";
 
 export const fetchChildDataAttendanceRecords = async (
   selectedDate,
@@ -12,10 +12,10 @@ export const fetchChildDataAttendanceRecords = async (
 
   try {
     const [attendances, permits] = await Promise.all([
-      axios.get(
+      axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance?rfid=${child.rfid}`
       ),
-      axios.get(
+      axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/permits?rfid=${child.rfid}`
       ),
     ]);
@@ -178,7 +178,7 @@ export const fetchChildDataAttendanceRecords = async (
 
 export const fetchChildAttendanceData = async (user) => {
   try {
-    const attendanceResponse = await axios.get(
+    const attendanceResponse = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance?parent=${user.nid}`
     );
 
@@ -209,7 +209,7 @@ export const fetchChildAttendanceData = async (user) => {
 
 export const fetchChildSubjectAttendanceData = async (user) => {
   try {
-    const subattendance = await axios.get(
+    const subattendance = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/subject-attendance?parent=${
         user.nid
       }`
@@ -270,7 +270,7 @@ export const updatePassword = async (
   };
 
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
         parent_user?.nid || teacher_user?.nid
       }`,
@@ -305,7 +305,7 @@ export const updatePassword = async (
 
 export const fetchPermitDataParent = async (parentUser) => {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/permits?parent=${
         parentUser.nid
       }`
@@ -313,7 +313,7 @@ export const fetchPermitDataParent = async (parentUser) => {
 
     const convertedData = await Promise.all(
       response.data.data.map(async (item) => {
-        const studentResponse = await axios.get(
+        const studentResponse = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${
             item.student_rfid
           }`
@@ -397,7 +397,7 @@ export const SubmitFormPermit = async (
     }
 
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/permits`,
         formDataToSend,
         {

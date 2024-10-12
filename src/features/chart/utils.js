@@ -37,7 +37,7 @@ export const updateChartData = (period, setChart, data) => {
   // Define labels based on the selected period
   switch (period) {
     case "Day":
-      labels = ["Today"];
+      labels = [...kelasUnik];
       break;
     case "Month":
       labels = Array.from(
@@ -88,18 +88,26 @@ export const updateChartData = (period, setChart, data) => {
           );
       });
     } else if (period === "Day") {
-      return kelasUnik.map((kelas) => {
-        const todayData = filteredData.filter(
-          (item) =>
-            moment(item.tanggal, "DD-MM-YYYY").date() === currentDate &&
-            moment(item.tanggal, "DD-MM-YYYY").month() === currentMonth
-        );
+      const todayData = filteredData.filter(
+        (item) =>
+          moment(item.tanggal, "DD-MM-YYYY").date() === currentDate &&
+          moment(item.tanggal, "DD-MM-YYYY").month() === currentMonth
+      );
 
-        return todayData.reduce((sum, item) => {
-          const dataItem = item.data.find((d) => d.name === kelas);
-          return sum + (dataItem ? dataItem.data : 0);
-        }, 0);
+      // Inisialisasi array untuk menampung data ontime dan late untuk setiap kelas
+      const dataPerKelas = kelasUnik.map(() => ({ ontime: 0, late: 0 }));
+
+      todayData.forEach((item) => {
+        item.data.forEach((d) => {
+          const kelasIndex = kelasUnik.indexOf(d.name);
+          if (kelasIndex !== -1) {
+            dataPerKelas[kelasIndex].ontime += d.ontime; // Tambahkan data ontime
+            dataPerKelas[kelasIndex].late += d.late; // Tambahkan data late
+          }
+        });
       });
+
+      return dataPerKelas;
     } else {
       return [];
     }
@@ -121,16 +129,25 @@ export const updateChartData = (period, setChart, data) => {
       backgroundColor: backgroundColors,
     });
   } else {
-    datasets = kelasUnik.map((kelas, index) => {
-      const dataKelas = aggregatedData[index];
+    const ontimeData = aggregatedData.map((item) => item.ontime);
+    const lateData = aggregatedData.map((item) => item.late);
 
-      return {
-        label: kelas,
-        data: [dataKelas],
-        backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
-          Math.random() * 255
-        )}, ${Math.floor(Math.random() * 255)}, 0.5)`,
-      };
+    // Buat datasets untuk ontime
+    datasets.push({
+      label: "On time",
+      data: ontimeData,
+      backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+        Math.random() * 255
+      )}, ${Math.floor(Math.random() * 255)}, 0.5)`, // Warna untuk ontime
+    });
+
+    // Buat datasets untuk late
+    datasets.push({
+      label: "Late",
+      data: lateData,
+      backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+        Math.random() * 255
+      )}, ${Math.floor(Math.random() * 255)}, 0.5)`, // Warna untuk late
     });
   }
 

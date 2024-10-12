@@ -12,6 +12,7 @@ export const BarChartTheme = (theme) => {
     },
     scales: {
       x: {
+        stacked: true,
         ticks: {
           color: `${theme === "dark" ? "white" : "black"}`,
           // autoSkip: false,
@@ -23,6 +24,7 @@ export const BarChartTheme = (theme) => {
         },
       },
       y: {
+        stacked: true,
         ticks: {
           color: `${theme === "dark" ? "white" : "black"}`,
         },

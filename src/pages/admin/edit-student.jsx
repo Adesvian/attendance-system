@@ -4,13 +4,14 @@ import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import TextInput from "../../components/input/TextInput";
 import SingleButton from "../../components/button/Button";
-import axios from "axios";
 import { io } from "socket.io-client";
 import {
   handleChangeParentData,
-  submitStudentData,
   updateStudentData,
 } from "../../app/api/v1/admin-services";
+import axiosInstance from "../../app/api/auth/axiosConfig";
+
+const socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
 
 function EditStudent() {
   const { id } = useParams();
@@ -48,11 +49,11 @@ function EditStudent() {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        const studentResponse = await axios.get(
+        const studentResponse = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`
         );
 
-        const userResponse = await axios.get(
+        const userResponse = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
             studentResponse.data.data.parent_nid
           }`
@@ -135,23 +136,10 @@ function EditStudent() {
   };
 
   useEffect(() => {
-    const socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
-    socket.on("rfidData", (data) => {
-      setStudentData((prevData) => ({
-        ...prevData,
-        rfid: data,
-      }));
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
+    dispatch(setPageTitle({ title: "Edit Siswa" }));
     const fetchParentData = async () => {
       try {
-        const response = await axios.get(
+        const response = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`
         );
         setParentData(response.data.data);
@@ -161,7 +149,18 @@ function EditStudent() {
     };
 
     fetchParentData();
-    dispatch(setPageTitle({ title: "Tambah Siswa" }));
+
+    const handleGetUid = (data) => {
+      setStudentData((prevData) => ({
+        ...prevData,
+        rfid: data,
+      }));
+    };
+
+    socket.on("get-uid", handleGetUid);
+    return () => {
+      socket.off("get-uid", handleGetUid);
+    };
   }, []);
   return (
     <>
@@ -287,8 +286,8 @@ function EditStudent() {
                   <option value="2">Kelas 2</option>
                   <option value="3">Kelas 3</option>
                   <option value="4">Kelas 4</option>
-                  <option value="3">Kelas 5</option>
-                  <option value="4">Kelas 6</option>
+                  <option value="5">Kelas 5</option>
+                  <option value="6">Kelas 6</option>
                 </select>
               </div>
             </div>

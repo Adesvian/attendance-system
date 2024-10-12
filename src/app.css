@@ -21,3 +21,53 @@
   background-color: #ecffed;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%230f6614' fill-opacity='0.09'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
+
+/* styles.css or your existing CSS file */
+.fc-toolbar .fc-toolbar-title {
+  font-size: 2rem; /* Adjust size as needed */
+  font-family: "Arial", sans-serif; /* Change to your desired font */
+  font-weight: bold; /* Make it bold or adjust as desired */
+}
+
+.fc .fc-daygrid-day-number {
+  font-size: 1.2rem; /* Example: change the size of day numbers */
+}
+
+/* If you want to style the button in the toolbar */
+.fc-toolbar button {
+  font-size: 1rem; /* Change button font size */
+}
+
+@media (max-width: 768px) {
+  .fc {
+    font-size: 0.9rem; /* Adjust the font size for the calendar */
+  }
+
+  .fc-daygrid-day {
+    padding: 0.5rem; /* Adjust padding for day cells */
+    height: auto; /* Allow auto height for day cells */
+    min-height: 60px; /* Minimum height for day cells */
+  }
+
+  .fc-toolbar {
+    flex-direction: column; /* Stack toolbar elements vertically */
+    align-items: center; /* Center align elements */
+  }
+
+  .fc-today-button,
+  .fc-prev-button,
+  .fc-next-button {
+    font-size: 0.75rem; /* Smaller font size for buttons */
+    padding: 0.25rem 0.5rem; /* Adjust padding for buttons */
+  }
+
+  .fc-daygrid-event {
+    font-size: 0.8rem; /* Smaller font size for event titles */
+  }
+
+  /* Optional: Make the modal full-width on small screens */
+  .modal-box {
+    max-width: 90vw; /* Limit max width to 90% of the viewport width */
+    width: auto; /* Auto width to adapt to content */
+  }
+}
