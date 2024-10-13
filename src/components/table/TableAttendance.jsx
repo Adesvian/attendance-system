@@ -59,6 +59,7 @@ const TableComponent = forwardRef(
     const [orderBy, setOrderBy] = useState(columns[0]?.field || "");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const parent = useSelector((state) => state.auth.parent);
     // Format data based on type
     const formattedData = useMemo(() => {
       return type === "logs-table"
@@ -237,7 +238,7 @@ const TableComponent = forwardRef(
                                 </div>
                               </div>
                             )}
-                            {col.field === "action" && (
+                            {col.field === "action" && !parent && (
                               <OptionMenu row={row} onDelete={handleDelete} />
                             )}
 

@@ -93,7 +93,8 @@ function EditSubject() {
                 required
               >
                 <option value="1">Wajib</option>
-                <option value="2">Mulok</option>
+                <option value="2">Pilihan</option>
+                <option value="3">Mulok</option>
               </select>
             </div>
           </div>
