@@ -250,7 +250,7 @@ function WhatsappConfiguration() {
       ) : (
         <div className="flex flex-col md:flex-row gap-4 mt-5 p-5 rounded-md lg:px-10">
           <div className="flex flex-col items-center self-center">
-            <img src="../../assets/phone.png" alt="device" className="w-24" />
+            <img src="./assets/phone.png" alt="device" className="w-24" />
           </div>
           <div className="flex flex-col w-full md:w-3/4 font-medium gap-y-2">
             <div className="flex items-center">

@@ -190,7 +190,7 @@ function TableDataManager({
                           </>
                         ) : (
                           <img
-                            src={`/assets/icon/${
+                            src={`./assets/icon/${
                               row.status === "Accepted" ? "approve" : "rejected"
                             }.png`}
                             alt="Attachment"

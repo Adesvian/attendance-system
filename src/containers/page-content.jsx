@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import { decodeJWT } from "../app/api/auth/auth";
 import { getCookie } from "../features/user/login-utils";
+import { fetchCookies } from "../redux/authSlice";
 
 const Page404 = lazy(() => import("../pages/utils/404"));
 
@@ -23,8 +24,7 @@ function PageContent() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // const cookies = await dispatch(fetchCookies()).unwrap();
-        const cookies = getCookie("_USER_AUTH_RAMADHAN");
+        const cookies = await dispatch(fetchCookies()).unwrap();
 
         if (!cookies || Object.keys(cookies).length === 0) {
           Swal.fire({
@@ -38,7 +38,7 @@ function PageContent() {
                 rgba(0,0,123,0.4)
               `,
             html: `
-                  <img src="/assets/icon/waiting-pixel.gif" class="w-48 h-auto ml-7 lg:ml-36" />
+                  <img src="./assets/icon/waiting-pixel.gif" class="w-48 h-auto ml-7 lg:ml-36" />
               `,
           }).then(() => {
             navigate("/login", { replace: true });

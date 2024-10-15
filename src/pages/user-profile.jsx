@@ -47,7 +47,7 @@ function UserProfile() {
     <div className="p-8 font-poppins flex">
       <img
         className="w-32 h-32 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600 drop-shadow-md mx-14"
-        src="../assets/user-profile.png"
+        src="./assets/user-profile.png"
         alt="User Avatar"
       />
       <div className="flex flex-col w-full">

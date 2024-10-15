@@ -101,7 +101,7 @@ const DashboardParent = () => {
           </div>
           <div className="absolute -right-4 -top-0 lg:right-0 lg:-top-5">
             <img
-              src="../assets/welcome-sign.png"
+              src="./assets/welcome-sign.png"
               alt="welcome"
               className="w-52"
             />
@@ -109,10 +109,10 @@ const DashboardParent = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5 mb-5">
-        <div className="md:col-span-2 lg:col-span-2 col-span-1 bg-white dark:bg-base-100 rounded-md p-5">
+        <div className="md:col-span-2 lg:col-span-2 col-span-1 bg-white dark:bg-base-100 rounded-md p-5 ">
           <div
             role="tablist"
-            className="tabs tabs-lifted tab-xs lg:tabs-lg mb-4 overflow-x-auto whitespace-nowrap"
+            className="tabs tabs-lifted tab-xs lg:tabs-lg mb-4 overflow-x-auto whitespace-nowrap "
           >
             {Object.keys(tabContent).map((day) => (
               <button
@@ -129,20 +129,22 @@ const DashboardParent = () => {
               </button>
             ))}
           </div>
-          {filteredLessons.length > 0 ? (
-            filteredLessons.map((lesson) => (
-              <div
-                key={lesson.id}
-                className="card p-4 mb-2 bg-gray-100 dark:bg-base-200 rounded shadow text-black dark:text-white flex flex-col"
-              >
-                <h3 className="font-bold">{lesson.subject.name}</h3>
-                <p>Jam Mulai : {formatTime(lesson.start_time)}</p>
-                <p>Jam Selesai : {formatTime(lesson.end_time)}</p>
-              </div>
-            ))
-          ) : (
-            <p>Tidak ada pelajaran untuk hari ini.</p>
-          )}
+          <div className="max-h-[28rem] overflow-scroll">
+            {filteredLessons.length > 0 ? (
+              filteredLessons.map((lesson) => (
+                <div
+                  key={lesson.id}
+                  className="card p-4 mb-2 bg-gray-100 dark:bg-base-200 rounded shadow text-black dark:text-white flex flex-col "
+                >
+                  <h3 className="font-bold">{lesson.subject.name}</h3>
+                  <p>Jam Mulai : {formatTime(lesson.start_time)}</p>
+                  <p>Jam Selesai : {formatTime(lesson.end_time)}</p>
+                </div>
+              ))
+            ) : (
+              <p>Tidak ada pelajaran untuk hari ini.</p>
+            )}
+          </div>
         </div>
 
         <div className="lg:col-span-1 md:col-span-1 col-span-1">

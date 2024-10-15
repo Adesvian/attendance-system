@@ -195,6 +195,7 @@ function CreatePermit() {
             </label>
             <TextInput
               type="date"
+              isMinDateEnabled={true}
               id="date"
               name="date"
               value={formData.date}

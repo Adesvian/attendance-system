@@ -19,7 +19,6 @@ function ProtectedRoute() {
     const getCookies = async () => {
       try {
         const result = await dispatch(fetchCookies()).unwrap();
-
         // Cek apakah cookies adalah objek kosong
         if (result && Object.keys(result).length > 0) {
           setCookies(result);

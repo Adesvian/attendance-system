@@ -14,7 +14,7 @@ import { checkAuthCookies } from "./features/user/login-utils"; // Make sure to 
 
 function App() {
   return (
-    <Router>
+    <Router basename="/attendance-system">
       <Routes>
         {/* Public route for login */}
         <Route path="/login" element={<Login />} />

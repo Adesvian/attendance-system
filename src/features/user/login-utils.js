@@ -19,7 +19,6 @@ export const getCookie = (name) => {
 export const checkAuthCookies = async (setErrorMessage, navigate) => {
   try {
     const authToken = getCookie("_USER_AUTH_RAMADHAN");
-
     if (authToken) {
       try {
         const decryptedToken = decrypt(

@@ -7,6 +7,7 @@ dotenv.config();
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: "/attendance-system/",
   server: {
     port: process.env.PORT || 5173,
   },

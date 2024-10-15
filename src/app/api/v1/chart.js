@@ -29,11 +29,11 @@ export const fetchAttendanceChartData = async (
         };
       }
 
-      acc[date][className].data +=
-        status && curr.method === 1001 ? 1 : curr.method === 1001 ? 1 : 0;
-      acc[date][className].ontime += curr.status === 200 ? 1 : 0;
-      acc[date][className].late += curr.status === 201 ? 1 : 0;
-
+      if (curr.method === 1001) {
+        acc[date][className].data += 1;
+        acc[date][className].ontime += curr.status === 200 ? 1 : 0;
+        acc[date][className].late += curr.status === 201 ? 1 : 0;
+      }
       return acc;
     }, {});
 

@@ -46,7 +46,7 @@ function LeftSidebar() {
       <div className="p-2">
         <div className="flex flex-col items-center">
           <img
-            src="/assets/school-logo-background.png"
+            src="/attendance-system/assets/school-logo-background.png"
             className={`cursor-pointer duration-300 ${imageClasses} `}
             alt="Sidebar Logo"
           />

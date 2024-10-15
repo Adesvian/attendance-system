@@ -11,6 +11,7 @@ function TextInput({
   className,
   required = false,
   readOnly = false,
+  isMinDateEnabled = false,
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [minDate, setMinDate] = useState("");
@@ -35,7 +36,7 @@ function TextInput({
         className={`input input-bordered w-full dark:text-dark-text bg-white dark:bg-base-300 text-gray-900 ${className}`}
         required={required}
         readOnly={readOnly}
-        min={type === "date" ? minDate : undefined}
+        min={type === "date" && isMinDateEnabled ? minDate : undefined}
       />
       {type === "password" && (
         <button

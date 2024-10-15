@@ -34,7 +34,7 @@ function Avatar() {
         <div className="w-10 rounded-full">
           <img
             alt="Tailwind CSS Navbar component"
-            src="/assets/user-profile.png"
+            src="/attendance-system/assets/user-profile.png"
           />
         </div>
       </div>

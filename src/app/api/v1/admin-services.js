@@ -588,7 +588,7 @@ export const fetchTeachers = async (setData) => {
     const updatedData = response.data.data.map((teacher) => {
       return {
         ...teacher,
-        profile: `assets/icon/${
+        profile: `./assets/icon/${
           teacher.gender === "Perempuan" ? "miss" : "sir"
         }.png`,
         type:
@@ -1114,7 +1114,7 @@ export const fetchStudentData = async (setData) => {
     const updatedData = response.data.data.map((student) => {
       return {
         ...student,
-        profile: `assets/icon/${
+        profile: `./assets/icon/${
           student.gender === "Perempuan" ? "girl" : "boy"
         }-icon.png`,
         rfid: student.rfid,
