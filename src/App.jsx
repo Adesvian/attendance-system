@@ -9,6 +9,7 @@ import {
 import Layout from "./containers";
 import "./app.css";
 import Login from "./pages/login";
+import Reset from "./pages/forgot-password";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { checkAuthCookies } from "./features/user/login-utils"; // Make sure to import the function
 
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         {/* Public route for login */}
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<Reset />} />
 
         {/* Route for checking authentication and redirecting */}
         <Route path="/" element={<RedirectBasedOnRole />} />

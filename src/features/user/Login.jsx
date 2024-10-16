@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SingleButton from "../../components/button/Button";
 import TextInput from "../../components/input/TextInput";
 import Alert from "@mui/material/Alert";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { checkAuthCookies, login } from "../user/login-utils";
 
@@ -34,19 +34,19 @@ function LoginForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-login-svg bg-gray-100 bg-cover">
-      <div className="bg-white py-12 px-12 rounded-md shadow-md w-full max-w-sm sm:max-w-md h-screen md:h-auto flex flex-col justify-center">
+      <div className="bg-white py-12 px-12 rounded-md shadow-md w-full lg:max-w-md h-screen lg:h-auto flex flex-col justify-center text-center">
         <div className="mb-6 z-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
             Login
           </h2>
-          <span className="block text-sm text-gray-500 w-max">
+          <span className="lg:block text-sm text-gray-500 w-max">
             Selamat Datang! Silahkan login menggunakan akun anda
           </span>
         </div>
-
         <form onSubmit={submitForm} className="flex flex-col">
           <TextInput
             id="username"
+            name="username"
             type="text"
             label="Username"
             value={creds.username}
@@ -56,6 +56,7 @@ function LoginForm() {
           />
           <TextInput
             id="password"
+            name="password"
             type="password"
             label="Password"
             value={creds.password}
@@ -75,12 +76,17 @@ function LoginForm() {
             disabled={loading}
           />
         </form>
-
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center rounded-md">
             <span className="loading loading-spinner text-primary"></span>
           </div>
         )}
+        <Link
+          to="/reset-password"
+          className="text-sm mt-2 text-red-400 text-end"
+        >
+          Lupa Password?
+        </Link>
       </div>
     </div>
   );
