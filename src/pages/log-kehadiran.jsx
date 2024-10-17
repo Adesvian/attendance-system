@@ -51,7 +51,7 @@ function LogKehadiran() {
               <ExportButtonsComponent
                 exportCSV={() => exportCSV(ref)}
                 exportExcel={() => exportExcel(ref)}
-                exportPdf={() => exportPdf(ref)}
+                exportPdf={() => exportPdf(ref, user, parent_user)}
               />
             ),
           },
@@ -65,7 +65,7 @@ function LogKehadiran() {
               <ExportButtonsComponent
                 exportCSV={() => exportCSV(ref)}
                 exportExcel={() => exportExcel(ref)}
-                exportPdf={() => exportPdf(ref)}
+                exportPdf={() => exportPdf(ref, user, parent_user)}
               />
             ),
           },
@@ -81,7 +81,7 @@ function LogKehadiran() {
               <ExportButtonsComponent
                 exportCSV={() => exportCSV(ref)}
                 exportExcel={() => exportExcel(ref)}
-                exportPdf={() => exportPdf(ref)}
+                exportPdf={() => exportPdf(ref, user, parent_user)}
               />
             ),
           },

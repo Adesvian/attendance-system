@@ -421,7 +421,7 @@ export const fetchDataSubjectAttendanceRecords = async (
   }
 };
 
-export const exportPdf = async (fn, user) => {
+export const exportPdf = async (fn, user, parent_user) => {
   const data = fn.current;
   if (data) {
     try {
@@ -439,7 +439,7 @@ export const exportPdf = async (fn, user) => {
           moment().format("DD MMM YYYY HH:mm:ss") +
           "\n" +
           "User Download : " +
-          (user ? user.name : "admin") +
+          (parent_user ? parent_user.name : user ? user.name : "admin") +
           "\n",
         pageWidth - 35,
         {}
