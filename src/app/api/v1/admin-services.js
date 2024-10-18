@@ -1626,7 +1626,12 @@ export const fetchThresholdData = async (
 
     // Set Check-Out Entries
     const checkOutEntries = data
-      .filter((entry) => entry.method === 1002 && entry.custom_time !== null)
+      .filter(
+        (entry) =>
+          entry.method === 1002 &&
+          entry.custom_time !== null &&
+          entry.custom_time !== "isFriday"
+      )
       .map((entry) => ({
         class: entry.class_id,
         time: moment.utc(entry.time).format("HH:mm"),
@@ -1759,6 +1764,7 @@ export const DeleteCheckOut = async (
       }`,
       {
         time: "13:00:00",
+        defaultTime: true,
       }
     );
 
