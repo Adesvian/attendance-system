@@ -38,17 +38,6 @@ function Holidays() {
   }, []);
 
   const handleDateClick = (arg) => {
-    const existingEvent = events.find((event) => event.date === arg.dateStr);
-    if (existingEvent) {
-      Swal.fire({
-        title: "Error!",
-        text: "An event already exists on this date!",
-        icon: "error",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
     setHolidayDate(arg.dateStr);
     setHolidayName("");
     setSelectedEventId(null);
@@ -188,7 +177,9 @@ function Holidays() {
                 {selectedEventId ? "Update Event" : "Tambah Event"}
               </h2>
               <div className="mb-4">
-                <label className="block text-sm font-medium">Event Name</label>
+                <label className="block text-sm font-medium mb-2">
+                  Event Name
+                </label>
                 <TextInput
                   type="text"
                   value={holidayName}
@@ -198,7 +189,9 @@ function Holidays() {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium">Event Date</label>
+                <label className="block text-sm font-medium mb-2">
+                  Event Date
+                </label>
                 <TextInput
                   type="date"
                   value={holidayDate}

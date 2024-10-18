@@ -196,6 +196,7 @@ function Threshold() {
               <SingleButton
                 onClick={handleDefaultCheckOutSubmit}
                 className="btn btn-success text-white w-full h-12"
+                disabled={availableClasses.length === 0}
               >
                 Set Time
               </SingleButton>

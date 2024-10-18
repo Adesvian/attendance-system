@@ -1499,10 +1499,7 @@ export const DisconnectSession = async (setLoading, setIsConnected, data) => {
 export const SubmitSession = async (event, setLoading, socket, data) => {
   event.preventDefault();
 
-  let finalWaNum = data.number;
-  if (finalWaNum.startsWith("08")) {
-    finalWaNum = "62" + finalWaNum.slice(1);
-  }
+  let finalWaNum = "62" + data.number;
   data.greet_template = `Assalamualaikum Ayah/Bunda\nKami menginformasikan anak anda *{nama}* baru saja melakukan absensi di sekolah.\n\n*Kehadiran*\t: {metode}\n*Waktu*\t: {waktu}\n*Status*\t:{status}\n\nHormat Kami Admin Ramadhan 🙏`;
   const updatedData = { ...data, number: finalWaNum };
   setLoading(true);

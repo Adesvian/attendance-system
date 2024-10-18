@@ -67,6 +67,7 @@ function WhatsappConfiguration() {
 
   const handleDelete = async () => {
     DeleteSession(setLoading, setData, data.number);
+    setIsValid(false);
   };
 
   const handleChange = (e) => {
@@ -196,12 +197,15 @@ function WhatsappConfiguration() {
                   id="number"
                   name="number"
                   type="number"
-                  label="6287xxxxx"
+                  label="1234567890"
                   value={data.number}
                   onChange={handleChange}
                   required
-                  className="pr-12"
+                  className="px-12 "
                 />
+                <span className="absolute inset-y-0 left-3 flex items-center">
+                  +62
+                </span>
                 <span className="absolute inset-y-0 right-3 flex items-center">
                   {isValid ? (
                     <FaCheck className="text-green-500" />
