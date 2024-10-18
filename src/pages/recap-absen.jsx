@@ -15,13 +15,9 @@ import {
   fetchDataClassOption,
 } from "../app/api/v1/admin-services";
 import { fetchDataSubjectAttendanceRecords } from "../app/api/v1/teacher-services";
-
 import { fetchChildDataAttendanceRecords } from "../app/api/v1/parent-services";
+import Swal from "sweetalert2";
 
-const holidays = [
-  { date: "01-10-2024", description: "Independence Day" },
-  { date: "02-10-2024", description: "Holiday Event" },
-];
 const RecapAbsensi = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.teacher);
@@ -92,15 +88,51 @@ const RecapAbsensi = () => {
   };
 
   const handleCSVExport = () => {
+    if (selectedDate == null || selectedClass == null) {
+      Swal.fire({
+        icon: "error",
+        title: "Woopsie!",
+        text: `Pilih periode ${
+          user == null ? "dan kelas" : ""
+        } terlebih dahulu`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      return;
+    }
     exportCSV(data, selectedDate, selectedClass);
   };
   const handleExcelExport = () => {
+    if (selectedDate == null || selectedClass == null) {
+      Swal.fire({
+        icon: "error",
+        title: "Woopsie!",
+        text: `Pilih periode ${
+          user == null ? "dan kelas" : ""
+        } terlebih dahulu`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      return;
+    }
     exportExcel(data, selectedDate, selectedClass);
   };
 
   const columns = generateColumns(selectedDate);
 
   const handlePDFExport = async () => {
+    if (selectedDate == null || selectedClass == null) {
+      Swal.fire({
+        icon: "error",
+        title: "Woopsie!",
+        text: `Pilih periode ${
+          user == null ? "dan kelas" : ""
+        } terlebih dahulu`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      return;
+    }
     await exportPdf(data, selectedDate, selectedClass, user, parent_user);
   };
 

@@ -130,11 +130,6 @@ const TableComponent = forwardRef(
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[10, 25, 50, 100]}
-                sx={{
-                  "& .MuiTablePagination-selectIcon": {
-                    color: theme === "dark" ? "white" : "inherit",
-                  },
-                }}
                 labelRowsPerPage="Rows per page:"
                 labelDisplayedRows={({ from, to, count }) =>
                   `${from}-${to} of ${count}`
@@ -145,7 +140,6 @@ const TableComponent = forwardRef(
           {data.length > 0 ? (
             <div className="overflow-x-auto">
               {" "}
-              {/* Added overflow-x-auto */}
               <TableContainer
                 component={Paper}
                 className={
@@ -186,19 +180,6 @@ const TableComponent = forwardRef(
                               direction={orderBy === col.field ? order : "asc"}
                               onClick={() => handleRequestSort(col.field)}
                               className="dark:text-dark-text text-dark-text hover:dark:text-dark-text focus:dark:text-dark-text"
-                              sx={{
-                                "&.Mui-active": {
-                                  color: theme === "dark" ? "white" : "inherit",
-                                  "& .MuiTableSortLabel-icon": {
-                                    color:
-                                      theme === "dark" ? "white" : "inherit",
-                                  },
-                                },
-                                "&:hover": {
-                                  color: theme === "dark" ? "white" : "inherit",
-                                },
-                                color: theme === "dark" ? "white" : "inherit",
-                              }}
                             >
                               {col.header}
                             </TableSortLabel>

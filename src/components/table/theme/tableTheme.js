@@ -1,3 +1,4 @@
+import { colors } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 
 const getTheme = (theme) => {
@@ -47,6 +48,22 @@ const getTheme = (theme) => {
           },
         },
       },
+
+      MuiTablePagination: {
+        styleOverrides: {
+          root: {
+            "& .MuiTablePagination-input": {
+              marginRight: "5px",
+            },
+            "& .MuiTablePagination-actions": {
+              marginLeft: "1px",
+            },
+            "& .MuiIconButton-root": {
+              padding: "4px",
+            },
+          },
+        },
+      },
       MuiPagination: {
         styleOverrides: {
           root: {
@@ -54,7 +71,7 @@ const getTheme = (theme) => {
               color: isDarkTheme ? "white" : "inherit",
             },
             "& .MuiPaginationItem-root.Mui-selected": {
-              backgroundColor: isDarkTheme ? "white" : "#00000014",
+              backgroundColor: isDarkTheme ? "white" : "#000000",
               color: isDarkTheme ? "black" : "inherit",
             },
             "& .MuiPaginationItem-page": {
@@ -63,6 +80,10 @@ const getTheme = (theme) => {
             },
             "& .MuiPaginationItem-root.MuiButtonBase-root": {
               borderColor: isDarkTheme ? "white" : "inherit",
+            },
+            "& .MuiPaginationItem-page.Mui-disabled": {
+              color: isDarkTheme ? "white" : "inherit",
+              opacity: isDarkTheme ? 0.5 : 1,
             },
           },
         },
