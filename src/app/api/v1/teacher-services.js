@@ -49,35 +49,38 @@ export const fetchDataDashboard = async (
     ];
 
     const classParams = uniqueClass.join(",");
-    const [chartdata, attendance, students, permits] = await Promise.all([
-      user.class != null
-        ? fetchDataFromApi(
-            `attendance?class=${user.class.id ? user.class.id : classParams}`
-          )
-        : fetchDataFromApi(
-            `subject-attendance?class=${classParams}&subject=${uniqueSubject}`
-          ),
+    const [chartdata, attendance, students, permits, events] =
+      await Promise.all([
+        user.class != null
+          ? fetchDataFromApi(
+              `attendance?class=${user.class.id ? user.class.id : classParams}`
+            )
+          : fetchDataFromApi(
+              `subject-attendance?class=${classParams}&subject=${uniqueSubject}`
+            ),
 
-      user.class != null
-        ? fetchDataFromApi(
-            `attendance-today?class=${
-              user.class != null ? user.class.id : classParams
-            }`
-          )
-        : fetchDataFromApi(
-            `subject-attendance-today?class=${
-              user.class != null ? user.class.id : classParams
-            }`
-          ),
+        user.class != null
+          ? fetchDataFromApi(
+              `attendance-today?class=${
+                user.class != null ? user.class.id : classParams
+              }`
+            )
+          : fetchDataFromApi(
+              `subject-attendance-today?class=${
+                user.class != null ? user.class.id : classParams
+              }`
+            ),
 
-      fetchDataFromApi(
-        `students?class=${user.class != null ? user.class.id : classParams}`
-      ),
+        fetchDataFromApi(
+          `students?class=${user.class != null ? user.class.id : classParams}`
+        ),
 
-      fetchDataFromApi(
-        `permits?class=${user.class != null ? user.class.id : classParams}`
-      ),
-    ]);
+        fetchDataFromApi(
+          `permits?class=${user.class != null ? user.class.id : classParams}`
+        ),
+
+        fetchDataFromApi(`events`),
+      ]);
 
     const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
     const todayEnd = Math.floor(new Date().setHours(23, 59, 59, 999) / 1000);
@@ -159,6 +162,7 @@ export const fetchDataDashboard = async (
       ).length,
       late: attendance.data.filter((a) => a.status === 201).length,
       attendance: attendance.data,
+      events: events.data,
       chartData: chartdata.data,
     }));
   } catch (error) {
@@ -198,6 +202,24 @@ export const fetchDataSubjectAttendanceRecords = async (
         }/permits?class=${selectedClass}`
       ),
     ]);
+    const isExtracurricular = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${selectedSubject}`
+    );
+    let filteredStudents;
+
+    if (isExtracurricular.data.data.category.id == 2) {
+      const enrolledStudents = await axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll/${selectedSubject}`
+      );
+      const enrolledRFIDs = enrolledStudents.data.data.map(
+        (enrolled) => enrolled.student_rfid
+      );
+      filteredStudents = students.data.data.filter((student) =>
+        enrolledRFIDs.includes(student.rfid)
+      );
+    } else {
+      filteredStudents = students.data.data;
+    }
 
     const classSubjectMap = classSchedule.data.data.map((item) => ({
       class_id: item.class_id,
@@ -277,7 +299,7 @@ export const fetchDataSubjectAttendanceRecords = async (
       );
     };
 
-    const formattedData = students.data.data.map((student) => {
+    const formattedData = filteredStudents.map((student) => {
       const attendance = Array(daysInMonth).fill("-");
 
       attendance.forEach((_, index) => {
@@ -819,4 +841,128 @@ export const deleteAttendance = async (id, tab, setData) => {
       console.error("Error deleting teacher:", error);
     }
   }
+};
+
+export const fetchSChedule = async (
+  teacher,
+  setScheduleData,
+  setSelectedClassId,
+  setSubjectId
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
+        teacher.nid
+      }`
+    );
+    if (response.data.data.length === 0) {
+      return;
+    }
+    const schedule = response.data.data || [];
+    setScheduleData({ schedule });
+
+    const uniqueClasses = [
+      ...new Set(schedule.map((item) => item.class_id)),
+    ].sort((a, b) => a - b);
+
+    if (uniqueClasses.length > 0) {
+      setSelectedClassId(uniqueClasses[0]);
+    }
+
+    if (teacher.type === "Ekstra Teacher") {
+      const subjectId = schedule[0].subject_id;
+      setSubjectId(subjectId);
+    }
+  } catch (error) {
+    console.error("Error fetching schedule:", error);
+  }
+};
+
+export const fetchStudentsEnrollment = async (
+  selectedClassId,
+  setStudents,
+  scheduleData,
+  setSelectedClassId
+) => {
+  if (selectedClassId) {
+    try {
+      const response = await axiosInstance.get(
+        `${
+          import.meta.env.VITE_BASE_URL_BACKEND
+        }/students?class=${selectedClassId}`
+      );
+      setStudents(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  } else if (scheduleData.schedule.length > 0) {
+    // Set default selected class
+    const firstClassId = scheduleData.schedule[0].class_id;
+    setSelectedClassId(firstClassId);
+  }
+};
+
+export const enrollStudents = async (
+  subjectId,
+  selectedStudents,
+  handleCloseModal
+) => {
+  try {
+    const enrollResponse = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll/${subjectId}`
+    );
+    const enrolledStudents = enrollResponse.data.data.map(
+      (student) => student.student_rfid
+    );
+
+    const studentsToAdd = selectedStudents.filter(
+      (rfid) => !enrolledStudents.includes(rfid)
+    );
+    const studentsToRemove = enrolledStudents.filter(
+      (rfid) => !selectedStudents.includes(rfid)
+    );
+
+    // Add new enrollments
+    if (studentsToAdd.length > 0) {
+      await axiosInstance.post(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll`,
+        {
+          student_rfid: studentsToAdd,
+          ekstrakurikuler: subjectId,
+        }
+      );
+    }
+
+    // Remove unenrolled students
+    if (studentsToRemove.length > 0) {
+      await Promise.all(
+        studentsToRemove.map((rfid) =>
+          axiosInstance.delete(
+            `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll`,
+            {
+              data: { student_rfid: [rfid], ekstrakurikuler: subjectId },
+            }
+          )
+        )
+      );
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: `Siswa berhasil diperbarui.`,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Gagal memperbarui enroll siswa.",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+    console.error("Error updating enrollments:", error);
+  }
+  handleCloseModal();
 };

@@ -5,6 +5,8 @@ import axios from "axios";
 import moment from "moment";
 import RecentAttendance from "../../features/activity/recent";
 import axiosInstance from "../../app/api/auth/axiosConfig";
+import Notifications from "../../features/activity/notifications";
+import { fetchDataDashboard } from "../../app/api/v1/parent-services";
 
 const DashboardParent = () => {
   const dispatch = useDispatch();
@@ -14,6 +16,7 @@ const DashboardParent = () => {
   const [data, setData] = useState({
     schedule: [],
     attendance: [],
+    events: [],
   });
 
   const tabContent = {
@@ -32,58 +35,14 @@ const DashboardParent = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (child && child.class && child.class.id) {
-        try {
-          const schedulePromise = axiosInstance.get(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?class=${
-              child.class.id
-            }`
-          );
-
-          const attendancePromise = axiosInstance.get(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today?rfid=${
-              child.rfid
-            }`
-          );
-
-          const subjectAttendancePromise = axiosInstance.get(
-            `${
-              import.meta.env.VITE_BASE_URL_BACKEND
-            }/subject-attendance-today?rfid=${child.rfid}`
-          );
-
-          // Wait for all promises to resolve
-          const [
-            scheduleResponse,
-            attendanceResponse,
-            subjectAttendanceResponse,
-          ] = await Promise.all([
-            schedulePromise,
-            attendancePromise,
-            subjectAttendancePromise,
-          ]);
-
-          // Combine attendance data
-          const combinedAttendance = [
-            ...(attendanceResponse.data.data || []),
-            ...(subjectAttendanceResponse.data.data || []),
-          ];
-
-          setData((prevData) => ({
-            ...prevData,
-            schedule: scheduleResponse.data.data || [],
-            attendance: combinedAttendance,
-          }));
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      }
+      await fetchDataDashboard(child, setData);
     };
 
     fetchData();
     dispatch(setPageTitle({ title: "Dashboard Wali Murid" }));
   }, [child, dispatch]);
 
+  console.log(data);
   return (
     <>
       <div className="grid grid-cols-1 gap-6 mt-5">
@@ -148,12 +107,37 @@ const DashboardParent = () => {
         </div>
 
         <div className="lg:col-span-1 md:col-span-1 col-span-1">
-          <RecentAttendance
-            data={data.attendance}
-            initialRowsPerPage={5}
-            initialSortOrder="asc"
-          />
+          <div className="carousel rounded-box w-full shadow-md ">
+            <div className="carousel-item w-full" id="recent-attendance">
+              <RecentAttendance
+                data={data.attendance}
+                initialRowsPerPage={5}
+                initialSortOrder="asc"
+              />
+            </div>
+            <div className="carousel-item w-full" id="notifications">
+              <Notifications
+                data={data.events}
+                initialRowsPerPage={5}
+                initialSortOrder="asc"
+              />
+            </div>
+          </div>
         </div>
+      </div>
+      <div className="relative bottom-14 right-5 flex justify-end">
+        <a
+          href="#recent-attendance"
+          className="btn btn-xs dark:bg-white dark:text-black"
+        >
+          1
+        </a>
+        <a
+          href="#notifications"
+          className="btn btn-xs ml-2 dark:bg-white dark:text-black"
+        >
+          2
+        </a>
       </div>
     </>
   );

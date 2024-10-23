@@ -98,6 +98,15 @@ function EditClassSchedule() {
     }
   }, [id]);
 
+  const groupedSubjects = subjects.reduce((acc, subject) => {
+    const categoryName = subject.category.name;
+    if (!acc[categoryName]) {
+      acc[categoryName] = [];
+    }
+    acc[categoryName].push(subject);
+    return acc;
+  }, {});
+
   return (
     <div className="p-2 px-10 font-poppins">
       <form onSubmit={handleSubmit}>
@@ -147,11 +156,17 @@ function EditClassSchedule() {
                 required
               >
                 <option value="">Pilih Mata Pelajaran</option>
-                {subjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </option>
-                ))}
+                {Object.entries(groupedSubjects).map(
+                  ([categoryName, subjects]) => (
+                    <optgroup key={categoryName} label={categoryName}>
+                      {subjects.map((subject) => (
+                        <option key={subject.id} value={subject.id}>
+                          {subject.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
+                )}
               </select>
             </div>
           </div>

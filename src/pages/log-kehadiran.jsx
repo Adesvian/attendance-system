@@ -165,7 +165,7 @@ function LogKehadiran() {
               }`}
             >
               <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 mt-3 lg:-mt-10">
-                <div className="flex justify-end gap-x-1 lg:relative lg:right-[23rem] lg:top-[3rem]">
+                <div className="flex justify-end gap-x-1 lg:relative lg:right-[20rem] lg:top-[3rem]">
                   {tab.exportFunction(tab.ref)}
                 </div>
                 <TableComponent

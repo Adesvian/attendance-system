@@ -280,10 +280,7 @@ export const fetchDataClassOption = async (
   setSelectedSubject
 ) => {
   try {
-    if (user != null && user.class != null) {
-      setClassOptions([{ value: user.class.id, label: user.class.name }]);
-      setSelectedClass(user.class.id);
-    } else if (user != null) {
+    if (user != null) {
       const { data: classes } = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?teacherid=${
           user.nid
@@ -291,14 +288,23 @@ export const fetchDataClassOption = async (
       );
 
       const uniqueSubject = [
-        // Menggunakan Map untuk memastikan subject.id unik
-        ...new Map(
-          classes.data.map((item) => [
-            item.subject_id,
-            { id: item.subject_id, name: item.subject.name },
-          ])
-        ).values(),
-      ].sort((a, b) => a.name.localeCompare(b.name)); // Sortir berdasarkan nama subject
+        ...Array.from(
+          new Map(
+            classes.data
+              .filter((item) =>
+                user.class ? item.class_id !== user.class.id : true
+              )
+              .map((item) => [
+                item.subject_id,
+                {
+                  id: item.subject_id,
+                  name: item.subject.name,
+                  category: item.subject.category?.name,
+                },
+              ])
+          ).values()
+        ),
+      ].sort((a, b) => a.name.localeCompare(b.name));
 
       setSubjectOptions([
         ...uniqueSubject.map((subject) => ({
@@ -319,7 +325,9 @@ export const fetchDataClassOption = async (
       ]);
 
       if (uniqueClass.length > 0 || uniqueSubject.length > 0) {
-        setSelectedSubject(uniqueSubject[0].id);
+        if (uniqueSubject.length > 0) {
+          setSelectedSubject(uniqueSubject[0].id);
+        }
         setSelectedClass(uniqueClass[0]);
       }
     } else {
@@ -633,6 +641,8 @@ export const submitTeacherData = async (teacherData, setLoading) => {
     password: teacherData.password,
     role: "teacher",
   };
+  console.log(formattedTeacherData);
+  console.log(formattedUserData);
 
   try {
     await Promise.all([
@@ -952,6 +962,47 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
   };
 
   try {
+    const isExist = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`,
+      {
+        params: {
+          kelas: Number(class_id),
+          day: day,
+        },
+      }
+    );
+
+    const { data: isExtracurricular } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${subject_id}`
+    );
+
+    const newStartTime = new Date(`1970-01-01T${start_time}:00Z`).getTime();
+    const newEndTime = new Date(`1970-01-01T${end_time}:00Z`).getTime();
+
+    const existingSchedules = isExist.data.data;
+    let isConflict = false;
+
+    if (existingSchedules.length > 0) {
+      for (const existing of existingSchedules) {
+        const existingStartTime = new Date(existing.start_time).getTime();
+        const existingEndTime = new Date(existing.end_time).getTime();
+
+        if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
+          isConflict = true;
+          break;
+        }
+      }
+    }
+
+    if (isConflict && isExtracurricular.data.category.id !== 2) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Jadwal yang Anda masukkan bertabrakan dengan jadwal lain!",
+      });
+      return false;
+    }
+
     const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`,
       schedulePayload
@@ -960,20 +1011,15 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
     Swal.fire({
       icon: "success",
       title: "Success!",
-      text: "Class schedule successfully created!",
+      text: "Jadwal berhasil berhasil ditambahkan.",
     });
 
     return true;
   } catch (error) {
-    console.error("Error creating class schedule:", error);
     Swal.fire({
       icon: "error",
       title: "Oops...",
-      text: error.response
-        ? error.response.data.error === "P2002"
-          ? `Jadwal yang anda masukkan bertabrakan dengan jadwal lain!`
-          : "Something went wrong!"
-        : "Something went wrong!",
+      text: "Something went wrong! With server.",
     });
   } finally {
     setLoading(false);
@@ -996,6 +1042,46 @@ export const updateSchedule = async (scheduleData, id, setLoading) => {
   };
 
   try {
+    const isExist = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`,
+      {
+        params: {
+          kelas: Number(class_id),
+          day: day,
+        },
+      }
+    );
+
+    const { data: isExtracurricular } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${subject_id}`
+    );
+
+    const newStartTime = new Date(`1970-01-01T${start_time}:00Z`).getTime();
+    const newEndTime = new Date(`1970-01-01T${end_time}:00Z`).getTime();
+
+    const existingSchedules = isExist.data.data;
+    let isConflict = false;
+
+    if (existingSchedules.length > 0) {
+      for (const existing of existingSchedules) {
+        const existingStartTime = new Date(existing.start_time).getTime();
+        const existingEndTime = new Date(existing.end_time).getTime();
+
+        if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
+          isConflict = true;
+          break;
+        }
+      }
+    }
+
+    if (isConflict && isExtracurricular.data.category.id !== 2) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Jadwal yang Anda masukkan bertabrakan dengan jadwal lain!",
+      });
+      return false;
+    }
     const response = await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule/${id}`,
       schedulePayload
@@ -1004,20 +1090,15 @@ export const updateSchedule = async (scheduleData, id, setLoading) => {
     Swal.fire({
       icon: "success",
       title: "Success!",
-      text: "Data successfully updated!",
+      text: "Jadwal berhasil berhasil ditambahkan.",
     });
 
     return true;
   } catch (error) {
-    console.error("Error creating class schedule:", error);
     Swal.fire({
       icon: "error",
       title: "Oops...",
-      text: error.response
-        ? error.response.data.error === "P2002"
-          ? `Jadwal yang anda masukkan bertabrakan dengan jadwal lain!`
-          : "Something went wrong!"
-        : "Something went wrong!",
+      text: "Something went wrong! With server.",
     });
   } finally {
     setLoading(false);

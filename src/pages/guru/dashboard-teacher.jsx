@@ -11,6 +11,7 @@ import { MdOutlineWatchLater, MdPendingActions } from "react-icons/md";
 import RecentAttendance from "../../features/activity/recent";
 import { fetchDataDashboard } from "../../app/api/v1/teacher-services";
 import io from "socket.io-client";
+import Notifications from "../../features/activity/notifications";
 
 let socket;
 
@@ -31,6 +32,7 @@ function DashboardTeacher() {
     onTime: 0,
     late: 0,
     attendance: [],
+    events: [],
     chartData: [],
   });
 
@@ -125,11 +127,36 @@ function DashboardTeacher() {
       </div>
       <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 lg:gap-6 md:gap-x-5 gap-y-4 mt-5 mb-5">
         <BarChart chartData={data.chartData} />
-        <RecentAttendance
-          data={data.attendance}
-          initialRowsPerPage={5}
-          initialSortOrder="asc"
-        />
+        <div className="carousel rounded-box w-full shadow-md ">
+          <div className="carousel-item w-full" id="recent-attendance">
+            <RecentAttendance
+              data={data.attendance}
+              initialRowsPerPage={5}
+              initialSortOrder="asc"
+            />
+          </div>
+          <div className="carousel-item w-full" id="notifications">
+            <Notifications
+              data={data.events}
+              initialRowsPerPage={5}
+              initialSortOrder="asc"
+            />
+          </div>
+        </div>
+      </div>
+      <div className="relative bottom-14 right-5 flex justify-end">
+        <a
+          href="#recent-attendance"
+          className="btn btn-xs dark:bg-white dark:text-black"
+        >
+          1
+        </a>
+        <a
+          href="#notifications"
+          className="btn btn-xs ml-2 dark:bg-white dark:text-black"
+        >
+          2
+        </a>
       </div>
     </>
   );

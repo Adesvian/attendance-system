@@ -2,6 +2,54 @@ import moment from "moment";
 import Swal from "sweetalert2";
 import axiosInstance from "../auth/axiosConfig";
 
+export const fetchDataDashboard = async (child, setData) => {
+  if (child && child.class && child.class.id) {
+    try {
+      const schedulePromise = axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule?class=${
+          child.class.id
+        }`
+      );
+
+      const attendancePromise = axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today?rfid=${
+          child.rfid
+        }`
+      );
+
+      const subjectAttendancePromise = axiosInstance.get(
+        `${
+          import.meta.env.VITE_BASE_URL_BACKEND
+        }/subject-attendance-today?rfid=${child.rfid}`
+      );
+
+      const events = await axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
+      );
+
+      const [scheduleResponse, attendanceResponse, subjectAttendanceResponse] =
+        await Promise.all([
+          schedulePromise,
+          attendancePromise,
+          subjectAttendancePromise,
+        ]);
+
+      const combinedAttendance = [
+        ...(attendanceResponse.data.data || []),
+        ...(subjectAttendanceResponse.data.data || []),
+      ];
+      setData((prevData) => ({
+        ...prevData,
+        schedule: scheduleResponse.data.data || [],
+        attendance: combinedAttendance,
+        events: events.data.data,
+      }));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+};
+
 export const fetchChildDataAttendanceRecords = async (
   selectedDate,
   child,

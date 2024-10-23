@@ -1,0 +1,23 @@
+#calendar {
+  width: auto;
+  margin: 0 auto;
+  font-size: 10px;
+}
+
+.fc-toolbar .fc-toolbar-title {
+  font-size: 15px;
+  font-family: "Arial", sans-serif;
+  font-weight: bold;
+}
+
+.fc .fc-daygrid-day-number {
+  font-size: 12px;
+}
+
+.fc-view-month .fc-event,
+.fc-view-agendaWeek .fc-event {
+  font-size: 0;
+  overflow: hidden;
+  height: 1px;
+  cursor: pointer;
+}

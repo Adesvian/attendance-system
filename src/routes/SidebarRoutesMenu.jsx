@@ -51,7 +51,6 @@ const sidebar_routes = [
     role: ["teacher", "parent"],
     icon: <LiaEnvelopeOpenTextSolid className={iconClasses} />,
   },
-
   {
     path: "",
     icon: <HiOutlineClipboard className={iconClasses} />,

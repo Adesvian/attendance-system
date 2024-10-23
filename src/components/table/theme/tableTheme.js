@@ -71,7 +71,7 @@ const getTheme = (theme) => {
               color: isDarkTheme ? "white" : "inherit",
             },
             "& .MuiPaginationItem-root.Mui-selected": {
-              backgroundColor: isDarkTheme ? "white" : "#000000",
+              backgroundColor: isDarkTheme ? "white" : "inherit",
               color: isDarkTheme ? "black" : "inherit",
             },
             "& .MuiPaginationItem-page": {

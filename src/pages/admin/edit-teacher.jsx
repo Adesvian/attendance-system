@@ -220,6 +220,7 @@ function EditTeacher() {
               >
                 <option value="Class Teacher">Wali Kelas</option>
                 <option value="Subject Teacher">Guru Mapel</option>
+                <option value="Ekstra Teacher">Guru Ekskul</option>
               </select>
             </div>
           </div>

@@ -3,76 +3,168 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
 import axios from "axios";
 import moment from "moment";
+import SingleButton from "../../components/button/Button";
+import {
+  enrollStudents,
+  fetchSChedule,
+  fetchStudentsEnrollment,
+} from "../../app/api/v1/teacher-services";
+import EnrollModal from "../../components/modal/EnrollModal";
 
 function Schedule() {
   const dispatch = useDispatch();
   const teacher = useSelector((state) => state.auth.teacher);
   const [activeTab, setActiveTab] = useState("senin");
-  const [scheduleData, setScheduleData] = useState({
-    schedule: [],
-  });
-
-  const tabContent = {
-    senin: "Tab content for Senin",
-    selasa: "Tab content for Selasa",
-    rabu: "Tab content for Rabu",
-    kamis: "Tab content for Kamis",
-    jumat: "Tab content for Jumat",
-  };
+  const [scheduleData, setScheduleData] = useState({ schedule: [] });
+  const [students, setStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStudentsByClass, setSelectedStudentsByClass] = useState({});
+  const [subjectId, setSubjectId] = useState(null);
+  const [selectedClassId, setSelectedClassId] = useState("");
 
   useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule/teacher/${
-            teacher.nid
-          }`
+    const loadSchedule = async () => {
+      await fetchSChedule(
+        teacher,
+        setScheduleData,
+        setSelectedClassId,
+        setSubjectId
+      );
+    };
+
+    loadSchedule();
+    dispatch(setPageTitle({ title: "Jadwal Mengajar" }));
+  }, [dispatch, teacher.nid]);
+
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (selectedClassId) {
+        await fetchStudentsEnrollment(
+          selectedClassId,
+          setStudents,
+          scheduleData
         );
-        setScheduleData({ schedule: response.data.data || [] });
-      } catch (error) {
-        console.error("Error fetching schedule:", error);
       }
     };
 
-    fetchSchedule();
-    dispatch(setPageTitle({ title: "Jadwal Mengajar" }));
-  }, [dispatch, teacher.nid]);
+    loadStudents();
+  }, [selectedClassId, scheduleData]);
+
+  useEffect(() => {
+    if (scheduleData.schedule.length > 0 && !selectedClassId) {
+      const firstClassId = scheduleData.schedule[0].class_id;
+      setSelectedClassId(firstClassId);
+    }
+  }, [scheduleData, selectedClassId]);
 
   const filteredLessons = scheduleData.schedule.filter(
     (lesson) => lesson.day === activeTab
   );
 
-  // Group lessons by class name
   const groupedLessons = filteredLessons.reduce((acc, lesson) => {
     const className = lesson.class.name;
-    if (!acc[className]) {
-      acc[className] = [];
-    }
+    acc[className] = acc[className] || [];
     acc[className].push(lesson);
     return acc;
   }, {});
 
-  // Sort class names
-  const sortedClassNames = Object.keys(groupedLessons).sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const sortedClassNames = Object.keys(groupedLessons).sort();
 
   const formatTime = (time) => moment.utc(time).format("HH:mm");
 
+  const handleOpenModal = async () => {
+    const enrollResponse = await axios.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll/${subjectId}`
+    );
+
+    const enrolledStudents = enrollResponse.data.data.map(
+      (student) => student.student_rfid
+    );
+    setSelectedStudentsByClass((prev) => ({
+      ...prev,
+      [selectedClassId]: enrolledStudents,
+    }));
+    document.getElementById("enroll").showModal();
+  };
+
+  const handleCloseModal = () => {
+    setSearchTerm("");
+    document.getElementById("enroll").close();
+  };
+
+  const handleCheckboxChange = (id) => {
+    setSelectedStudentsByClass((prev) => ({
+      ...prev,
+      [selectedClassId]: prev[selectedClassId]?.includes(id)
+        ? prev[selectedClassId].filter((studentId) => studentId !== id)
+        : [...(prev[selectedClassId] || []), id],
+    }));
+  };
+
+  const handleSelectAllChange = () => {
+    setSelectedStudentsByClass((prev) => {
+      const currentSelected = prev[selectedClassId] || [];
+      const allStudentIds = students.map((student) => student.rfid);
+      const isAllSelected = currentSelected.length === students.length;
+
+      return {
+        ...prev,
+        [selectedClassId]: isAllSelected ? [] : allStudentIds,
+      };
+    });
+  };
+
+  const filteredStudents = students.filter((student) =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleEnrollStudents = async () => {
+    await enrollStudents(
+      subjectId,
+      selectedStudentsByClass[selectedClassId] || [],
+      handleCloseModal
+    );
+  };
+
+  const uniqueClasses = [
+    ...new Set(scheduleData.schedule.map((item) => item.class_id)),
+  ].sort();
+
   return (
     <>
+      {teacher.type === "Ekstra Teacher" && (
+        <div className="grid justify-end">
+          <SingleButton
+            className="bg-[#347928] hover:bg-[#2d6424] text-white mb-2"
+            onClick={handleOpenModal}
+            btnTitle={"Enroll Siswa"}
+            disabled={subjectId === null}
+          />
+          <EnrollModal
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedClassId={selectedClassId}
+            setSelectedClassId={setSelectedClassId}
+            uniqueClasses={uniqueClasses}
+            filteredStudents={filteredStudents}
+            selectedStudents={selectedStudentsByClass[selectedClassId] || []}
+            handleSelectAllChange={handleSelectAllChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleCloseModal={handleCloseModal}
+            handleEnrollStudents={handleEnrollStudents}
+          />
+        </div>
+      )}
+
       <div
         role="tablist"
         className="tabs tabs-lifted lg:tabs-lg mb-4 overflow-x-auto whitespace-nowrap"
       >
-        {Object.keys(tabContent).map((day) => (
+        {["senin", "selasa", "rabu", "kamis", "jumat"].map((day) => (
           <button
             key={day}
-            role="tab"
-            className={`tab [--tab-bg:#347928] dark:[--tab-bg:white] dark:[--tab-border-color:#fff] flex-shrink-0 ${
-              activeTab === day
-                ? "tab-active text-white dark:!text-[#1a1a1a]"
-                : "text-gray-800 dark:text-gray-200"
+            className={`tab [--tab-bg:#347928] flex-shrink-0 ${
+              activeTab === day ? "tab-active text-white" : "text-gray-800"
             }`}
             onClick={() => setActiveTab(day)}
           >
@@ -83,24 +175,20 @@ function Schedule() {
 
       {sortedClassNames.length > 0 ? (
         <div className="join join-vertical w-full">
-          {sortedClassNames.map((className, index) => (
+          {sortedClassNames.map((className) => (
             <div
               key={className}
-              className="collapse collapse-arrow join-item border-gray-200 dark:border-gray-700 border"
+              className="collapse collapse-arrow join-item border"
             >
-              <input
-                type="radio"
-                name="accordion"
-                defaultChecked={index === 0}
-              />
+              <input type="radio" name="accordion" />
               <div className="collapse-title text-xl font-medium">
-                {className} {/* Display class name */}
+                {className}
               </div>
               <div className="collapse-content">
                 {groupedLessons[className].map((lesson) => (
                   <div
                     key={lesson.id}
-                    className="card p-4 bg-gray-100 dark:bg-base-300 rounded shadow text-black dark:text-dark-text flex flex-col mb-2"
+                    className="card p-4 bg-gray-100 rounded shadow mb-2"
                   >
                     <h3 className="font-bold">{lesson.subject.name}</h3>
                     <p>Jam Mulai: {formatTime(lesson.start_time)}</p>

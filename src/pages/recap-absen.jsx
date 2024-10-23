@@ -45,31 +45,6 @@ const RecapAbsensi = () => {
     setSelectedSubject(event.target.value);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchDataClassOption(
-        user,
-        setClassOptions,
-        setSubjectOptions,
-        setSelectedClass,
-        setSelectedSubject
-      );
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
-        );
-        const formattedHolidays = response.data.data.map((holiday) => ({
-          date: moment(holiday.date).format("DD-MM-YYYY"),
-          description: holiday.description,
-        }));
-        setHolidays(formattedHolidays);
-      } catch (error) {
-        console.error("Error fetching holidays:", error);
-      }
-    };
-    fetchData();
-  }, []);
-
   const generateColumns = () => {
     const daysInMonth = selectedDate ? moment(selectedDate).daysInMonth() : 0;
     const cols = [
@@ -138,20 +113,50 @@ const RecapAbsensi = () => {
 
   useEffect(() => {
     dispatch(setPageTitle({ title: "Rekapitulasi Absensi" }));
+    const fetchData = async () => {
+      await fetchDataClassOption(
+        user,
+        setClassOptions,
+        setSubjectOptions,
+        setSelectedClass,
+        setSelectedSubject
+      );
+
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
+        );
+        const formattedHolidays = response.data.data.map((holiday) => ({
+          date: moment(holiday.date).format("DD-MM-YYYY"),
+          description: holiday.description,
+        }));
+        setHolidays(formattedHolidays);
+      } catch (error) {
+        console.error("Error fetching holidays:", error);
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
     if (parent_user != null) {
       fetchChildDataAttendanceRecords(selectedDate, child, holidays, setData);
     } else {
-      if (user == null || user.class != null) {
+      if (user == null) {
         fetchDataAttendanceRecords(
           selectedDate,
           selectedClass,
           holidays,
           setData
         );
-      } else {
+      } else if (user.class != null && selectedClass == user.class.id) {
+        fetchDataAttendanceRecords(
+          selectedDate,
+          selectedClass,
+          holidays,
+          setData
+        );
+      } else if (user.class == null || selectedClass != user.class.id) {
         fetchDataSubjectAttendanceRecords(
           selectedDate,
           selectedClass,
@@ -204,6 +209,16 @@ const RecapAbsensi = () => {
                   options={SubjectOptions}
                 />
               )}
+              {(user != null && user.class == null) ||
+                user == null ||
+                (selectedClass != user.class.id && (
+                  <CustomSelect
+                    value={selectedSubject}
+                    size="medium"
+                    onChange={handleSubjectChange}
+                    options={SubjectOptions}
+                  />
+                ))}
             </>
           )}
         </div>

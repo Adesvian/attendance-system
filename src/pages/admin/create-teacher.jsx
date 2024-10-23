@@ -30,7 +30,8 @@ function CreateTeacher() {
       setTeacherData((prevData) => ({
         ...prevData,
         [name]: value,
-        class: value === "Subject Teacher" ? null : 1,
+        class:
+          value === "Subject Teacher" || value === "Ekstra Teacher" ? null : 1,
       }));
     } else if (name === "nid") {
       setTeacherData({
@@ -179,6 +180,7 @@ function CreateTeacher() {
               >
                 <option value="Class Teacher">Wali Kelas</option>
                 <option value="Subject Teacher">Guru Mapel</option>
+                <option value="Ekstra Teacher">Guru Ekskul</option>
               </select>
             </div>
           </div>
