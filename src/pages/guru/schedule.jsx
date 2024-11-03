@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
-import axios from "axios";
 import moment from "moment";
 import SingleButton from "../../components/button/Button";
 import {
@@ -10,6 +9,7 @@ import {
   fetchStudentsEnrollment,
 } from "../../app/api/v1/teacher-services";
 import EnrollModal from "../../components/modal/EnrollModal";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
 function Schedule() {
   const dispatch = useDispatch();
@@ -73,7 +73,7 @@ function Schedule() {
   const formatTime = (time) => moment.utc(time).format("HH:mm");
 
   const handleOpenModal = async () => {
-    const enrollResponse = await axios.get(
+    const enrollResponse = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll/${subjectId}`
     );
 
@@ -159,6 +159,7 @@ function Schedule() {
       <div
         role="tablist"
         className="tabs tabs-lifted lg:tabs-lg mb-4 overflow-x-auto whitespace-nowrap"
+        data-testid="schedule-element"
       >
         {["senin", "selasa", "rabu", "kamis", "jumat"].map((day) => (
           <button

@@ -36,20 +36,22 @@ function Subject() {
 
   return (
     <>
-      <SearchAndButton
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        buttonLabel="Tambah Data Mapel"
-        onButtonClick={() => navigate("/data-mapel/create-mapel")}
-      />
+      <div data-testid="subject-element">
+        <SearchAndButton
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          buttonLabel="Tambah Data Mapel"
+          onButtonClick={() => navigate("/data-mapel/create-mapel")}
+        />
 
-      <TableDataManager
-        data={data}
-        columns={columns}
-        handleAct1={handleEdit}
-        handleAct2={handleDelete}
-        searchQuery={searchQuery}
-      />
+        <TableDataManager
+          data={data}
+          columns={columns}
+          handleAct1={handleEdit}
+          handleAct2={handleDelete}
+          searchQuery={searchQuery}
+        />
+      </div>
     </>
   );
 }

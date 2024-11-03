@@ -40,20 +40,22 @@ function ClassSchedule() {
 
   return (
     <>
-      <SearchAndButton
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        buttonLabel="Tambah Jadwal Guru"
-        onButtonClick={() => navigate("/data-jadwal/create-jadwal")}
-      />
+      <div data-testid="class-schedule-element">
+        <SearchAndButton
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          buttonLabel="Tambah Jadwal Guru"
+          onButtonClick={() => navigate("/data-jadwal/create-jadwal")}
+        />
 
-      <TableDataManager
-        data={data}
-        columns={columns}
-        handleAct1={handleEdit}
-        handleAct2={handleDelete}
-        searchQuery={searchQuery}
-      />
+        <TableDataManager
+          data={data}
+          columns={columns}
+          handleAct1={handleEdit}
+          handleAct2={handleDelete}
+          searchQuery={searchQuery}
+        />
+      </div>
     </>
   );
 }

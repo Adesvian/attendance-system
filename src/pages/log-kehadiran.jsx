@@ -132,7 +132,7 @@ function LogKehadiran() {
 
   return (
     <>
-      <div className="relative mb-14 lg:mb-0">
+      <div className="relative mb-14 lg:mb-0" data-testid="logs-element">
         <FaSearch className="absolute right-[17.3rem] top-[.8rem] z-10 text-md text-gray-300 dark:text-gray-600" />
         <input
           type="text"
@@ -165,7 +165,7 @@ function LogKehadiran() {
               }`}
             >
               <div className="grid lg:grid-cols-1 md:grid-cols-2 grid-cols-1 mt-3 lg:-mt-10">
-                <div className="flex justify-end gap-x-1 lg:relative lg:right-[20rem] lg:top-[3rem]">
+                <div className="flex lg:justify-start justify-end  gap-x-1 lg:relative lg:left-[0rem] lg:top-[3rem]">
                   {tab.exportFunction(tab.ref)}
                 </div>
                 <TableComponent

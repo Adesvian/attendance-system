@@ -4,7 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import SingleButton from "../../components/button/Button";
 import TextInput from "../../components/input/TextInput";
-import axios from "axios";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
@@ -18,41 +18,37 @@ function Holidays() {
 
   useEffect(() => {
     dispatch(setPageTitle({ title: "Events Calendar" }));
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
-        );
-        const formattedEvents = response.data.data.map((event) => ({
-          id: event.id,
-          title: event.name,
-          date: event.date.split("T")[0],
-        }));
-        setEvents(formattedEvents);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      }
-    };
-
     fetchEvents();
   }, []);
 
-  const handleDateClick = (arg) => {
-    setHolidayDate(arg.dateStr);
-    setHolidayName("");
-    setSelectedEventId(null);
+  const fetchEvents = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
+      );
+      const formattedEvents = response.data.data.map((event) => ({
+        id: event.id,
+        title: event.name,
+        date: event.date.split("T")[0],
+      }));
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
+  const openModal = (name = "", date = "", eventId = null) => {
+    setHolidayName(name);
+    setHolidayDate(date);
+    setSelectedEventId(eventId);
     document.getElementById("ModalEvent").showModal();
   };
 
+  const handleDateClick = (arg) => openModal("", arg.dateStr);
+
   const handleEventClick = (arg) => {
-    const eventId = Number(arg.event.id);
-    const event = events.find((e) => e.id === eventId);
-    if (event) {
-      setHolidayName(event.title);
-      setHolidayDate(event.date);
-      setSelectedEventId(event.id);
-      document.getElementById("ModalEvent").showModal();
-    }
+    const event = events.find((e) => e.id === Number(arg.event.id));
+    if (event) openModal(event.title, event.date, event.id);
   };
 
   const handleModalClose = () => {
@@ -70,47 +66,19 @@ function Holidays() {
     };
 
     try {
-      if (selectedEventId) {
-        await axios.put(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/events/${selectedEventId}`,
-          holiday
-        );
-        Swal.fire({
-          title: "Updated!",
-          text: "Holiday has been updated!",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      } else {
-        await axios.post(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/events`,
-          holiday
-        );
-        Swal.fire({
-          title: "Success!",
-          text: "Holiday has been added!",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      }
+      const apiUrl = `${import.meta.env.VITE_BASE_URL_BACKEND}/events/${
+        selectedEventId || ""
+      }`;
+      const method = selectedEventId ? axiosInstance.put : axiosInstance.post;
+      await method(apiUrl, holiday);
 
-      const fetchEvents = async () => {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
-          );
-          const formattedEvents = response.data.data.map((event) => ({
-            id: event.id,
-            title: event.name,
-            date: event.date.split("T")[0],
-          }));
-          setEvents(formattedEvents);
-        } catch (error) {
-          console.error("Error fetching events:", error);
-        }
-      };
+      Swal.fire({
+        title: selectedEventId ? "Updated!" : "Success!",
+        text: `Holiday has been ${selectedEventId ? "updated" : "added"}!`,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
 
       fetchEvents();
     } catch (error) {
@@ -122,7 +90,7 @@ function Holidays() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(
+      await axiosInstance.delete(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/events/${selectedEventId}`
       );
       Swal.fire({
@@ -132,22 +100,6 @@ function Holidays() {
         timer: 1500,
         showConfirmButton: false,
       });
-
-      const fetchEvents = async () => {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
-          );
-          const formattedEvents = response.data.data.map((event) => ({
-            id: event.id,
-            title: event.name,
-            date: event.date.split("T")[0],
-          }));
-          setEvents(formattedEvents);
-        } catch (error) {
-          console.error("Error fetching events:", error);
-        }
-      };
 
       fetchEvents();
     } catch (error) {

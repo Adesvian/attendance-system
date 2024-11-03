@@ -95,7 +95,7 @@ function EditTeacher() {
     dispatch(setPageTitle({ title: "Edit Guru" }));
   }, []);
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="edit-teacher-element">
       <form onSubmit={handleSubmit}>
         {/* NIK Guru */}
         <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">

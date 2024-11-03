@@ -986,14 +986,17 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
       for (const existing of existingSchedules) {
         const existingStartTime = new Date(existing.start_time).getTime();
         const existingEndTime = new Date(existing.end_time).getTime();
-
-        if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
-          isConflict = true;
-          break;
+        if (existing.day === day && existing.class_id === parseInt(class_id)) {
+          if (
+            newStartTime < existingEndTime &&
+            newEndTime > existingStartTime
+          ) {
+            isConflict = true;
+            break;
+          }
         }
       }
     }
-
     if (isConflict && isExtracurricular.data.category.id !== 2) {
       Swal.fire({
         icon: "error",
@@ -1090,7 +1093,7 @@ export const updateSchedule = async (scheduleData, id, setLoading) => {
     Swal.fire({
       icon: "success",
       title: "Success!",
-      text: "Jadwal berhasil berhasil ditambahkan.",
+      text: "Jadwal berhasil berhasil diperbarui.",
     });
 
     return true;
@@ -1647,6 +1650,24 @@ export const DeleteSession = async (setLoading, setData, data) => {
 };
 
 export const updateNotification = async (setLoading, greet, number) => {
+  const requiredPlaceholders = ["{nama}", "{metode}", "{waktu}", "{status}"];
+
+  const missingPlaceholders = requiredPlaceholders.filter(
+    (placeholder) => !greet.includes(placeholder)
+  );
+
+  if (missingPlaceholders.length > 0) {
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: `Silahkan gunakan placeholder berikut: ${missingPlaceholders.join(
+        ", "
+      )}`,
+      showConfirmButton: true,
+    });
+    return false;
+  }
+
   setLoading(true);
   try {
     const response = await axiosInstance.put(
@@ -1665,8 +1686,7 @@ export const updateNotification = async (setLoading, greet, number) => {
       showConfirmButton: false,
       timer: 1500,
     });
-
-    setLoading(false);
+    return true;
   } catch (error) {
     console.error("Error:", error);
     Swal.fire({
@@ -1675,6 +1695,7 @@ export const updateNotification = async (setLoading, greet, number) => {
       text: "Failed to update the greeting template.",
       showConfirmButton: true,
     });
+    return false;
   } finally {
     setLoading(false);
   }

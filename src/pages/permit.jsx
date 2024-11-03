@@ -171,7 +171,7 @@ function Permit() {
     setColumns(newColumns);
   }, [dispatch, parent_user, user]);
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="permit-element">
       <SearchAndButton
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}

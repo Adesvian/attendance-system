@@ -8,7 +8,7 @@ import TextInput from "../../components/input/TextInput";
 
 function CreatePermit() {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const child = useSelector((state) => state.header.child);
   const id = useRef(null);
   const fileInputRef = useRef(null);
@@ -50,7 +50,7 @@ function CreatePermit() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    const maxSize = 10 * 1024 * 1024;
 
     if (file && file.size > maxSize) {
       setErrors((prevErrors) => ({

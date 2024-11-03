@@ -162,8 +162,6 @@ function Threshold() {
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
               Default jam check-out <span className="font-bold">13:00:00</span>.
-              Jam check-out yang di set diatas jam 13:00:00 maka diacatat
-              sebagai custom jam check-out.
             </p>
           </div>
           <div className="flex gap-2">

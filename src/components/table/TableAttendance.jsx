@@ -152,7 +152,7 @@ const TableComponent = forwardRef(
                   stickyHeader
                   aria-label="sticky table"
                   ref={ref}
-                  className="whitespace-nowrap table-auto"
+                  className=" table-auto"
                 >
                   <TableHead>
                     <TableRow>
@@ -171,7 +171,7 @@ const TableComponent = forwardRef(
                             left: index === 0 ? 0 : "auto",
                             zIndex: index === 0 ? 10 : 2,
                             minWidth: col.field === "name" ? "150px" : "auto",
-                            whiteSpace: "nowrap", // Prevent wrapping of cell content
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {type === "logs-table" ? (
@@ -206,7 +206,7 @@ const TableComponent = forwardRef(
                               position: colIndex === 0 ? "sticky" : "static",
                               left: colIndex === 0 ? 0 : "auto",
                               zIndex: colIndex === 0 ? 5 : "auto",
-                              whiteSpace: "nowrap", // Prevent wrapping of cell content
+                              fontSize: colIndex === 0 ? "0.7rem" : "1rem",
                             }}
                           >
                             {col.field === "profile" && (

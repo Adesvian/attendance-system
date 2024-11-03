@@ -6,7 +6,7 @@ import TextInput from "../../components/input/TextInput";
 import SingleButton from "../../components/button/Button";
 import { submitSubjectData } from "../../app/api/v1/admin-services";
 
-function CreateTeacher() {
+function CreateSubject() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ function CreateTeacher() {
     dispatch(setPageTitle({ title: "Tambah Mata Pelajaran" }));
   }, []);
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="add-subject-element">
       <form onSubmit={handleSubmit}>
         {/* Nama Subject */}
         <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
@@ -100,4 +100,4 @@ function CreateTeacher() {
   );
 }
 
-export default CreateTeacher;
+export default CreateSubject;

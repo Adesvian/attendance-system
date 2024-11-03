@@ -51,7 +51,10 @@ function Dashboard() {
 
   return (
     <>
-      <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 mt-5">
+      <div
+        className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 mt-5"
+        data-testid="dashboard-element"
+      >
         <StatsCard
           Icon={
             <FiUsers className="bg-indigo-200 text-indigo-600 w-16 h-16 rounded-[22px] p-4" />

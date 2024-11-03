@@ -164,10 +164,10 @@ function Reset() {
                 {errorMessage}
               </Alert>
             )}
-            <div className="col-span-3">
+            <div className="col-span-3 z-30">
               <SingleButton
                 type="submit"
-                className="btn bg-green-900 hover:bg-green-800 w-full border-none text-white z-10"
+                className="btn bg-green-900 hover:bg-green-800 w-full border-none text-white"
                 btnTitle="Verify"
                 disabled={loading}
               />

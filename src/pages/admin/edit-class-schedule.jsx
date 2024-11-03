@@ -108,7 +108,7 @@ function EditClassSchedule() {
   }, {});
 
   return (
-    <div className="p-2 px-10 font-poppins">
+    <div className="p-2 font-poppins" data-testid="edit-class-schedule-element">
       <form onSubmit={handleSubmit}>
         <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
           {/* Teacher Selection */}

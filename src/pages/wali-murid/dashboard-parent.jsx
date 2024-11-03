@@ -42,10 +42,12 @@ const DashboardParent = () => {
     dispatch(setPageTitle({ title: "Dashboard Wali Murid" }));
   }, [child, dispatch]);
 
-  console.log(data);
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 mt-5">
+      <div
+        className="grid grid-cols-1 gap-6 mt-5"
+        data-testid="dashboard-element"
+      >
         <div className="relative parent-welcome-card bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-8 font-poppins flex flex-row">
           <div className="z-40">
             <h1 className="text-2xl font-bold">
@@ -68,7 +70,7 @@ const DashboardParent = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5 mb-5">
-        <div className="md:col-span-2 lg:col-span-2 col-span-1 bg-white dark:bg-base-100 rounded-md p-5 ">
+        <div className="md:col-span-2 lg:col-span-2 col-span-1 bg-white dark:bg-base-100 rounded-md">
           <div
             role="tablist"
             className="tabs tabs-lifted tab-xs lg:tabs-lg mb-4 overflow-x-auto whitespace-nowrap "

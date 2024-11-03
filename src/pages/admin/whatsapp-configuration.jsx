@@ -40,6 +40,7 @@ function WhatsappConfiguration() {
     status: "Pending",
     greet_template: "",
   });
+  const [defaultGreetTemplate, setDefaultGreetTemplate] = useState("");
   let QrCount = 0;
 
   const handleQR = async () => {
@@ -56,9 +57,19 @@ function WhatsappConfiguration() {
 
   const handleGreetSubmit = async (event) => {
     event.preventDefault();
-    document.getElementById("modal_greet").close();
     const greet = event.target.custom_greet.value;
-    updateNotification(setLoading, greet, data.number);
+    document.getElementById("modal_greet").close();
+
+    const success = await updateNotification(setLoading, greet, data.number);
+
+    if (!success) {
+      setData((prevData) => ({
+        ...prevData,
+        greet_template: defaultGreetTemplate,
+      }));
+    } else {
+      setDefaultGreetTemplate(greet);
+    }
   };
 
   const handleDisconnect = async () => {
@@ -85,7 +96,6 @@ function WhatsappConfiguration() {
   const handleSubmit = async (event) => {
     SubmitSession(event, setLoading, socket, data);
   };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -97,6 +107,7 @@ function WhatsappConfiguration() {
         if (fetchedData.length > 0) {
           const firstEntry = fetchedData[0];
           setData(firstEntry);
+          setDefaultGreetTemplate(firstEntry.greet_template);
           setHasData(true);
 
           if (firstEntry.status === "active") {
@@ -181,7 +192,7 @@ function WhatsappConfiguration() {
   }, []);
 
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="whatsapp-config-element">
       {!hasData ? (
         <form onSubmit={handleSubmit}>
           <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
@@ -381,12 +392,12 @@ function WhatsappConfiguration() {
               placeholder="Enter your custom greeting here"
               className="w-full h-60 p-2 border border-gray-300 dark:bg-gray-800 rounded"
               value={data.greet_template}
-              onChange={(e) => {
-                setData({
-                  ...data,
+              onChange={(e) =>
+                setData((prevData) => ({
+                  ...prevData,
                   greet_template: e.target.value,
-                });
-              }}
+                }))
+              }
             />
             <div className="flex gap-2 mt-2">
               <span className="text-red-500">*</span>

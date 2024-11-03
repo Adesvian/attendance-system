@@ -3,9 +3,9 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import TextInput from "../../components/input/TextInput";
 import SingleButton from "../../components/button/Button";
-import axios from "axios";
 import { updateSubject } from "../../app/api/v1/admin-services";
 import { setPageTitle } from "../../redux/headerSlice";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 
 function EditSubject() {
   const { id } = useParams();
@@ -20,7 +20,7 @@ function EditSubject() {
   useEffect(() => {
     const fetchSubjectData = async () => {
       try {
-        const response = await axios.get(
+        const response = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${id}`
         );
 
@@ -53,7 +53,7 @@ function EditSubject() {
     dispatch(setPageTitle({ title: "Edit Mata Pelajaran" }));
   }, []);
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="edit-subject-element">
       <form onSubmit={handleSubmit}>
         {/* Nama Subject */}
         <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">

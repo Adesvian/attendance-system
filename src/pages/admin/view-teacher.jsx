@@ -67,7 +67,7 @@ function ViewTeacher() {
   }, []);
 
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="detail-teacher-element">
       <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
         <div className="sm:col-span-6">
           <label

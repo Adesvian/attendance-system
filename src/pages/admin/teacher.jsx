@@ -41,21 +41,23 @@ function Guru() {
 
   return (
     <>
-      <SearchAndButton
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        buttonLabel="Tambah Data Guru"
-        onButtonClick={() => navigate("/teacher/create-teacher")}
-      />
+      <div data-testid="teacher-element">
+        <SearchAndButton
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          buttonLabel="Tambah Data Guru"
+          onButtonClick={() => navigate("/teacher/create-teacher")}
+        />
 
-      <TableDataManager
-        data={data}
-        columns={columns}
-        handleAct0={handleView}
-        handleAct1={handleEdit}
-        handleAct2={handleDelete}
-        searchQuery={searchQuery}
-      />
+        <TableDataManager
+          data={data}
+          columns={columns}
+          handleAct0={handleView}
+          handleAct1={handleEdit}
+          handleAct2={handleDelete}
+          searchQuery={searchQuery}
+        />
+      </div>
     </>
   );
 }

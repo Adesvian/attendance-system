@@ -1,14 +1,22 @@
 import React from "react";
 import Reset from "../features/user/Reset";
+import { useNavigate } from "react-router-dom";
 
 function Forgot() {
+  const navigate = useNavigate();
+
+  const handleLogoClick = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="wrapper relative overflow-hidden">
       <img
         src="./assets/school-logo.png"
         alt="school logo"
-        className="absolute top-5 left-7  w-24 h-24"
+        className="absolute top-5 left-7 w-24 h-24 cursor-pointer"
         loading="lazy"
+        onClick={handleLogoClick}
       />
       <img
         src="./assets/school-logo-background.png"

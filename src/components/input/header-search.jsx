@@ -11,9 +11,10 @@ const SearchAndButton = ({
   onButtonClick,
 }) => {
   const teacher = useSelector((state) => state.auth.teacher);
+  const span = teacher ? "lg:col-span-6" : "lg:col-span-4";
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-x-6">
-      <div className="lg:col-span-4 relative">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-x-6 mb-4">
+      <div className={`${span} relative`}>
         <TextInput
           id="search"
           name="search"

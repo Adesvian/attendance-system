@@ -164,7 +164,7 @@ function EditStudent() {
   }, []);
   return (
     <>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} data-testid="edit-student-element">
         <div className="p-2 font-poppins">
           <div className="mt-5 grid grid-cols-1 gap-x-6 sm:grid-cols-6">
             <div className="sm:col-span-3">

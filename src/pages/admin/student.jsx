@@ -44,21 +44,23 @@ function Student() {
   }, []);
   return (
     <>
-      <SearchAndButton
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        buttonLabel="Tambah Data Siswa"
-        onButtonClick={() => navigate("/data-siswa/create-siswa")}
-      />
+      <div data-testid="student-element">
+        <SearchAndButton
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          buttonLabel="Tambah Data Siswa"
+          onButtonClick={() => navigate("/data-siswa/create-siswa")}
+        />
 
-      <TableDataManager
-        data={data}
-        columns={columns}
-        handleAct0={handleView}
-        handleAct1={handleEdit}
-        handleAct2={handleDelete}
-        searchQuery={searchQuery}
-      />
+        <TableDataManager
+          data={data}
+          columns={columns}
+          handleAct0={handleView}
+          handleAct1={handleEdit}
+          handleAct2={handleDelete}
+          searchQuery={searchQuery}
+        />
+      </div>
     </>
   );
 }

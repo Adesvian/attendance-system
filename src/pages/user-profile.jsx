@@ -44,15 +44,20 @@ function UserProfile() {
   };
 
   return (
-    <div className="p-8 font-poppins flex">
+    <div
+      className="p-4 sm:p-8 font-poppins flex flex-col lg:flex-row items-center lg:items-start"
+      data-testid="user-profile-element"
+    >
       <img
-        className="w-32 h-32 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600 drop-shadow-md mx-14"
+        className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600 drop-shadow-md mb-4 lg:mb-0 lg:mr-8"
         src="./assets/user-profile.png"
         alt="User Avatar"
       />
+
       <div className="flex flex-col w-full">
-        <form className="grid grid-cols-1 gap-y-4" onSubmit={handleSave}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form className="grid gap-y-4" onSubmit={handleSave}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* NIK Field */}
             <div>
               <label
                 className="block text-gray-700 dark:text-gray-300 mb-1"
@@ -68,6 +73,8 @@ function UserProfile() {
                 className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
               />
             </div>
+
+            {/* Name Field */}
             <div>
               <label
                 className="block text-gray-700 dark:text-gray-300 mb-1"
@@ -83,6 +90,8 @@ function UserProfile() {
                 className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
               />
             </div>
+
+            {/* Gender Field */}
             <div>
               <label
                 className="block text-gray-700 dark:text-gray-300 mb-1"
@@ -99,7 +108,9 @@ function UserProfile() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Birth Date and Place */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
                 className="block text-gray-700 dark:text-gray-300 mb-1"
@@ -131,9 +142,11 @@ function UserProfile() {
               />
             </div>
           </div>
+
+          {/* Address and Phone Number */}
           <div
-            className={`grid grid-cols-1 md:grid-cols-${
-              teacher_user ? 1 : 2
+            className={`grid grid-cols-1 ${
+              teacher_user ? "md:grid-cols-1" : "md:grid-cols-2"
             } gap-4`}
           >
             <div>
@@ -151,7 +164,7 @@ function UserProfile() {
                 className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
               />
             </div>
-            {!teacher_user && ( // Only show phone number if the user is not a teacher
+            {!teacher_user && (
               <div>
                 <label
                   className="block text-gray-700 dark:text-gray-300 mb-1"
@@ -169,8 +182,9 @@ function UserProfile() {
               </div>
             )}
           </div>
+
           {/* Password Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:gap-4">
             <div>
               <label
                 className="block text-gray-700 dark:text-gray-300 mb-1"
@@ -202,16 +216,22 @@ function UserProfile() {
               />
             </div>
           </div>
+
           {/* Save Button */}
-          <div className="mt-4">
+          <div className="lg:mt-4">
             <SingleButton
               type="submit"
-              disabled={!password || !confirmPassword} // Disable button if fields are empty
+              disabled={
+                !password ||
+                !confirmPassword ||
+                password.length < 6 ||
+                confirmPassword.length < 6
+              }
               className={`float-end p-2 rounded ${
                 !password || !confirmPassword
                   ? "bg-gray-400"
                   : "bg-blue-600 hover:bg-blue-700"
-              } text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
+              } text-white w-full sm:w-auto`}
             >
               Save
             </SingleButton>

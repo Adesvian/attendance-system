@@ -11,4 +11,9 @@ export default defineConfig({
   server: {
     port: process.env.PORT || 5173,
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: "./test/setup.js",
+  },
 });

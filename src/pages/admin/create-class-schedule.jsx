@@ -81,7 +81,7 @@ function CreateClassSchedule() {
   }, {});
 
   return (
-    <div className="p-2 font-poppins">
+    <div className="p-2 font-poppins" data-testid="add-class-schedule-element">
       <form onSubmit={handleSubmit}>
         <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
           {/* Teacher Selection */}
