@@ -77,8 +77,18 @@ function WhatsappConfiguration() {
   };
 
   const handleDelete = async () => {
-    DeleteSession(setLoading, setData, data.number);
-    setIsValid(false);
+    const success = await DeleteSession(setLoading, setData, data.number);
+
+    if (success) {
+      setHasData(false);
+      setIsValid(false);
+      setData((prevData) => ({
+        ...prevData,
+        number: "",
+        name: "",
+        status: "pending",
+      }));
+    }
   };
 
   const handleChange = (e) => {
@@ -122,7 +132,7 @@ function WhatsappConfiguration() {
     };
 
     fetchData();
-    dispatch(setPageTitle({ title: "Guru" }));
+    dispatch(setPageTitle({ title: "Whatsapp Configuration" }));
 
     socket = io(`${import.meta.env.VITE_SOCKET_URL_BACKEND}`);
 
@@ -142,15 +152,25 @@ function WhatsappConfiguration() {
 
     socket.on("connected-creds", async (data) => {
       try {
+        setIsConnected(true);
+
+        if (QRModal.current) {
+          setTimeout(() => {
+            QRModal.current.close();
+          }, 3000);
+        }
+
         const status_connected = {
           status: "active",
         };
+
         await axiosInstance.put(
           `${
             import.meta.env.VITE_BASE_URL_BACKEND
           }/update-whatsapp-creds/${data}`,
           status_connected
         );
+
         setData((prevData) => ({
           ...prevData,
           status: "active",
@@ -158,10 +178,6 @@ function WhatsappConfiguration() {
       } catch (error) {
         console.log(error);
       }
-      handleCloseQR();
-      setTimeout(() => {
-        setIsConnected(true);
-      }, 3000);
     });
 
     socket.on("stop-session", (data) => {
@@ -173,6 +189,8 @@ function WhatsappConfiguration() {
 
     socket.on("closed-session", (data) => {
       setHasData(false);
+      setIsValid(false);
+      setIsConnected(false);
       setData((prevData) => ({
         ...prevData,
         number: "",

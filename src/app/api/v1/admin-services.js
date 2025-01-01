@@ -5,31 +5,45 @@ import axiosInstance from "../auth/axiosConfig";
 
 export const fetchDataDashboard = async (setData) => {
   try {
-    const [
-      students,
-      subjects,
-      teachers,
-      classes,
-      permits,
-      attendance,
-      classSchedule,
-      chartData,
-    ] = await Promise.all([
-      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/students`),
-      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`),
-      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`),
-      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/classes`),
-      axiosInstance.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-today`
-      ),
-      axiosInstance.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today`
-      ),
-      axiosInstance.get(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
-      ),
-      axiosInstance.get(`${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`),
-    ]);
+    // Pertama, dapatkan data students
+    const students = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students`
+    );
+
+    // Kemudian, dapatkan data subjects
+    const subjects = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects`
+    );
+
+    // Kemudian, dapatkan data teachers
+    const teachers = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`
+    );
+
+    // Kemudian, dapatkan data classes
+    const classes = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/classes`
+    );
+
+    // Kemudian, dapatkan data permits hari ini
+    const permits = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/permits-today`
+    );
+
+    // Kemudian, dapatkan data attendance hari ini
+    const attendance = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today`
+    );
+
+    // Kemudian, dapatkan data class schedule
+    const classSchedule = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
+    );
+
+    // Terakhir, dapatkan data chart attendance
+    const chartData = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`
+    );
 
     const whatsapp = await axiosInstance.get(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/get-whatsapp-creds`
@@ -95,23 +109,19 @@ export const fetchDataAttendanceRecords = async (
   if (!selectedDate || !selectedClass) return setData([]);
 
   try {
-    const [students, attendances, permits] = await Promise.all([
-      axiosInstance.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/students?class=${selectedClass}`
-      ),
-      axiosInstance.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/attendance?class=${selectedClass}`
-      ),
-      axiosInstance.get(
-        `${
-          import.meta.env.VITE_BASE_URL_BACKEND
-        }/permits?class=${selectedClass}`
-      ),
-    ]);
+    const students = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students?class=${selectedClass}`
+    );
+
+    const attendances = await axiosInstance.get(
+      `${
+        import.meta.env.VITE_BASE_URL_BACKEND
+      }/attendance?class=${selectedClass}`
+    );
+
+    const permits = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/permits?class=${selectedClass}`
+    );
 
     const selectedMonth = moment(selectedDate).month();
     const selectedYear = moment(selectedDate).year();
@@ -602,7 +612,9 @@ export const fetchTeachers = async (setData) => {
         type:
           teacher.type === "Class Teacher"
             ? `Wali Kelas ${teacher.class_id}`
-            : "Guru Mapel",
+            : teacher.type === "Subject Teacher"
+            ? "Guru Mata Pelajaran"
+            : "Guru Ekstrakurikuler",
         ttl:
           teacher.birth_of_place || teacher.birth_of_date
             ? `${teacher.birth_of_place},${moment(teacher.birth_of_date).format(
@@ -641,20 +653,18 @@ export const submitTeacherData = async (teacherData, setLoading) => {
     password: teacherData.password,
     role: "teacher",
   };
-  console.log(formattedTeacherData);
-  console.log(formattedUserData);
 
   try {
-    await Promise.all([
-      axiosInstance.post(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`,
-        formattedTeacherData
-      ),
-      axiosInstance.post(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
-        formattedUserData
-      ),
-    ]);
+    await axiosInstance.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers`,
+      formattedTeacherData
+    );
+
+    // Jika berhasil, buat user
+    await axiosInstance.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
+      formattedUserData
+    );
 
     Swal.fire({
       icon: "success",
@@ -695,7 +705,7 @@ export const updateTeacherData = async (teacherData, id, setLoading) => {
       ? new Date(teacherData.birth_of_date).toISOString()
       : null,
     type: teacherData.type,
-    class_id: Number(teacherData.class_id),
+    class_id: parseInt(teacherData.class),
     address: teacherData.address,
   };
 
@@ -708,16 +718,15 @@ export const updateTeacherData = async (teacherData, id, setLoading) => {
   };
 
   try {
-    await Promise.all([
-      axiosInstance.put(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`,
-        formatTeacherData
-      ),
-      axiosInstance.put(
-        `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`,
-        formatUserData
-      ),
-    ]);
+    await axiosInstance.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${id}`,
+      formatTeacherData
+    );
+
+    await axiosInstance.put(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id}`,
+      formatUserData
+    );
 
     Swal.fire({
       icon: "success",
@@ -760,14 +769,13 @@ export const deleteTeacher = async (nid, setData) => {
 
   if (confirmDelete.isConfirmed) {
     try {
-      await Promise.all([
-        axiosInstance.delete(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${nid}`
-        ),
-        axiosInstance.delete(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${nid}`
-        ),
-      ]);
+      await axiosInstance.delete(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/teachers/${nid}`
+      );
+
+      await axiosInstance.delete(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${nid}`
+      );
 
       // Update the data state to remove the deleted item
       setData((prevData) => prevData.filter((teacher) => teacher.nid !== nid));
@@ -972,10 +980,6 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
       }
     );
 
-    const { data: isExtracurricular } = await axiosInstance.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${subject_id}`
-    );
-
     const newStartTime = new Date(`1970-01-01T${start_time}:00Z`).getTime();
     const newEndTime = new Date(`1970-01-01T${end_time}:00Z`).getTime();
 
@@ -995,9 +999,23 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
             break;
           }
         }
+
+        if (
+          existing.teacher_nid === teacher_nid &&
+          existing.subject.category_id !== 2
+        ) {
+          if (
+            newStartTime < existingEndTime &&
+            newEndTime > existingStartTime
+          ) {
+            isConflict = true;
+            break;
+          }
+        }
       }
     }
-    if (isConflict && isExtracurricular.data.category.id !== 2) {
+
+    if (isConflict) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -1029,7 +1047,12 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
   }
 };
 
-export const updateSchedule = async (scheduleData, id, setLoading) => {
+export const updateSchedule = async (
+  scheduleData,
+  id,
+  setLoading,
+  ScheduleDataOriginal
+) => {
   setLoading(true);
 
   const { teacher_nid, class_id, subject_id, day, start_time, end_time } =
@@ -1065,19 +1088,49 @@ export const updateSchedule = async (scheduleData, id, setLoading) => {
     const existingSchedules = isExist.data.data;
     let isConflict = false;
 
+    const isUnchanged = Object.keys(scheduleData).every(
+      (key) => scheduleData[key] === ScheduleDataOriginal[key]
+    );
+
+    if (isUnchanged) {
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Jadwal berhasil berhasil diperbarui.",
+      });
+      return true;
+    }
+
     if (existingSchedules.length > 0) {
       for (const existing of existingSchedules) {
         const existingStartTime = new Date(existing.start_time).getTime();
         const existingEndTime = new Date(existing.end_time).getTime();
+        if (existing.day === day && existing.class_id === parseInt(class_id)) {
+          if (
+            newStartTime < existingEndTime &&
+            newEndTime > existingStartTime
+          ) {
+            isConflict = true;
+            break;
+          }
+        }
 
-        if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
-          isConflict = true;
-          break;
+        if (
+          existing.teacher_nid === teacher_nid &&
+          existing.subject.category_id !== 2
+        ) {
+          if (
+            newStartTime < existingEndTime &&
+            newEndTime > existingStartTime
+          ) {
+            isConflict = true;
+            break;
+          }
         }
       }
     }
 
-    if (isConflict && isExtracurricular.data.category.id !== 2) {
+    if (isConflict) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -1156,34 +1209,22 @@ export const handleChangeParentData = (
 ) => {
   const newData = { ...studentData, [name]: value };
 
-  // If parent_type is set to 'exist'
-  if (name === "parent_exist" && newData.parent_type === "exist") {
-    const parentExist = parentData.find((parent) => parent.nid === value);
-
-    if (parentExist) {
-      newData.parent_nid = parentExist.nid;
-      newData.parent_name = parentExist.name;
-      newData.parent_gender = parentExist.gender;
-      newData.parent_birth_of_place = parentExist.birth_of_place;
-      newData.parent_birth_of_date = parentExist.birth_of_date;
-      newData.phone_num = parentExist.phone_num;
-      newData.address = parentExist.address;
+  if (newData.parent_type === "exist") {
+    // Handle existing parent
+    if (name === "parent_exist") {
+      const parentExist = parentData.find((parent) => parent.nid === value);
+      if (parentExist) {
+        Object.assign(newData, {
+          parent_nid: parentExist.nid,
+          parent_name: parentExist.name,
+          parent_gender: parentExist.gender,
+          parent_birth_of_place: parentExist.birth_of_place,
+          parent_birth_of_date: parentExist.birth_of_date,
+          phone_num: parentExist.phone_num,
+          address: parentExist.address,
+        });
+      }
     }
-  }
-
-  // If parent_type is set to 'new', reset all relevant fields
-  if (name === "parent_type" && value === "new") {
-    newData.parent_exist = ""; // Clear existing parent selection
-    newData.parent_nid = ""; // Reset NID for new parent
-    newData.parent_name = ""; // Reset name for new parent
-    newData.parent_gender = "Laki-Laki"; // Default value
-    newData.parent_birth_of_place = ""; // Reset birth place
-    newData.parent_birth_of_date = ""; // Reset birth date
-    newData.phone_num = ""; // Reset phone number
-    newData.address = ""; // Reset address
-    newData.username = ""; // Reset username
-    newData.password = ""; // Reset password
-    newData.isnew = false; // Reset isnew state
   }
 
   return newData;
@@ -1306,26 +1347,48 @@ export const submitStudentData = async (studentData, setLoading) => {
   }
 };
 
-export const updateStudentData = async (studentData, id, setLoading) => {
-  // setLoading(true);
+export const updateStudentData = async (
+  studentData,
+  id,
+  setLoading,
+  studentDataOriginal
+) => {
+  setLoading(true);
   let parentExist = false;
 
-  try {
-    await axiosInstance.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
-        studentData.parent_nid
-      }`
-    );
-    parentExist = true;
-  } catch (error) {
-    if (error.response && error.response.status === 404) {
-      parentExist = false;
-    } else {
-      parentExist = false;
+  if (
+    studentData.parent_type !== "exist" &&
+    studentData.parent_nid !== studentDataOriginal.parent_nid
+  ) {
+    try {
+      await axiosInstance.get(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+          studentData.parent_nid
+        }`
+      );
+      parentExist = true;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        parentExist = false;
+      } else {
+        console.error("Error checking parent NIK:", error);
+        setLoading(false);
+        return;
+      }
     }
   }
 
-  // Prepare student data
+  if (parentExist && studentData.parent_type !== "exist") {
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: `NIK ${studentData.parent_nid} already exists in the database!`,
+    });
+    setLoading(false);
+    return false;
+  }
+
+  // Siapkan data siswa
   const formattedData = {
     rfid: studentData.rfid,
     name: studentData.name,
@@ -1338,7 +1401,6 @@ export const updateStudentData = async (studentData, id, setLoading) => {
     parent_nid: studentData.parent_nid,
   };
 
-  // Prepare parent data only if parent_type is not "exist"
   const formatParentData =
     studentData.parent_type !== "exist"
       ? {
@@ -1365,73 +1427,53 @@ export const updateStudentData = async (studentData, id, setLoading) => {
         }
       : null;
 
-  const promises = [];
-
-  // Handle parent data update/creation based on conditions
-  if (studentData.parent_type !== "exist") {
-    // Only create or update parent if not exist
-    if (studentData.isnew) {
-      promises.push(
-        axiosInstance.post(
+  try {
+    if (studentData.parent_type !== "exist") {
+      if (studentData.isnew) {
+        await axiosInstance.post(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
           formatParentData
-        )
-      );
-      promises.push(
-        axiosInstance.post(
+        );
+        await axiosInstance.post(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
           formatUserData
-        )
-      );
-    } else {
-      if (parentExist) {
-        promises.push(
-          axiosInstance.put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
-              studentData.parent_nid
-            }`,
-            formatParentData
-          )
-        );
-        promises.push(
-          axiosInstance.put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
-              studentData.parent_nid
-            }`,
-            formatUserData
-          )
         );
       } else {
-        // If the parent does not exist and is not new, update the parent anyway
-        promises.push(
-          axiosInstance.put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
-              studentData.default_nid
-            }`,
-            formatParentData
-          )
+        await axiosInstance.put(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+            studentDataOriginal.parent_nid
+          }`,
+          formatParentData
         );
-        promises.push(
-          axiosInstance.put(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
-              studentData.default_nid
-            }`,
-            formatUserData
-          )
+        await axiosInstance.put(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
+            studentDataOriginal.parent_nid
+          }`,
+          formatUserData
         );
       }
+    } else {
+      await axiosInstance.put(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+          studentData.parent_nid
+        }`,
+        {
+          name: studentData.parent_name,
+          gender: studentData.parent_gender,
+          birth_of_place: studentData.parent_birth_of_place || null,
+          birth_of_date: studentData.parent_birth_of_date
+            ? new Date(studentData.parent_birth_of_date).toISOString()
+            : null,
+          phone_num: studentData.phone_num || null,
+          address: studentData.address || null,
+        }
+      );
     }
-  }
 
-  // Always include the student update
-  promises.push(
-    axiosInstance.put(
+    await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`,
       formattedData
-    )
-  );
-  try {
-    await Promise.all(promises);
+    );
     Swal.fire({
       icon: "success",
       title: "Success!",
@@ -1439,13 +1481,12 @@ export const updateStudentData = async (studentData, id, setLoading) => {
     });
     return true;
   } catch (error) {
-    console.error("Error updating student:", error);
     Swal.fire({
       icon: "error",
       title: "Oops...",
       text: error.response
         ? error.response.data.error === "P2002"
-          ? `RFID ${studentData.rfid} already exists!`
+          ? `Data parent already exists!`
           : "Something went wrong!"
         : "Something went wrong!",
     });
@@ -1477,14 +1518,13 @@ export const deleteStudent = async (id, setData) => {
         `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id.rfid}`
       );
       if (count.data.count === 1) {
-        await Promise.all([
-          axiosInstance.delete(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${id.parent_nid}`
-          ),
-          axiosInstance.delete(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id.parent_nid}`
-          ),
-        ]);
+        await axiosInstance.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${id.parent_nid}`
+        );
+
+        await axiosInstance.delete(
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${id.parent_nid}`
+        );
       }
       setData((prevData) => prevData.filter((item) => item.rfid !== id.rfid));
       Swal.fire({
@@ -1504,7 +1544,6 @@ export const deleteStudent = async (id, setData) => {
 };
 
 export const functionOpenQR = async (QRModal, data) => {
-  console.log(data);
   if (QRModal.current) {
     QRModal.current.showModal();
     const formatData = {
@@ -1517,7 +1556,7 @@ export const functionOpenQR = async (QRModal, data) => {
         formatData
       );
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 };
@@ -1541,7 +1580,7 @@ export const functionCloseQR = async (
         formatData
       );
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 };
@@ -1557,7 +1596,7 @@ export const ConnnectSession = async (setLoading, setIsConnected, data) => {
       setIsConnected(false);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   } finally {
     setLoading(false);
   }
@@ -1574,7 +1613,7 @@ export const DisconnectSession = async (setLoading, setIsConnected, data) => {
       setIsConnected(false);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   } finally {
     setLoading(false);
   }
@@ -1597,7 +1636,7 @@ export const SubmitSession = async (event, setLoading, socket, data) => {
       socket.emit("new-data", updatedData);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   } finally {
     setLoading(false);
   }
@@ -1798,6 +1837,14 @@ export const DefaultCheckOutSubmit = async (defaultCheckOutTime) => {
       }
     );
 
+    const data = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold`
+    );
+
+    const remainAvailClasses = data.data.data
+      .filter((entry) => entry.method === 1002 && entry.custom_time === null)
+      .map((entry) => entry.class_id);
+
     Swal.fire({
       icon: "success",
       title: "Success!",
@@ -1805,6 +1852,8 @@ export const DefaultCheckOutSubmit = async (defaultCheckOutTime) => {
       showConfirmButton: false,
       timer: 1500,
     });
+
+    return remainAvailClasses;
   } catch (error) {
     console.error("Error submitting check-out:", error);
     Swal.fire({
@@ -1867,6 +1916,14 @@ export const DeleteCheckOut = async (
       }
     );
 
+    const data = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold`
+    );
+
+    const remainAvailClasses = data.data.data
+      .filter((entry) => entry.method === 1002 && entry.custom_time === null)
+      .map((entry) => entry.class_id);
+
     setCheckOutEntries(updatedEntries);
     setAvailableClasses((prev) => [...prev, entryToDelete.class]);
 
@@ -1877,6 +1934,7 @@ export const DeleteCheckOut = async (
       showConfirmButton: false,
       timer: 1500,
     });
+    return remainAvailClasses;
   } catch (error) {
     console.error("Error submitting check-out:", error);
     Swal.fire({

@@ -23,6 +23,7 @@ function EditClassSchedule() {
     start_time: "",
     end_time: "",
   });
+  const [scheduleDataOriginal, setScheduleDataOriginal] = useState({});
   const [teachers, setTeachers] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -37,7 +38,13 @@ function EditClassSchedule() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await updateSchedule(scheduleData, id, setLoading);
+
+    const success = await updateSchedule(
+      scheduleData,
+      id,
+      setLoading,
+      scheduleDataOriginal
+    );
     if (success) {
       navigate("/data-jadwal");
     }
@@ -71,7 +78,6 @@ function EditClassSchedule() {
     dispatch(setPageTitle({ title: "Edit Jadwal Kelas" }));
   }, [dispatch]);
 
-  // Fetching the existing schedule data based on the id
   useEffect(() => {
     const fetchSubjectData = async () => {
       try {
@@ -87,6 +93,16 @@ function EditClassSchedule() {
           day: data.day || "senin",
           start_time: moment(data.start_time).utc().format("HH:mm"), // Format to HH:mm
           end_time: moment(data.end_time).utc().format("HH:mm"), // Format to HH:mm
+        });
+
+        // Simpan data asli untuk perbandingan saat submit
+        setScheduleDataOriginal({
+          teacher_nid: data.teacher_nid || "",
+          class_id: data.class_id || "",
+          subject_id: data.subject_id || "",
+          day: data.day || "senin",
+          start_time: moment(data.start_time).utc().format("HH:mm"),
+          end_time: moment(data.end_time).utc().format("HH:mm"),
         });
       } catch (error) {
         console.error("Error fetching subject data:", error);

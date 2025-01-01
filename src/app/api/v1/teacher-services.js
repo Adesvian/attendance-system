@@ -323,7 +323,8 @@ export const fetchDataSubjectAttendanceRecords = async (
 
       // Temukan semua permit (izin/sakit) untuk siswa ini, hanya yang Accepted
       const studentPermits = processedPermits.filter(
-        (permit) => permit.student_rfid === student.rfid
+        (permit) =>
+          permit.student_rfid === student.rfid && permit.status === 200
       );
 
       studentAttendanceRecords.forEach((record) => {

@@ -28,7 +28,13 @@ function Threshold() {
   };
   const handleDefaultCheckOutSubmit = async (event) => {
     event.preventDefault();
-    await DefaultCheckOutSubmit(defaultCheckOutTime);
+    const res = await DefaultCheckOutSubmit(defaultCheckOutTime);
+
+    if (res.length === 0) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2500);
+    }
   };
 
   const handleEachClassCheckOutSubmit = async (index) => {
@@ -60,12 +66,18 @@ function Threshold() {
   };
 
   const handleDeleteCheckOut = async (index) => {
-    await DeleteCheckOut(
+    const res = await DeleteCheckOut(
       index,
       checkOutEntries,
       setCheckOutEntries,
       setAvailableClasses
     );
+
+    if (res.length === 1) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2500);
+    }
   };
 
   useEffect(() => {
@@ -181,7 +193,7 @@ function Threshold() {
           <div className="grid grid-cols-8 gap-x-6 mb-6 mt-5">
             <div className="lg:col-span-7 col-span-8">
               <label className="block mb-1 text-red-500 dark:text-red-300 font-medium">
-                Default Check-Out Time{" "}
+                Check-Out Time (Unset Class)
               </label>
               <input
                 type="time"
@@ -227,8 +239,8 @@ function Threshold() {
                 onChange={(e) => setSelectedClass(e.target.value)}
                 className="border p-2 rounded-md w-full h-12 dark:bg-base-100"
               >
-                {availableClasses.map((classOption) => (
-                  <option key={classOption} value={classOption}>
+                {availableClasses.map((classOption, index) => (
+                  <option key={`${classOption}-${index}`} value={classOption}>
                     Kelas {classOption}
                   </option>
                 ))}
@@ -248,7 +260,10 @@ function Threshold() {
 
           {/* Check-Out Entries */}
           {checkOutEntries.map((entry, index) => (
-            <div key={index} className="mb-4 flex gap-x-6 items-end">
+            <div
+              key={`${entry.class}-${entry.time}-${index}`}
+              className="mb-4 flex gap-x-6 items-end"
+            >
               <div className="w-full">
                 <label className="block mb-1 text-red-500 dark:text-red-300 font-medium">
                   Check-Out Time:{" "}

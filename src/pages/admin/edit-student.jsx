@@ -38,6 +38,7 @@ function EditStudent() {
     password: "",
     isnew: false,
   });
+  const [studentDataOriginal, setStudentDataOriginal] = useState({});
 
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
@@ -102,6 +103,7 @@ function EditStudent() {
         const formattedData = formatData(response);
 
         setStudentData(formattedData);
+        setStudentDataOriginal(formattedData);
       } catch (error) {
         console.error("Error fetching student data:", error);
       }
@@ -129,7 +131,12 @@ function EditStudent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await updateStudentData(studentData, id, setLoading);
+    const success = await updateStudentData(
+      studentData,
+      id,
+      setLoading,
+      studentDataOriginal
+    );
     if (success) {
       navigate("/data-siswa");
     }

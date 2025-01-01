@@ -50,8 +50,9 @@ function EditTeacher() {
               : new Date(response.teacher.birth_of_date)
                   .toISOString()
                   .split("T")[0],
-          class_id: String(response.teacher.class_id),
+          class: String(response.teacher.class_id),
         };
+
         setTeacherData(formattedData);
       } catch (error) {
         console.error("Error fetching teacher data:", error);
@@ -68,7 +69,8 @@ function EditTeacher() {
       setTeacherData((prevData) => ({
         ...prevData,
         [name]: value,
-        class: value === "Subject Teacher" ? null : 1,
+        class:
+          value === "Subject Teacher" || value === "Ekstra Teacher" ? null : 1,
       }));
     } else if (name === "nid") {
       setTeacherData({

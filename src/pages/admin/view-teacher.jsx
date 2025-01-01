@@ -63,6 +63,7 @@ function ViewTeacher() {
     };
 
     fetchTeacherData();
+
     dispatch(setPageTitle({ title: "Detail Guru" }));
   }, []);
 
@@ -205,7 +206,9 @@ function ViewTeacher() {
               value={
                 teacherData.type === "Class Teacher"
                   ? "Wali Kelas"
-                  : "Guru Mapel"
+                  : teacherData.type === "Subject Teacher"
+                  ? "Guru Mata Pelajaran"
+                  : "Guru Ekstrakurikuler"
               }
               onChange={() => {}}
               readOnly

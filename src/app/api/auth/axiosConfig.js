@@ -15,7 +15,13 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
+  (response) => response,
   (error) => {
+    console.error(
+      "Interceptor caught error:",
+      error.response?.status,
+      error.message
+    );
     return Promise.reject(error);
   }
 );

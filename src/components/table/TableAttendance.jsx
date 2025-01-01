@@ -226,7 +226,7 @@ const TableComponent = forwardRef(
                             {col.field !== "profile" &&
                               col.field !== "action" && (
                                 <div
-                                  className={`p-2 mr-5 font-medium ${getStatusClass(
+                                  className={`p-2 mr-5 font-medium text-base ${getStatusClass(
                                     row[col.field]
                                   )}`}
                                 >
