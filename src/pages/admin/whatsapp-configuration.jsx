@@ -52,7 +52,7 @@ function WhatsappConfiguration() {
   };
 
   const handleConnect = async () => {
-    ConnnectSession(setIsConnected, setLoading, data.number);
+    ConnnectSession(setIsConnected, setLoading, data.name);
   };
 
   const handleGreetSubmit = async (event) => {
@@ -60,7 +60,7 @@ function WhatsappConfiguration() {
     const greet = event.target.custom_greet.value;
     document.getElementById("modal_greet").close();
 
-    const success = await updateNotification(setLoading, greet, data.number);
+    const success = await updateNotification(setLoading, greet, data.name);
 
     if (!success) {
       setData((prevData) => ({
@@ -73,11 +73,11 @@ function WhatsappConfiguration() {
   };
 
   const handleDisconnect = async () => {
-    DisconnectSession(setIsConnected, setLoading, data.number);
+    DisconnectSession(setIsConnected, setLoading, data.name);
   };
 
   const handleDelete = async () => {
-    const success = await DeleteSession(setLoading, setData, data.number);
+    const success = await DeleteSession(setLoading, setData, data.name);
 
     if (success) {
       setHasData(false);

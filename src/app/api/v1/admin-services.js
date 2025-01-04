@@ -1590,7 +1590,7 @@ export const ConnnectSession = async (setLoading, setIsConnected, data) => {
   try {
     const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/start-session`,
-      { number: data }
+      { name: data }
     );
     if (response.data.success) {
       setIsConnected(false);
@@ -1607,7 +1607,7 @@ export const DisconnectSession = async (setLoading, setIsConnected, data) => {
   try {
     const response = await axiosInstance.post(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/stop-session`,
-      { number: data }
+      { name: data }
     );
     if (response.data.success) {
       setIsConnected(false);
@@ -1688,7 +1688,7 @@ export const DeleteSession = async (setLoading, setData, data) => {
   }
 };
 
-export const updateNotification = async (setLoading, greet, number) => {
+export const updateNotification = async (setLoading, greet, name) => {
   const requiredPlaceholders = ["{nama}", "{metode}", "{waktu}", "{status}"];
 
   const missingPlaceholders = requiredPlaceholders.filter(
@@ -1710,9 +1710,7 @@ export const updateNotification = async (setLoading, greet, number) => {
   setLoading(true);
   try {
     const response = await axiosInstance.put(
-      `${
-        import.meta.env.VITE_BASE_URL_BACKEND
-      }/update-whatsapp-creds/${number}`,
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/update-whatsapp-creds/${name}`,
       {
         greet_template: greet,
       }
