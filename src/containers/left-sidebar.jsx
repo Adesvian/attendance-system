@@ -27,16 +27,18 @@ function LeftSidebar() {
 
   // Sidebar width classes
   const sidebarClasses = sideBar
-    ? "lg:w-64 w-full" // Expanded on desktop and mobile
-    : "lg:w-24 w-0"; // Collapsed on desktop, hidden on mobile
+    ? "lg:static lg:w-64 md:w-72 w-[17rem]" // Expanded state
+    : "lg:static lg:w-20 w-0 -left-full lg:left-0"; // Collapsed state
 
   // Image and title classes
-  const imageClasses = sideBar ? "rotate-[360deg] w-1/2" : "w-full";
-  const titleClasses = sideBar ? "" : "hidden";
+  const imageClasses = sideBar
+    ? "rotate-[360deg] w-24 md:w-32 lg:w-1/2"
+    : "w-12 lg:w-16";
+  const titleClasses = sideBar ? "block" : "hidden";
 
   // Link container and icon classes
   const linkContainerClasses = `flex items-center gap-x-3 rounded-md ${
-    sideBar ? "p-3" : "p-1.5 justify-center"
+    sideBar ? "p-3 md:p-4" : "p-2 lg:p-3 justify-center"
   }`;
 
   return (
@@ -83,8 +85,10 @@ function LeftSidebar() {
                       className={`${linkContainerClasses} hover:bg-gray-200 hover:text-black`}
                     >
                       {cloneElement(menu.icon, {
-                        className: `flex-shrink-0 ${
-                          sideBar ? "w-6 h-6" : "w-8 h-8"
+                        className: `flex-shrink-0  ${
+                          sideBar
+                            ? "w-6 h-6 md:w-6 md:h-6"
+                            : "w-6 h-6 lg:w-8 lg:h-8"
                         }`,
                       })}
                       <span className={`${sideBar ? "" : "hidden"}`}>

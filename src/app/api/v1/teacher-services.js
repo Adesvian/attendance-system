@@ -3,6 +3,7 @@ import jsPDF from "jspdf";
 import autotable from "jspdf-autotable";
 import axiosInstance from "../auth/axiosConfig";
 import Swal from "sweetalert2";
+import { logger } from "./admin-services";
 
 export const fetchDataDashboard = async (
   setData,
@@ -444,7 +445,7 @@ export const fetchDataSubjectAttendanceRecords = async (
   }
 };
 
-export const exportPdf = async (fn, user, parent_user) => {
+export const exportPdf = async (fn, user, parent_user, label) => {
   const data = fn.current;
   if (data) {
     try {
@@ -492,6 +493,13 @@ export const exportPdf = async (fn, user, parent_user) => {
       autotable(pdf, { html: tableElement, startY: 40 });
 
       pdf.save(`Logs-Records-${moment().format("DD-MM-YYYY")}.pdf`);
+      await logger({
+        activity: `Export ${window.location.pathname
+          .split("/")
+          .filter(Boolean)
+          .pop()
+          .replace(/-/g, " ")}  "${label}"  file into PDF`,
+      });
     } catch (error) {
       console.error("Error generating PDF: ", error);
     }
@@ -500,7 +508,7 @@ export const exportPdf = async (fn, user, parent_user) => {
   }
 };
 
-export const exportCSV = async (fn) => {
+export const exportCSV = async (fn, label) => {
   const data = fn.current;
   if (data) {
     try {
@@ -546,6 +554,13 @@ export const exportCSV = async (fn) => {
       // Create a blob and save as CSV file
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       saveAs(blob, `Logs-Records-${moment().format("DD-MM-YYYY")}.csv`);
+      await logger({
+        activity: `Export ${window.location.pathname
+          .split("/")
+          .filter(Boolean)
+          .pop()
+          .replace(/-/g, " ")} "${label}" file into CSV`,
+      });
     } catch (error) {
       console.error("Error exporting CSV: ", error);
     }
@@ -603,6 +618,13 @@ export const exportExcel = async (fn) => {
 
       // Write the workbook to an Excel file
       writeFile(workbook, `Logs-Records-${moment().format("DD-MM-YYYY")}.xlsx`);
+      await logger({
+        activity: `Export ${window.location.pathname
+          .split("/")
+          .filter(Boolean)
+          .pop()
+          .replace(/-/g, " ")} "${label}" file into Excel`,
+      });
     } catch (error) {
       console.error("Error exporting Excel: ", error);
     }
@@ -934,17 +956,16 @@ export const enrollStudents = async (
       );
     }
 
-    // Remove unenrolled students
+    // Remove unenrolled students in one request
     if (studentsToRemove.length > 0) {
-      await Promise.all(
-        studentsToRemove.map((rfid) =>
-          axiosInstance.delete(
-            `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll`,
-            {
-              data: { student_rfid: [rfid], ekstrakurikuler: subjectId },
-            }
-          )
-        )
+      await axiosInstance.delete(
+        `${import.meta.env.VITE_BASE_URL_BACKEND}/enroll`,
+        {
+          data: {
+            student_rfid: studentsToRemove,
+            ekstrakurikuler: subjectId,
+          },
+        }
       );
     }
 

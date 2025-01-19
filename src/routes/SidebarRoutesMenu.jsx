@@ -13,7 +13,7 @@ import {
   LiaEnvelopeOpenTextSolid,
 } from "react-icons/lia";
 import { GrSchedules } from "react-icons/gr";
-import { IoCalendarOutline } from "react-icons/io5";
+import { IoCalendarOutline, IoLogoBuffer } from "react-icons/io5";
 import { CiCalendarDate } from "react-icons/ci";
 
 const iconClasses = `h-6 w-6`;
@@ -113,6 +113,12 @@ const sidebar_routes = [
     name: "Time Setting",
     role: ["admin"],
     icon: <PiTimerLight className={iconClasses} />,
+  },
+  {
+    path: "/logs-system",
+    name: "Log Sistem",
+    role: ["admin"],
+    icon: <IoLogoBuffer className={iconClasses} />,
   },
 ];
 

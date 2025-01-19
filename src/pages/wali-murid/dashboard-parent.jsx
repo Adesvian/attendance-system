@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
-import axios from "axios";
 import moment from "moment";
 import RecentAttendance from "../../features/activity/recent";
-import axiosInstance from "../../app/api/auth/axiosConfig";
 import Notifications from "../../features/activity/notifications";
-import { fetchDataDashboard } from "../../app/api/v1/parent-services";
+import {
+  fetchDataDashboard,
+  isCheckout,
+} from "../../app/api/v1/parent-services";
+import Alert from "@mui/material/Alert";
+import Fade from "@mui/material/Fade";
 
 const DashboardParent = () => {
   const dispatch = useDispatch();
@@ -18,6 +21,14 @@ const DashboardParent = () => {
     attendance: [],
     events: [],
   });
+  const [countChild, setCountChild] = useState(0);
+  const [showAlerts, setShowAlerts] = useState([]);
+
+  const handleClose = (index) => {
+    const newShowAlerts = [...showAlerts];
+    newShowAlerts[index] = false;
+    setShowAlerts(newShowAlerts);
+  };
 
   const tabContent = {
     senin: "Tab content for Senin",
@@ -36,18 +47,47 @@ const DashboardParent = () => {
   useEffect(() => {
     const fetchData = async () => {
       await fetchDataDashboard(child, setData);
+      await isCheckout(user.nid, setCountChild);
     };
 
     fetchData();
     dispatch(setPageTitle({ title: "Dashboard Wali Murid" }));
   }, [child, dispatch]);
 
+  useEffect(() => {
+    if (countChild.length > 0) {
+      setShowAlerts(new Array(countChild.length).fill(true));
+    }
+  }, [countChild]);
   return (
     <>
       <div
         className="grid grid-cols-1 gap-6 mt-5"
         data-testid="dashboard-element"
       >
+        <div
+          className={`relative mb-10 ${
+            showAlerts.indexOf(true) === -1 ? "hidden" : ""
+          }`}
+        >
+          {showAlerts.map((showAlert, index) => (
+            <Fade key={index} in={showAlert} timeout={500}>
+              <Alert
+                severity="warning"
+                onClose={() => handleClose(index)}
+                className="transition-all duration-500 ease-in-out absolute w-full"
+                style={{
+                  zIndex: showAlerts.length - index,
+                }}
+              >
+                <strong>{countChild[index].name}</strong>, belum melakukan
+                proses checkout dengan RFID untuk hari ini. Mohon pastikan siswa
+                melakukan tapping untuk mencatat kehadiran.
+              </Alert>
+            </Fade>
+          ))}
+        </div>
+
         <div className="relative parent-welcome-card bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-8 font-poppins flex flex-row">
           <div className="z-40">
             <h1 className="text-2xl font-bold">

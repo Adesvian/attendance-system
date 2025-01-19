@@ -49,9 +49,9 @@ function LogKehadiran() {
             ref: dt,
             exportFunction: (ref) => (
               <ExportButtonsComponent
-                exportCSV={() => exportCSV(ref)}
-                exportExcel={() => exportExcel(ref)}
-                exportPdf={() => exportPdf(ref, user, parent_user)}
+                exportCSV={() => exportCSV(ref, activeTab)}
+                exportExcel={() => exportExcel(ref, activeTab)}
+                exportPdf={() => exportPdf(ref, user, parent_user, activeTab)}
               />
             ),
           },
@@ -63,9 +63,9 @@ function LogKehadiran() {
             ref: dts,
             exportFunction: (ref) => (
               <ExportButtonsComponent
-                exportCSV={() => exportCSV(ref)}
-                exportExcel={() => exportExcel(ref)}
-                exportPdf={() => exportPdf(ref, user, parent_user)}
+                exportCSV={() => exportCSV(ref, activeTab)}
+                exportExcel={() => exportExcel(ref, activeTab)}
+                exportPdf={() => exportPdf(ref, user, parent_user, activeTab)}
               />
             ),
           },
@@ -79,9 +79,9 @@ function LogKehadiran() {
             ref: dts,
             exportFunction: (ref) => (
               <ExportButtonsComponent
-                exportCSV={() => exportCSV(ref)}
-                exportExcel={() => exportExcel(ref)}
-                exportPdf={() => exportPdf(ref, user, parent_user)}
+                exportCSV={() => exportCSV(ref, activeTab)}
+                exportExcel={() => exportExcel(ref, activeTab)}
+                exportPdf={() => exportPdf(ref, user, parent_user, activeTab)}
               />
             ),
           },

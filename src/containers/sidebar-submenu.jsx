@@ -7,50 +7,62 @@ function SidebarSubMenu({ submenu, name, icon }) {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const { sideBar } = useSelector((state) => state.header);
-  // Determine if the submenu should be expanded based on the current path
+
   useEffect(() => {
     const isCurrentPath = submenu.some((m) => m.path === location.pathname);
     setIsExpanded(isCurrentPath);
   }, []);
 
-  // Toggle submenu visibility
   const handleToggle = () => setIsExpanded((prev) => !prev);
 
-  // Determine icon size based on sidebar state
-  const iconSize = sideBar ? "w-6 h-6" : "w-8 h-8";
-  const containerClasses = `flex flex-1 items-center gap-x-3 duration-300 ${
-    sideBar ? "p-3" : "p-1.5"
+  const iconSize = "w-6 h-6";
+  const containerClasses = `flex items-center gap-x-3 duration-300 min-w-0 ${
+    sideBar ? "p-3 flex-1" : "p-1.5"
   }`;
-  const textClasses = `transition-transform duration-300 overflow-hidden  ${
-    sideBar ? "max-w-[10rem] opacity-100" : "max-w-0 opacity-0"
-  }`;
-  const chevronClasses = `w-6 h-6 -translate-x-3 duration-300 transition-transform ${
-    sideBar
-      ? isExpanded
-        ? "rotate-180"
-        : ""
-      : isExpanded
-      ? "rotate-0"
-      : "-rotate-90"
-  } ${sideBar ? "" : "-ml-2.5"}`;
 
-  const linkContainerClasses = `flex items-center gap-x-3 rounded-md ${
-    sideBar ? "p-3" : "p-1.5 justify-center"
+  // Pilihan 1: Truncate dengan ellipsis
+  const textClassesTruncate = `transition-transform duration-300 truncate ${
+    sideBar ? "max-w-[6rem] opacity-100" : "max-w-0 opacity-0"
   }`;
+
+  // Pilihan 2: Two lines dengan text wrap
+  const textClassesTwoLines = `transition-transform duration-300 leading-tight ${
+    sideBar
+      ? "max-w-[6rem] opacity-100 whitespace-normal line-clamp-2"
+      : "max-w-0 opacity-0"
+  }`;
+
+  // Pilihan 3: Smaller text size
+  const textClassesSmaller = `transition-transform duration-300 text-sm ${
+    sideBar ? "max-w-[6rem] opacity-100" : "max-w-0 opacity-0"
+  }`;
+
+  const chevronClasses = `w-6 h-6 transition-transform duration-300 ${
+    isExpanded ? "rotate-180" : "rotate-0"
+  }`;
+
+  // Pilih salah satu textClasses yang ingin digunakan:
+  const activeTextClasses = textClassesTwoLines; // atau textClassesTwoLines atau textClassesSmaller
 
   return (
     <>
       <div
-        className={`flex items-center cursor-pointer text-base-200 dark:text-dark-text ${
-          sideBar ? "justify-start" : ""
+        className={`flex items-center cursor-pointer text-base-200 dark:text-dark-text w-full ${
+          sideBar ? "pr-2" : "px-2"
         }`}
         onClick={handleToggle}
       >
         <div className={containerClasses}>
-          {cloneElement(icon, { className: `flex-shrink-0 ${iconSize}` })}
-          <span className={textClasses}>{name}</span>
+          {cloneElement(icon, {
+            className: `flex-shrink-0 ${iconSize}`,
+          })}
+          <span className={window.innerWidth < 480 ? activeTextClasses : ""}>
+            {name}
+          </span>
         </div>
-        <HiOutlineChevronDown className={chevronClasses} />
+        <div className="flex-shrink-0 ml-auto">
+          <HiOutlineChevronDown className={chevronClasses} />
+        </div>
       </div>
 
       {isExpanded && (
@@ -76,11 +88,11 @@ function SidebarSubMenu({ submenu, name, icon }) {
                         : "font-normal"
                     }
                   >
-                    <div
-                      className={`${linkContainerClasses} hover:text-black dark:hover:bg-dark-text hover:bg-gray-200 p-3`}
-                    >
-                      {item.icon}
-                      <span className={`${sideBar ? "" : "hidden"} `}>
+                    <div className="flex items-center gap-x-3 p-3 hover:text-black dark:hover:bg-dark-text hover:bg-gray-200 rounded-md">
+                      <div className="w-6 h-6 flex items-center justify-center">
+                        {cloneElement(item.icon, { className: iconSize })}
+                      </div>
+                      <span className={`${sideBar ? "" : "hidden"}`}>
                         {item.name}
                       </span>
                     </div>

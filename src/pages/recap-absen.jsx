@@ -6,7 +6,6 @@ import ExportButtonsComponent from "../features/export/Export";
 import TableComponent from "../components/table/TableAttendance";
 import moment from "moment";
 import CustomSelect from "../components/input/Select";
-import axios from "axios";
 import {
   exportCSV,
   exportExcel,
@@ -17,6 +16,10 @@ import {
 import { fetchDataSubjectAttendanceRecords } from "../app/api/v1/teacher-services";
 import { fetchChildDataAttendanceRecords } from "../app/api/v1/parent-services";
 import Swal from "sweetalert2";
+import axiosInstance from "../app/api/auth/axiosConfig";
+import StudentDetail from "../features/student-information/Student";
+import { useReactToPrint } from "react-to-print";
+import { FaPrint } from "react-icons/fa6";
 
 const RecapAbsensi = () => {
   const dispatch = useDispatch();
@@ -26,23 +29,73 @@ const RecapAbsensi = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [customClass, setCustomClass] = useState("");
   const [classOptions, setClassOptions] = useState([]);
   const [SubjectOptions, setSubjectOptions] = useState([]);
+  const [studentOptions, setStudentOptions] = useState([
+    { value: "", label: "Pilih Siswa", disabled: true },
+  ]);
   const [cleared, setCleared] = useState(false);
   const [data, setData] = useState([]);
   const [holidays, setHolidays] = useState([]);
   const dt = useRef(null);
+  const [isClassSelected, setIsClassSelected] = useState(false);
+  const [personalData, setPersonalData] = useState([]);
+  const componentRef = useRef(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+    documentTitle: "AwesomeFileName",
+  });
 
   const handleDateChange = (event) => {
     setSelectedDate(event);
   };
 
-  const handleClassChange = (event) => {
-    setSelectedClass(event.target.value);
+  const handleClassChange = async (event) => {
+    const selectedClass = event.target.value;
+
+    // Reset dropdown siswa dan selectedStudent
+    setStudentOptions([{ value: "", label: "Pilih Siswa", disabled: true }]);
+    setSelectedStudent("");
+
+    if (selectedClass === "") {
+      setIsClassSelected(false);
+      setSelectedClass("");
+      return; // Hentikan jika kelas tidak dipilih
+    }
+
+    try {
+      const response = await axiosInstance.get(
+        `${
+          import.meta.env.VITE_BASE_URL_BACKEND
+        }/students?class=${selectedClass}`
+      );
+
+      const formattedData = response.data.data.map((item) => ({
+        value: item.rfid,
+        label: item.name,
+      }));
+
+      setStudentOptions([
+        { value: "", label: "Pilih Siswa", disabled: true },
+        ...formattedData,
+      ]);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+
+    setIsClassSelected(true);
+    setSelectedClass(selectedClass);
   };
 
   const handleSubjectChange = (event) => {
     setSelectedSubject(event.target.value);
+  };
+
+  const handleStudentChange = (event) => {
+    setSelectedStudent(event.target.value);
   };
 
   const generateColumns = () => {
@@ -123,7 +176,7 @@ const RecapAbsensi = () => {
       );
 
       try {
-        const response = await axios.get(
+        const response = await axiosInstance.get(
           `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
         );
         const formattedHolidays = response.data.data.map((holiday) => ({
@@ -169,6 +222,21 @@ const RecapAbsensi = () => {
     }
   }, [selectedDate, selectedClass, selectedSubject, child]);
 
+  useEffect(() => {
+    // Pastikan semua kondisi terpenuhi sebelum mengisi personalData
+    if (selectedDate && selectedClass && selectedStudent) {
+      const student = data.find((i) => i.id === selectedStudent);
+      if (student) {
+        setPersonalData(student);
+      } else {
+        setPersonalData([]); // Kosongkan jika siswa tidak ditemukan
+      }
+      setCustomClass("hidden");
+    } else {
+      setCustomClass("");
+    }
+  }, [selectedDate, selectedClass, selectedStudent, data]);
+
   const getStatusClass = (status) => {
     switch (status) {
       case "H":
@@ -190,7 +258,7 @@ const RecapAbsensi = () => {
         className="sticky top-0 bg-white rounded-md dark:bg-base-100 pl-4 pt-4 pr-4 pb-0.5 "
         data-testid="recap-absen-element"
       >
-        <div className="flex gap-x-3 mb-4 font-poppins">
+        <div className="flex flex-col lg:flex-row gap-4 mb-4 font-poppins">
           <DatePickerComponent
             selectedDate={selectedDate}
             handleDateChange={handleDateChange}
@@ -203,6 +271,13 @@ const RecapAbsensi = () => {
                 size="medium"
                 onChange={handleClassChange}
                 options={classOptions}
+              />
+              <CustomSelect
+                value={selectedStudent}
+                size="medium"
+                onChange={handleStudentChange}
+                options={studentOptions}
+                name={isClassSelected}
               />
               {user != null && user.class == null && (
                 <CustomSelect
@@ -225,14 +300,28 @@ const RecapAbsensi = () => {
             </>
           )}
         </div>
-        <ExportButtonsComponent
-          exportCSV={handleCSVExport}
-          exportExcel={handleExcelExport}
-          exportPdf={handlePDFExport}
-        />
+        {!selectedStudent && !selectedDate && !selectedClass && (
+          <ExportButtonsComponent
+            exportCSV={handleCSVExport}
+            exportExcel={handleExcelExport}
+            exportPdf={handlePDFExport}
+          />
+        )}
+        {selectedStudent && selectedDate && selectedClass && (
+          <button
+            className="flex items-center justify-end w-full"
+            onClick={handlePrint}
+          >
+            <FaPrint className="text-black dark:text-dark-text w-5 h-5" />
+          </button>
+        )}
       </div>
       <div className="px-4 pb-5 bg-white dark:bg-base-100">
-        <div className="grid grid-cols-3 lg:grid-cols-12 font-poppins text-sm mt-5 lg:text-base lg:mt-0 whitespace-nowrap">
+        <div
+          className={`grid grid-cols-3 lg:grid-cols-12 font-poppins text-sm mt-5 lg:text-base lg:mt-0 whitespace-nowrap ${
+            selectedDate && selectedClass && !selectedStudent ? "" : "hidden"
+          }`}
+        >
           <p>
             <span className="font-bold">H</span> : Hadir
           </p>
@@ -254,8 +343,20 @@ const RecapAbsensi = () => {
           data={data}
           columns={columns}
           getStatusClass={getStatusClass}
+          className={customClass}
           type="recap"
         />
+        {selectedStudent && selectedDate && selectedClass && (
+          <StudentDetail
+            ref={componentRef}
+            data={{
+              personalData,
+              selectedClass,
+              selectedDate,
+              selectedStudent,
+            }}
+          />
+        )}
       </div>
     </>
   );

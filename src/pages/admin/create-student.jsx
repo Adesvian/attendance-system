@@ -80,6 +80,8 @@ function CreateStudent() {
   };
 
   useEffect(() => {
+    socket.emit("form-opened", { page: "form-c-student" });
+
     const fetchParentData = async () => {
       try {
         const response = await axiosInstance.get(
@@ -103,6 +105,7 @@ function CreateStudent() {
 
     socket.on("get-uid", handleGetUid);
     return () => {
+      socket.emit("form-closed", { page: "form-c-student" });
       socket.off("get-uid", handleGetUid);
     };
   }, []);

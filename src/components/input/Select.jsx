@@ -26,7 +26,10 @@ const CustomSelect = ({ value, onChange, options, name, size = "small" }) => {
         displayEmpty
         size={size}
         inputProps={{ "aria-label": "Filter by Status" }}
-        className="ml-2 text-xs"
+        className={`text-xs `}
+        style={{
+          display: `${name === undefined || name === true ? "block" : "none"}`,
+        }}
       >
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>

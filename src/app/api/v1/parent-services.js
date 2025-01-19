@@ -2,6 +2,100 @@ import moment from "moment";
 import Swal from "sweetalert2";
 import axiosInstance from "../auth/axiosConfig";
 
+export const isCheckout = async (id, setCountChild) => {
+  try {
+    // Fetch data anak dalam satu permintaan
+    const { data: childData } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students?parent=${id}`
+    );
+    const children = childData.data;
+
+    if (children.length === 0) {
+      console.log("No children found.");
+      setCountChild(0);
+      return;
+    }
+
+    // Ambil semua RFID dan kelas ID anak dalam satu array
+    const rfids = children.map((child) => child.rfid);
+    const classIds = children.map((child) => child.class.id);
+
+    // remove duplicat class id
+    const uniqueClassIds = [...new Set(classIds)];
+
+    // Fetch data attendance-today untuk semua anak
+    const { data: attendanceData } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-today`,
+      { params: { rfid: rfids.join(","), method: 1002 } } // Assuming batch request support
+    );
+
+    // Fetch data threshold untuk semua kelas
+    const isFriday = new Date().getDay() === 5;
+    const { data: thresholdData } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold`,
+      {
+        params: {
+          class: uniqueClassIds.join(","),
+          method: 1002,
+          ...(isFriday ? { custom: "isFriday" } : {}),
+        },
+        headers: {
+          "x-request-source": window.location.origin,
+        },
+      }
+    );
+
+    // Olah threshold data menjadi objek untuk akses cepat
+    const thresholdMap = {};
+    thresholdData.data.forEach((threshold) => {
+      // Ambil waktu dari threshold.time dalam UTC tanpa zona waktu
+      const timeString = new Date(threshold.time)
+        .toISOString() // "1970-01-01T13:00:00.000Z"
+        .substr(11, 8); // Ambil bagian "13:00:00"
+
+      // Simpan ke thresholdMap dengan format { class_id: "13:00:00" }
+      thresholdMap[threshold.class_id] = timeString;
+    });
+
+    // Periksa anak-anak yang belum checkout
+    const studentsWithoutAttendance = children.filter((child) => {
+      const childThresholdTime = thresholdMap[child.class.id];
+      if (!childThresholdTime) {
+        return true; // Asumsikan belum checkout jika tidak ada data threshold
+      }
+
+      const currentTime = new Date();
+      // Parse waktu threshold untuk membandingkan dengan waktu saat ini
+      const [thresholdHours, thresholdMinutes, thresholdSeconds] =
+        childThresholdTime
+          .split(":") // "13:00:00" => ["13", "00", "00"]
+          .map(Number); // Konversi ke angka
+
+      const thresholdTime = new Date(currentTime); // Salin waktu saat ini
+      thresholdTime.setHours(
+        thresholdHours,
+        thresholdMinutes,
+        thresholdSeconds,
+        0
+      ); // Set ke waktu threshold
+
+      // Periksa apakah sudah checkout
+      const hasCheckedOut = attendanceData.data.some(
+        (record) => record.status === 200 && record.student_rfid === child.rfid
+      );
+
+      // Anak belum checkout jika waktu sekarang lebih besar dari threshold dan belum ada data checkout
+      return !hasCheckedOut && currentTime > thresholdTime;
+    });
+
+    // Set jumlah anak yang belum checkout
+    setCountChild(studentsWithoutAttendance);
+  } catch (error) {
+    console.error("Error:", error);
+    setCountChild(0);
+  }
+};
+
 export const fetchDataDashboard = async (child, setData) => {
   if (child && child.class && child.class.id) {
     try {
@@ -26,7 +120,6 @@ export const fetchDataDashboard = async (child, setData) => {
       const events = await axiosInstance.get(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
       );
-
       const [scheduleResponse, attendanceResponse, subjectAttendanceResponse] =
         await Promise.all([
           schedulePromise,

@@ -52,7 +52,7 @@ const stableSort = (array, comparator) => {
 };
 
 const TableComponent = forwardRef(
-  ({ data, columns, getStatusClass, type, setData, tab }, ref) => {
+  ({ data, columns, getStatusClass, type, setData, tab, className }, ref) => {
     const theme = useSelector((state) => state.header.theme);
     const muitheme = getTheme(theme);
     const [order, setOrder] = useState("asc");
@@ -117,7 +117,7 @@ const TableComponent = forwardRef(
     };
 
     return (
-      <div className="text-gray-800 dark:text-white mt-5">
+      <div className={`text-gray-800 dark:text-white mt-5 ${className || ""}`}>
         <ThemeProvider theme={muitheme}>
           {type === "logs-table" && (
             <div className="flex justify-end">

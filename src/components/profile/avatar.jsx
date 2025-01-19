@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { resetAuth } from "../../redux/authSlice";
+import axiosInstance from "../../app/api/auth/axiosConfig";
 const baseURL_BE = import.meta.env.VITE_BASE_URL_BACKEND;
 function Avatar() {
   const navigate = useNavigate();
@@ -13,13 +13,15 @@ function Avatar() {
   };
 
   const handleLogout = async () => {
-    dispatch(resetAuth());
-    localStorage.clear();
     try {
-      await axios.delete(`${baseURL_BE}/logout`, {
+      const response = await axiosInstance.delete(`${baseURL_BE}/logout`, {
         withCredentials: true,
       });
-      navigate("/login");
+      if (response.status === 200) {
+        dispatch(resetAuth());
+        localStorage.clear();
+        navigate("/login");
+      }
     } catch (error) {
       console.error(error);
     }

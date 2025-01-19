@@ -12,7 +12,7 @@ function SingleButton({
   return (
     <button
       type={type}
-      className={`${className} rounded-md px-4 py-2 whitespace-nowrap focus:outline-none flex items-center justify-center ${
+      className={`${className} rounded-md px-4 py-4 whitespace-nowrap focus:outline-none flex items-center justify-center ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
       onClick={disabled ? null : onClick}

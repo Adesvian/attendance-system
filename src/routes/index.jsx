@@ -32,6 +32,7 @@ const Whatsapp = lazy(() => import("../pages/admin/whatsapp-configuration"));
 const TimeSetting = lazy(() => import("../pages/admin/time"));
 const Profile = lazy(() => import("../pages/user-profile"));
 const holidays = lazy(() => import("../pages/admin/holidays"));
+const Logs = lazy(() => import("../pages/admin/logs"));
 
 const routes = [
   {
@@ -183,6 +184,12 @@ const routes = [
     name: "Time Setting",
     role: ["admin"],
     component: TimeSetting,
+  },
+  {
+    path: "/logs-system",
+    name: "Log Sistem",
+    role: ["admin"],
+    component: Logs,
   },
   {
     path: "/user-profile",

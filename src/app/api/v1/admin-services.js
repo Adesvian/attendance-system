@@ -2,6 +2,50 @@ import moment from "moment";
 import "jspdf-autotable";
 import Swal from "sweetalert2";
 import axiosInstance from "../auth/axiosConfig";
+import { ScheduleValidator } from "../../validators/ScheduleValidator";
+
+export const fetchLogs = async (setData) => {
+  try {
+    const response = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/logsys`
+    );
+    const parseDate = (dateString) => {
+      const [day, month, yearTime] = dateString.split("/");
+      const [year, time] = yearTime.split(" ");
+      return new Date(`${year}-${month}-${day}T${time}`);
+    };
+
+    const sortedLogs = response.data.data.sort((a, b) => {
+      return parseDate(b.date_time) - parseDate(a.date_time);
+    });
+
+    const updatedData = sortedLogs.map((item, index) => ({
+      ...item,
+      id: index + 1,
+    }));
+
+    // Set data ke state
+    setData(updatedData);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+
+export const logger = async (data) => {
+  try {
+    const resp = await axiosInstance.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/logger`,
+      data,
+      {
+        headers: {
+          "x-request-source": window.location.origin,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Failed to logging:", error);
+  }
+};
 
 export const fetchDataDashboard = async (setData) => {
   try {
@@ -97,6 +141,63 @@ export const fetchRecentStudents = async (
     setError(error);
   } finally {
     setLoading(false);
+  }
+};
+
+export const fetchAttendanceDetailStudent = async (rfid, setData) => {
+  try {
+    const response = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-month?rfid=${rfid}`
+    );
+
+    const processedData = response.data.data.map((attendance) => {
+      const formattedDate = moment
+        .unix(attendance.date)
+        .format("DD MMM YYYY, HH:mm:ss"); // Mengonversi UNIX timestamp ke format waktu yang mudah dibaca
+      const method =
+        attendance.method === 1001
+          ? "Check In"
+          : attendance.method === 1002
+          ? "Check Out"
+          : "Unknown";
+
+      // Mengatur status berdasarkan kondisi yang diberikan
+      let status = "Done"; // Default status adalah "-"
+      if (attendance.method === 1001) {
+        status =
+          attendance.status === 200
+            ? "Tepat Waktu"
+            : attendance.status === 201
+            ? "Telat"
+            : "Unknown";
+      } else if (attendance.method === 1002 && attendance.status === 200) {
+        status = "Done"; // Status tidak ditampilkan jika method 1002 dan status 200
+      }
+
+      return {
+        rfid: attendance.student_rfid,
+        name: attendance.student.name,
+        date: formattedDate,
+        method,
+        status,
+      };
+    });
+
+    setData(processedData);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+
+export const getGender = async (id, setData) => {
+  try {
+    const response = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${id}`
+    );
+    const gender = response.data.data.gender === "Perempuan" ? "girl" : "boy";
+    setData(gender);
+  } catch (error) {
+    console.error("Error fetching data:", error);
   }
 };
 
@@ -265,6 +366,7 @@ export const fetchDataAttendanceRecords = async (
         }).length;
 
       return {
+        id: student.rfid,
         name: student.name,
         attendance: attendance,
         hadir,
@@ -276,6 +378,235 @@ export const fetchDataAttendanceRecords = async (
     });
 
     setData(formattedData);
+  } catch (error) {
+    console.error("Error fetching data: ", error);
+    setData([]);
+  }
+};
+
+export const ImrpovementAttendanceOfStudent = async (
+  selectedDate,
+  selectedStudent,
+  setData
+) => {
+  if (!selectedDate || !selectedStudent) return setData([]);
+
+  try {
+    const dateObj = new Date(selectedDate);
+
+    // Membuat array untuk menyimpan tiga bulan sebelumnya
+    const previousMonths = [1, 2, 3].map((offset) => {
+      const dateCopy = new Date(dateObj);
+      dateCopy.setMonth(dateCopy.getMonth() - offset); // Mengurangi bulan
+      return dateCopy.toISOString(); // Mengonversi ke format ISO string
+    });
+
+    const allFormattedData = [];
+
+    const response = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/events`
+    );
+    const holidays = response.data.data.map((holiday) => ({
+      date: moment(holiday.date).format("DD-MM-YYYY"),
+      description: holiday.description,
+    }));
+
+    const students = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/students/${selectedStudent}`
+    );
+
+    const attendances = await axiosInstance.get(
+      `${
+        import.meta.env.VITE_BASE_URL_BACKEND
+      }/attendance?rfid=${selectedStudent}`
+    );
+
+    const permits = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/permits?rfid=${selectedStudent}`
+    );
+
+    for (const prevMonth of previousMonths) {
+      const selectedMonth = moment(prevMonth).month();
+      const selectedYear = moment(prevMonth).year();
+      const daysInMonth = moment(prevMonth).daysInMonth();
+      const today = moment().startOf("day");
+      const holidayDates = holidays.map((holiday) =>
+        moment(holiday.date, "DD-MM-YYYY")
+      );
+      const methodMap = {
+        1001: "H",
+        "-": "-",
+        izin: "I",
+        sakit: "S",
+        alfa: "A",
+        libur: "L",
+      };
+
+      const processedRecords = attendances.data.data.map((record) => ({
+        ...record,
+        date: moment.unix(record.date).format("YYYY-MM-DD"),
+      }));
+
+      const processedPermits = permits.data.data
+        .filter((permit) => permit.status === 200)
+        .filter((permit) => {
+          const permitDate = moment.unix(permit.date);
+          return (
+            permitDate.month() === selectedMonth &&
+            permitDate.year() === selectedYear
+          );
+        })
+        .map((permit) => ({
+          ...permit,
+          date: moment.unix(permit.date).format("YYYY-MM-DD"),
+        }));
+
+      const filteredData = processedRecords.filter((record) => {
+        const recordDate = moment(record.date, "YYYY-MM-DD");
+        return (
+          recordDate.month() === selectedMonth &&
+          recordDate.year() === selectedYear &&
+          record.method === 1001
+        );
+      });
+
+      const formattedData = (() => {
+        const student = students.data.data;
+        // Inisialisasi array attendance untuk seluruh hari dalam bulan
+        const attendance = Array(daysInMonth).fill("-");
+
+        // Tandai hari libur dan akhir pekan
+        for (let index = 0; index < daysInMonth; index++) {
+          const currentDate = moment(prevMonth)
+            .date(index + 1)
+            .startOf("day");
+          const isWeekend = currentDate.day() === 0 || currentDate.day() === 6;
+          const isHoliday = holidayDates.some((holidayDate) =>
+            holidayDate.isSame(currentDate, "day")
+          );
+
+          if (isHoliday || isWeekend) {
+            attendance[index] = methodMap["libur"];
+          }
+        }
+
+        // Proses kehadiran
+        filteredData
+          .filter((record) => record.student_rfid === student.rfid)
+          .forEach(
+            (record) =>
+              (attendance[moment(record.date, "YYYY-MM-DD").date() - 1] =
+                methodMap[record.method] || "-")
+          );
+
+        // Proses permit
+        processedPermits
+          .filter((permit) => permit.student_rfid === student.rfid)
+          .forEach((permit) => {
+            const permitDate = moment(permit.date, "YYYY-MM-DD");
+
+            // Tandai 3 hari permit
+            for (let i = 0; i < 3; i++) {
+              const permitDay = permitDate.clone().add(i, "days");
+
+              if (
+                permitDay.month() === selectedMonth &&
+                permitDay.year() === selectedYear
+              ) {
+                const permitIndex = permitDay.date() - 1;
+
+                // Jika sudah ada kehadiran atau sudah ditandai sebagai libur, lewati penandaan
+                if (
+                  attendance[permitIndex] === "H" ||
+                  attendance[permitIndex] === methodMap["libur"]
+                ) {
+                  continue; // Keberadaan hadir dan libur harus diprioritaskan
+                }
+
+                // Cek kehadiran sehari setelah permit
+                const nextDay = permitDay.clone().add(1, "days");
+                const nextDayIndex = nextDay.date() - 1;
+
+                if (attendance[nextDayIndex] === "H") {
+                  // Tandai hanya hari pertama dengan izin
+                  attendance[permitIndex] =
+                    methodMap[permit.reason.toLowerCase()] || "-";
+                  break; // Keluar dari loop setelah menandai
+                } else {
+                  // Jika tidak ada kehadiran sehari setelahnya, tetap gunakan logika sebelumnya
+                  attendance[permitIndex] = holidayDates.some((holidayDate) =>
+                    holidayDate.isSame(permitDay, "day")
+                  )
+                    ? methodMap["libur"] // Tetap tandai sebagai libur jika permit jatuh pada hari libur
+                    : methodMap[permit.reason.toLowerCase()] || "-";
+                }
+              }
+            }
+          });
+
+        // Periksa tanggal sebelum hari ini untuk status alfa
+        attendance.forEach((status, index) => {
+          const currentDate = moment(prevMonth)
+            .date(index + 1)
+            .startOf("day");
+          if (currentDate.isBefore(today) && status === "-") {
+            attendance[index] = methodMap["alfa"];
+          }
+        });
+
+        const hadir = attendance.filter((status) => status === "H").length;
+        const absen = attendance.filter((status) => status === "A").length;
+        const izin = attendance.filter((status) => status === "I").length;
+        const sakit = attendance.filter((status) => status === "S").length;
+
+        const effectiveDays =
+          daysInMonth -
+          holidayDates.length -
+          attendance.filter((_, index) => {
+            const currentDate = moment(prevMonth)
+              .date(index + 1)
+              .startOf("day");
+            return currentDate.day() === 0 || currentDate.day() === 6;
+          }).length;
+
+        return {
+          hadir,
+          absen,
+          izin,
+          sakit,
+          percentage: ((hadir / effectiveDays) * 100).toFixed(1),
+        };
+      })();
+      allFormattedData.push(formattedData);
+    }
+
+    // Hitung Rata-rata Persentase dari 3 bulan terakhir
+    const totalPercentage = allFormattedData.reduce(
+      (sum, data) => sum + (parseFloat(data.percentage) || 0),
+      0
+    );
+
+    // Rata-rata persentase, pastikan hasilnya angka
+    const averagePercentage = totalPercentage ? totalPercentage / 3 : 0;
+
+    // Persentase bulan 3, pastikan konversi menjadi angka
+    const targetMonth = parseFloat(allFormattedData[0].percentage);
+
+    // Hitung Improvement berdasarkan bulan 3
+    const improvement =
+      parseFloat(averagePercentage) > 0
+        ? ((parseFloat(targetMonth) - parseFloat(averagePercentage)) /
+            parseFloat(averagePercentage)) *
+          100
+        : 0;
+
+    const result = {
+      averagePercentage,
+      improvement: improvement,
+      data: allFormattedData,
+    };
+
+    setData(result);
   } catch (error) {
     console.error("Error fetching data: ", error);
     setData([]);
@@ -398,6 +729,13 @@ export const exportCSV = async (data, selectedDate, selectedClass) => {
         "YYYY-MMMM"
       )}-${selectedClass}.csv`
     );
+    await logger({
+      activity: `Export ${window.location.pathname
+        .split("/")
+        .filter(Boolean)
+        .pop()
+        .replace(/-/g, " ")} file into CSV`,
+    });
   } catch (error) {
     console.error("Error exporting CSV:", error);
   }
@@ -487,22 +825,28 @@ export const exportExcel = async (data, selectedDate, selectedClass) => {
         "YYYY-MMMM"
       )}-${selectedClass}`
     );
+    await logger({
+      activity: `Export ${window.location.pathname
+        .split("/")
+        .filter(Boolean)
+        .pop()
+        .replace(/-/g, " ")} file into Excel`,
+    });
   } catch (error) {
     console.error("Error exporting to Excel:", error);
   }
 };
 
-const saveAsExcelFile = async (buffer, fileName) => {
+export const saveAsExcelFile = async (buffer, fileName) => {
   try {
     // Import file-saver module
     const { default: FileSaver } = await import("file-saver");
 
     const EXCEL_TYPE =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    const EXCEL_EXTENSION = ".xlsx";
     const data = new Blob([buffer], { type: EXCEL_TYPE });
 
-    FileSaver.saveAs(data, `${fileName}_export${EXCEL_EXTENSION}`);
+    FileSaver.saveAs(data, `${fileName}`);
   } catch (error) {
     console.error("Error saving Excel file:", error);
   }
@@ -591,6 +935,13 @@ export const exportPdf = async (
         "YYYY-MMMM"
       )}-${selectedClass}.pdf`
     );
+    await logger({
+      activity: `Export ${window.location.pathname
+        .split("/")
+        .filter(Boolean)
+        .pop()
+        .replace(/-/g, " ")} file into PDF`,
+    });
   } catch (error) {
     console.error("Error exporting to PDF:", error);
   }
@@ -617,9 +968,11 @@ export const fetchTeachers = async (setData) => {
             : "Guru Ekstrakurikuler",
         ttl:
           teacher.birth_of_place || teacher.birth_of_date
-            ? `${teacher.birth_of_place},${moment(teacher.birth_of_date).format(
-                " DD MMM YYYY"
-              )}`
+            ? `${teacher.birth_of_place || "-"}, ${
+                teacher.birth_of_date
+                  ? moment(teacher.birth_of_date).format("DD MMM YYYY")
+                  : "-"
+              }`
             : "-",
         address: teacher.address ? teacher.address : "-",
       };
@@ -970,56 +1323,59 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
   };
 
   try {
-    const isExist = await axiosInstance.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`,
-      {
-        params: {
-          kelas: Number(class_id),
-          day: day,
-        },
-      }
+    // Ambil semua jadwal yang ada
+    const existingSchedulesResponse = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
     );
 
-    const newStartTime = new Date(`1970-01-01T${start_time}:00Z`).getTime();
-    const newEndTime = new Date(`1970-01-01T${end_time}:00Z`).getTime();
+    // Transform data untuk validator
+    const existingSchedules = existingSchedulesResponse.data.data.map(
+      (schedule) => ({
+        id: schedule.id,
+        class_id: schedule.class_id,
+        subject_id: schedule.subject_id,
+        teacher_nid: schedule.teacher_nid,
+        day: schedule.day,
+        start_time: schedule.start_time,
+        end_time: schedule.end_time,
+        class: schedule.class,
+        subject: schedule.subject,
+        teacher: schedule.teacher,
+      })
+    );
 
-    const existingSchedules = isExist.data.data;
-    let isConflict = false;
+    // Ambil detail mata pelajaran untuk mendapatkan category_id
+    const { data: subjectDetails } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${subject_id}`
+    );
 
-    if (existingSchedules.length > 0) {
-      for (const existing of existingSchedules) {
-        const existingStartTime = new Date(existing.start_time).getTime();
-        const existingEndTime = new Date(existing.end_time).getTime();
-        if (existing.day === day && existing.class_id === parseInt(class_id)) {
-          if (
-            newStartTime < existingEndTime &&
-            newEndTime > existingStartTime
-          ) {
-            isConflict = true;
-            break;
-          }
-        }
+    const newScheduleData = {
+      class_id: Number(class_id),
+      teacher_nid: teacher_nid,
+      day: day,
+      start_time: schedulePayload.start_time,
+      end_time: schedulePayload.end_time,
+      subject: {
+        id: Number(subject_id),
+        name: subjectDetails.data?.name,
+        category_id: subjectDetails.data?.category_id,
+      },
+    };
 
-        if (
-          existing.teacher_nid === teacher_nid &&
-          existing.subject.category_id !== 2
-        ) {
-          if (
-            newStartTime < existingEndTime &&
-            newEndTime > existingStartTime
-          ) {
-            isConflict = true;
-            break;
-          }
-        }
-      }
-    }
+    const validator = new ScheduleValidator(existingSchedules);
+    const validationResult = validator.validateSchedule(newScheduleData);
 
-    if (isConflict) {
+    if (!validationResult.valid) {
+      let conflictMessage = validationResult.conflicts
+        .map((conflict) => conflict.message)
+        .join("\n");
+
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "Jadwal yang Anda masukkan bertabrakan dengan jadwal lain!",
+        title: "Jadwal Konflik",
+        text:
+          conflictMessage ||
+          "Jadwal yang Anda masukkan bertabrakan dengan jadwal lain!",
       });
       return false;
     }
@@ -1032,16 +1388,18 @@ export const submitScheduleData = async (scheduleData, setLoading) => {
     Swal.fire({
       icon: "success",
       title: "Success!",
-      text: "Jadwal berhasil berhasil ditambahkan.",
+      text: "Jadwal berhasil ditambahkan.",
     });
 
     return true;
   } catch (error) {
+    console.error("Submit schedule error:", error);
     Swal.fire({
       icon: "error",
       title: "Oops...",
-      text: "Something went wrong! With server.",
+      text: error.response?.data?.message || "Terjadi kesalahan pada server.",
     });
+    return false;
   } finally {
     setLoading(false);
   }
@@ -1068,76 +1426,82 @@ export const updateSchedule = async (
   };
 
   try {
-    const isExist = await axiosInstance.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`,
-      {
-        params: {
-          kelas: Number(class_id),
-          day: day,
-        },
-      }
-    );
-
-    const { data: isExtracurricular } = await axiosInstance.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${subject_id}`
-    );
-
-    const newStartTime = new Date(`1970-01-01T${start_time}:00Z`).getTime();
-    const newEndTime = new Date(`1970-01-01T${end_time}:00Z`).getTime();
-
-    const existingSchedules = isExist.data.data;
-    let isConflict = false;
-
-    const isUnchanged = Object.keys(scheduleData).every(
-      (key) => scheduleData[key] === ScheduleDataOriginal[key]
+    // Cek apakah data tidak berubah
+    const isUnchanged = Object.keys(schedulePayload).every(
+      (key) =>
+        String(schedulePayload[key]) === String(ScheduleDataOriginal[key])
     );
 
     if (isUnchanged) {
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "Jadwal berhasil berhasil diperbarui.",
+        text: "Jadwal berhasil diperbarui.",
       });
       return true;
     }
 
-    if (existingSchedules.length > 0) {
-      for (const existing of existingSchedules) {
-        const existingStartTime = new Date(existing.start_time).getTime();
-        const existingEndTime = new Date(existing.end_time).getTime();
-        if (existing.day === day && existing.class_id === parseInt(class_id)) {
-          if (
-            newStartTime < existingEndTime &&
-            newEndTime > existingStartTime
-          ) {
-            isConflict = true;
-            break;
-          }
-        }
+    // Ambil semua jadwal yang ada
+    const existingSchedulesResponse = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule`
+    );
 
-        if (
-          existing.teacher_nid === teacher_nid &&
-          existing.subject.category_id !== 2
-        ) {
-          if (
-            newStartTime < existingEndTime &&
-            newEndTime > existingStartTime
-          ) {
-            isConflict = true;
-            break;
-          }
-        }
-      }
-    }
+    // Transform data untuk validator
+    const existingSchedules = existingSchedulesResponse.data.data.map(
+      (schedule) => ({
+        id: schedule.id,
+        class_id: schedule.class_id,
+        subject_id: schedule.subject_id,
+        teacher_nid: schedule.teacher_nid,
+        day: schedule.day,
+        start_time: schedule.start_time,
+        end_time: schedule.end_time,
+        class: schedule.class,
+        subject: schedule.subject,
+        teacher: schedule.teacher,
+      })
+    );
 
-    if (isConflict) {
+    const { data: subjectDetails } = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/subjects/${subject_id}`
+    );
+
+    const newScheduleData = {
+      id: Number(id),
+      class_id: Number(class_id),
+      teacher_nid: teacher_nid,
+      day: day,
+      start_time: schedulePayload.start_time,
+      end_time: schedulePayload.end_time,
+      subject: {
+        id: Number(subject_id),
+        name: subjectDetails.data?.name,
+        category_id: subjectDetails.data?.category_id,
+      },
+    };
+
+    const validator = new ScheduleValidator(existingSchedules);
+    const validationResult = validator.validateSchedule(
+      newScheduleData,
+      Number(id)
+    );
+
+    if (!validationResult.valid) {
+      let conflictMessage = validationResult.conflicts
+        .map((conflict) => conflict.message)
+        .join("\n");
+
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "Jadwal yang Anda masukkan bertabrakan dengan jadwal lain!",
+        title: "Jadwal Konflik",
+        text:
+          conflictMessage ||
+          "Jadwal yang Anda masukkan bertabrakan dengan jadwal lain!",
       });
       return false;
     }
+
+    // Jika tidak ada konflik, lakukan update
     const response = await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/class-schedule/${id}`,
       schedulePayload
@@ -1146,16 +1510,18 @@ export const updateSchedule = async (
     Swal.fire({
       icon: "success",
       title: "Success!",
-      text: "Jadwal berhasil berhasil diperbarui.",
+      text: "Jadwal berhasil diperbarui.",
     });
 
     return true;
   } catch (error) {
+    console.error("Update schedule error:", error);
     Swal.fire({
       icon: "error",
       title: "Oops...",
-      text: "Something went wrong! With server.",
+      text: error.response?.data?.message || "Terjadi kesalahan pada server.",
     });
+    return false;
   } finally {
     setLoading(false);
   }
@@ -1264,16 +1630,14 @@ export const fetchStudentData = async (setData) => {
 };
 
 export const submitStudentData = async (studentData, setLoading) => {
-  // setLoading(true);
+  setLoading(true);
 
   const formatStudentData = {
     rfid: studentData.rfid,
     name: studentData.name,
     class_id: parseInt(studentData.class),
     gender: studentData.gender,
-    birth_of_place: studentData.birth_of_place
-      ? studentData.birth_of_place
-      : null,
+    birth_of_place: studentData.birth_of_place || null,
     birth_of_date: studentData.birth_of_date
       ? new Date(studentData.birth_of_date).toISOString()
       : null,
@@ -1282,6 +1646,7 @@ export const submitStudentData = async (studentData, setLoading) => {
 
   let formatUserData = null;
   let formatParentData = null;
+
   if (studentData.parent_type === "new") {
     formatUserData = {
       nid: studentData.parent_nid,
@@ -1294,52 +1659,42 @@ export const submitStudentData = async (studentData, setLoading) => {
       nid: studentData.parent_nid,
       name: studentData.parent_name,
       gender: studentData.parent_gender,
-      birth_of_place: studentData.parent_birth_of_place
-        ? studentData.parent_birth_of_place
-        : null,
+      birth_of_place: studentData.parent_birth_of_place || null,
       birth_of_date: studentData.parent_birth_of_date
         ? new Date(studentData.parent_birth_of_date).toISOString()
         : null,
-      phone_num: studentData.phone_num ? studentData.phone_num : null,
-      address: studentData.address ? studentData.address : null,
+      phone_num: studentData.phone_num || null,
+      address: studentData.address || null,
     };
   }
 
-  const promises = [
-    formatParentData
-      ? axiosInstance.post(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
-          formatParentData
-        )
-      : null,
-    formatUserData
-      ? axiosInstance.post(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
-          formatUserData
-        )
-      : null,
-    axiosInstance.post(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/students`,
-      formatStudentData
-    ),
-  ].filter(Boolean);
   try {
-    await Promise.all(promises);
+    await axiosInstance.post(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/create-student-with-parent`,
+      {
+        studentData: formatStudentData,
+        parentData: formatParentData,
+        userData: formatUserData,
+      }
+    );
+
     Swal.fire({
       icon: "success",
       title: "Success!",
       text: "Data successfully created!",
     });
+
     return true;
   } catch (error) {
-    console.error("Error creating student:", error);
+    console.error("Error creating data:", error);
+
     Swal.fire({
       icon: "error",
       title: "Oops...",
       text: error.response
-        ? error.response.data.error === "P2002"
-          ? `RFID ${studentData.rfid} already exists!`
-          : "Something went wrong!"
+        ? error.response.data.field === "PRIMARY"
+          ? `Data already exists!`
+          : "Data parent already exists!"
         : "Something went wrong!",
     });
   } finally {
@@ -1427,29 +1782,46 @@ export const updateStudentData = async (
         }
       : null;
 
+  const payload = {
+    parentData:
+      studentData.parent_type !== "exist"
+        ? {
+            nid: studentData.parent_nid,
+            name: studentData.parent_name,
+            gender: studentData.parent_gender,
+            birth_of_place: studentData.parent_birth_of_place || null,
+            birth_of_date: studentData.parent_birth_of_date
+              ? new Date(studentData.parent_birth_of_date).toISOString()
+              : null,
+            phone_num: studentData.phone_num || null,
+            address: studentData.address || null,
+          }
+        : null,
+    userData:
+      studentData.parent_type !== "exist"
+        ? {
+            nid: studentData.parent_nid,
+            name: studentData.parent_name,
+            username: studentData.username,
+            password: studentData.password,
+            role: "parent",
+          }
+        : null,
+  };
+
   try {
     if (studentData.parent_type !== "exist") {
       if (studentData.isnew) {
         await axiosInstance.post(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents`,
-          formatParentData
-        );
-        await axiosInstance.post(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/users`,
-          formatUserData
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/parent-and-user`,
+          payload
         );
       } else {
         await axiosInstance.put(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/parents/${
+          `${import.meta.env.VITE_BASE_URL_BACKEND}/parent-and-user/${
             studentDataOriginal.parent_nid
           }`,
-          formatParentData
-        );
-        await axiosInstance.put(
-          `${import.meta.env.VITE_BASE_URL_BACKEND}/users/${
-            studentDataOriginal.parent_nid
-          }`,
-          formatUserData
+          payload
         );
       }
     } else {
@@ -1481,13 +1853,14 @@ export const updateStudentData = async (
     });
     return true;
   } catch (error) {
+    console.error("Error updating student:", error);
     Swal.fire({
       icon: "error",
       title: "Oops...",
       text: error.response
-        ? error.response.data.error === "P2002"
-          ? `Data parent already exists!`
-          : "Something went wrong!"
+        ? error.response.data.field === "User_username_key"
+          ? `Data with that username already exists!`
+          : "Data parent already exists!"
         : "Something went wrong!",
     });
   } finally {
@@ -1551,7 +1924,7 @@ export const functionOpenQR = async (QRModal, data) => {
       scan: true,
     };
     try {
-      await axiosInstance.post(
+      const response = await axiosInstance.post(
         `${import.meta.env.VITE_BASE_URL_BACKEND}/create-session`,
         formatData
       );
