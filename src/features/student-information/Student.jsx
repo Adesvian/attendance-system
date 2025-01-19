@@ -34,14 +34,17 @@ const StudentDetail = forwardRef(({ data }, ref) => {
   const [gender, setGender] = useState("");
 
   // Gunakan useCallback untuk menghindari pembuatan ulang fungsi fetch setiap render
-  const fetchAttendanceLogs = useCallback(async (rfid) => {
-    try {
-      await fetchAttendanceDetailStudent(rfid, setAttendanceLogs);
-      await getGender(rfid, setGender);
-    } catch (error) {
-      console.error("Error fetching attendance logs:", error);
-    }
-  }, []);
+  const fetchAttendanceLogs = useCallback(
+    async (rfid) => {
+      try {
+        await fetchAttendanceDetailStudent(rfid, date, setAttendanceLogs);
+        await getGender(rfid, setGender);
+      } catch (error) {
+        console.error("Error fetching attendance logs:", error);
+      }
+    },
+    [data]
+  );
 
   // Effect untuk inisialisasi data student dan attendance awal
   useEffect(() => {
@@ -53,6 +56,8 @@ const StudentDetail = forwardRef(({ data }, ref) => {
       );
 
       if (isAllDataFilled && personalData.id) {
+        // Reset state
+        setPartialLogs({ OnTime: 0, Late: 0 }); // Reset partial logs saat student berubah
         setStudent({ class: selectedClass, person: personalData });
         setAttendance({
           attendance: personalData.attendance,
@@ -76,7 +81,7 @@ const StudentDetail = forwardRef(({ data }, ref) => {
         });
       }
     }
-  }, [data, date]);
+  }, [data]);
 
   // Effect untuk update chart data
   useEffect(() => {
@@ -170,7 +175,7 @@ const StudentDetail = forwardRef(({ data }, ref) => {
                   className="w-24 md:w-full rounded-full object-cover shadow-md print:w-full"
                 />
                 <div className="flex flex-row w-52 lg:w-44 mx-auto gap-x-2 justify-center items-center mt-3  text-gray-800 dark:text-dark-text print:w-44">
-                  <p className="font-medium text-base lg:text-sm print:text-sm print:text-sm">
+                  <p className="font-medium text-base lg:text-sm print:text-sm ">
                     {student.person.name}
                   </p>
                   <div className="border-l-2 border-gray-300 h-4 "></div>

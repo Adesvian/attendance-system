@@ -71,7 +71,7 @@ export const login = async (creds, setErrorMessage, navigate) => {
       setErrorMessage("Login failed! Please try again.");
     }
   } catch (error) {
-    console.error(error);
+    console.log("ini error nya : ", error);
     setErrorMessage(
       error.response?.data?.message || "An error occurred! Please try again."
     );

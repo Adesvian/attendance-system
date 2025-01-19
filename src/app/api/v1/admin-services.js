@@ -144,10 +144,12 @@ export const fetchRecentStudents = async (
   }
 };
 
-export const fetchAttendanceDetailStudent = async (rfid, setData) => {
+export const fetchAttendanceDetailStudent = async (rfid, date, setData) => {
   try {
     const response = await axiosInstance.get(
-      `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance-month?rfid=${rfid}`
+      `${
+        import.meta.env.VITE_BASE_URL_BACKEND
+      }/attendance-month?rfid=${rfid}&date=${date}`
     );
 
     const processedData = response.data.data.map((attendance) => {
