@@ -13,13 +13,14 @@ function BarChart({ chartData }) {
   const [activeButton, setActiveButton] = useState("Day");
   const [chart, setChart] = useState({ labels: [], datasets: [] });
   const [data, setData] = useState([]);
+  const [classes, setClasses] = useState([]);
 
   useEffect(() => {
-    fetchAttendanceChartData(chartData, setData);
+    fetchAttendanceChartData(chartData, setData, setClasses);
   }, [chartData]);
 
   useEffect(() => {
-    updateChartData(activeButton, setChart, data);
+    updateChartData(activeButton, setChart, data, classes);
   }, [activeButton, data]);
 
   return (

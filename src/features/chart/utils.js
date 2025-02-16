@@ -18,21 +18,14 @@ ChartJS.register(
   Legend
 );
 
-export const updateChartData = (period, setChart, data) => {
+export const updateChartData = (period, setChart, data, classes) => {
   let labels = [];
   let datasets = [];
 
   const currentYear = moment().year();
   const currentMonth = moment().month();
   const currentDate = moment().date();
-  const kelasUnik = [
-    "Kelas 1",
-    "Kelas 2",
-    "Kelas 3",
-    "Kelas 4",
-    "Kelas 5",
-    "Kelas 6",
-  ];
+  const kelasUnik = classes;
 
   // Define labels based on the selected period
   switch (period) {

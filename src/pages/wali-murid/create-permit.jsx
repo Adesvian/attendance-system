@@ -31,7 +31,7 @@ function CreatePermit() {
     if (child && Object.keys(child).length > 0) {
       setFormData({
         name: child.name || "",
-        class: child.class?.id || "",
+        class: child.class?.name || "",
         reason: "",
         date: "",
         file: null,
@@ -70,6 +70,23 @@ function CreatePermit() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const classid = {
+      1: "Kelas 1",
+      2: "Kelas 2",
+      3: "Kelas 3",
+      4: "Kelas 4",
+      5: "Kelas 5",
+      6: "Kelas 6",
+      7: "TK A",
+      8: "TK B",
+      9: "Play Group",
+    };
+    // ganti dengan id kelas
+    formData.class =
+      Number(
+        Object.keys(classid).find((key) => classid[key] === formData.class)
+      ) || formData.class;
+
     SubmitFormPermit(
       formData,
       setErrors,

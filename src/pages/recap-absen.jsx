@@ -210,6 +210,7 @@ const RecapAbsensi = () => {
           setData
         );
       } else if (user.class == null || selectedClass != user.class.id) {
+        console.log("masuk");
         fetchDataSubjectAttendanceRecords(
           selectedDate,
           selectedClass,

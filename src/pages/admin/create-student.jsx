@@ -21,7 +21,8 @@ function CreateStudent() {
   const [studentData, setStudentData] = useState({
     rfid: "",
     name: "",
-    class: 1,
+    level: "PG",
+    class: 9,
     gender: "Laki-Laki",
     birth_of_place: "",
     birth_of_date: "",
@@ -39,6 +40,15 @@ function CreateStudent() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "level") {
+      // Mengatur class sesuai jenjang
+      setStudentData((prevData) => ({
+        ...prevData,
+        [name]: value,
+        class: value === "PG" ? 9 : value === "TK" ? 7 : 1,
+      }));
+    }
     setStudentData((prevData) =>
       handleChangeParentData(prevData, parentData, name, value)
     );
@@ -70,7 +80,6 @@ function CreateStudent() {
       form.reportValidity();
       return;
     }
-
     setLoading(true);
 
     const success = await submitStudentData(studentData, setLoading);
@@ -176,7 +185,7 @@ function CreateStudent() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6">
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-4">
               <label
                 htmlFor="birth_of_place"
                 className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
@@ -234,12 +243,31 @@ function CreateStudent() {
                 </select>
               </div>
             </div>
-            <div className="sm:col-span-1 mt-3 lg:mt-0">
-              <label
-                htmlFor="class"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
-              >
-                Kelas :
+          </div>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
+            <div className="sm:col-span-1">
+              <label className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text">
+                Jenjang:
+              </label>
+              <div className="mt-2">
+                <select
+                  name="level"
+                  value={studentData.level}
+                  onChange={handleChange}
+                  className="border dark:border-none text-gray-900 p-3 rounded-md w-full dark:bg-base-300"
+                  required
+                >
+                  <option value="PG">Play Group</option>
+                  <option value="TK">TK</option>
+                  <option value="SD">SD</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Dropdown Kelas */}
+            <div className="sm:col-span-1">
+              <label className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text">
+                Kelas:
               </label>
               <div className="mt-2">
                 <select
@@ -247,20 +275,27 @@ function CreateStudent() {
                   id="class"
                   onChange={handleChange}
                   value={studentData.class}
-                  className="border dark:border-none p-3 rounded-md w-full dark:bg-base-300"
+                  className="border dark:border-none text-gray-900 p-3 rounded-md w-full dark:bg-base-300"
                   required
+                  disabled={studentData.level === "PG"} // PG ga punya kelas
                 >
-                  <option value="1">Kelas 1</option>
-                  <option value="2">Kelas 2</option>
-                  <option value="3">Kelas 3</option>
-                  <option value="4">Kelas 4</option>
-                  <option value="5">Kelas 5</option>
-                  <option value="6">Kelas 6</option>
+                  {studentData.level === "TK" && (
+                    <>
+                      <option value="7">A</option>
+                      <option value="8">B</option>
+                    </>
+                  )}
+                  {studentData.level === "SD" &&
+                    [1, 2, 3, 4, 5, 6].map((num) => (
+                      <option key={num} value={num}>
+                        Kelas {num}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
+          <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
             <div className="sm:col-span-6 mt-3 lg:mt-0">
               <label
                 htmlFor="parent_type"

@@ -656,22 +656,24 @@ export const fetchDataClassOption = async (
         })),
       ]);
 
-      const uniqueClass = [
-        ...new Set(classes.data.map((item) => item.class_id)),
-      ].sort((a, b) => a - b);
+      const uniqueClass = classes.data
+        .map((item) => ({
+          value: item.class_id,
+          label: item.class.name,
+        }))
+        .filter(
+          (value, index, self) =>
+            index === self.findIndex((t) => t.value === value.value) // untuk menghindari duplikat
+        )
+        .sort((a, b) => a.value - b.value);
 
-      setClassOptions([
-        ...uniqueClass.map((className) => ({
-          value: className,
-          label: "Kelas " + className,
-        })),
-      ]);
+      setClassOptions(uniqueClass);
 
       if (uniqueClass.length > 0 || uniqueSubject.length > 0) {
         if (uniqueSubject.length > 0) {
           setSelectedSubject(uniqueSubject[0].id);
         }
-        setSelectedClass(uniqueClass[0]);
+        setSelectedClass(uniqueClass[0].value);
       }
     } else {
       setClassOptions([
@@ -682,6 +684,9 @@ export const fetchDataClassOption = async (
         { value: 4, label: "Kelas 4" },
         { value: 5, label: "Kelas 5" },
         { value: 6, label: "Kelas 6" },
+        { value: 7, label: "TK A" },
+        { value: 8, label: "TK B" },
+        { value: 9, label: "Play Group" },
       ]);
     }
   } catch (err) {
@@ -964,7 +969,7 @@ export const fetchTeachers = async (setData) => {
         }.png`,
         type:
           teacher.type === "Class Teacher"
-            ? `Wali Kelas ${teacher.class_id}`
+            ? `Wali ${teacher.class.name}`
             : teacher.type === "Subject Teacher"
             ? "Guru Mata Pelajaran"
             : "Guru Ekstrakurikuler",
@@ -997,6 +1002,7 @@ export const submitTeacherData = async (teacherData, setLoading) => {
       ? new Date(teacherData.birth_of_date).toISOString()
       : null,
     type: teacherData.type,
+    education_level: teacherData.education_level,
     class_id: parseInt(teacherData.class),
     address: teacherData.address,
   };
@@ -1026,9 +1032,13 @@ export const submitTeacherData = async (teacherData, setLoading) => {
       title: "Success!",
       text: "Data successfully added!",
     });
-
     return true; // Indicate success
   } catch (error) {
+    const classlabel = {
+      7: "TK A",
+      8: "TK B",
+      9: "Play Group",
+    };
     Swal.fire({
       icon: "error",
       title: "Oops...",
@@ -1036,7 +1046,11 @@ export const submitTeacherData = async (teacherData, setLoading) => {
         ? error.response.data.error === "P2002"
           ? `${
               error.response.data.field.includes("class")
-                ? `Guru Kelas ${teacherData.class}`
+                ? `Guru ${
+                    teacherData.class in classlabel
+                      ? classlabel[teacherData.class]
+                      : `Kelas ${teacherData.class}`
+                  }`
                 : "NIK"
             } already exists!`
           : "Something went wrong!"
@@ -1060,6 +1074,7 @@ export const updateTeacherData = async (teacherData, id, setLoading) => {
       ? new Date(teacherData.birth_of_date).toISOString()
       : null,
     type: teacherData.type,
+    education_level: teacherData.education_level,
     class_id: parseInt(teacherData.class),
     address: teacherData.address,
   };
@@ -1091,6 +1106,11 @@ export const updateTeacherData = async (teacherData, id, setLoading) => {
 
     return true; // Indicate success
   } catch (error) {
+    const classlabel = {
+      7: "TK A",
+      8: "TK B",
+      9: "Play Group",
+    };
     Swal.fire({
       icon: "error",
       title: "Oops...",
@@ -1098,7 +1118,11 @@ export const updateTeacherData = async (teacherData, id, setLoading) => {
         ? error.response.data.error === "P2002"
           ? `${
               error.response.data.field.includes("class")
-                ? `Guru Kelas ${teacherData.class}`
+                ? `Guru ${
+                    teacherData.class in classlabel
+                      ? classlabel[teacherData.class]
+                      : `Kelas ${teacherData.class}`
+                  }`
                 : "NIK"
             } already exists!`
           : "Something went wrong!"
@@ -1637,6 +1661,7 @@ export const submitStudentData = async (studentData, setLoading) => {
   const formatStudentData = {
     rfid: studentData.rfid,
     name: studentData.name,
+    level: studentData.level,
     class_id: parseInt(studentData.class),
     gender: studentData.gender,
     birth_of_place: studentData.birth_of_place || null,
@@ -1688,8 +1713,6 @@ export const submitStudentData = async (studentData, setLoading) => {
 
     return true;
   } catch (error) {
-    console.error("Error creating data:", error);
-
     Swal.fire({
       icon: "error",
       title: "Oops...",
@@ -1749,6 +1772,7 @@ export const updateStudentData = async (
   const formattedData = {
     rfid: studentData.rfid,
     name: studentData.name,
+    level: studentData.level,
     class_id: Number(studentData.class),
     gender: studentData.gender,
     birth_of_place: studentData.birth_of_place || null,
@@ -1757,32 +1781,6 @@ export const updateStudentData = async (
       : null,
     parent_nid: studentData.parent_nid,
   };
-
-  const formatParentData =
-    studentData.parent_type !== "exist"
-      ? {
-          nid: studentData.parent_nid,
-          name: studentData.parent_name,
-          gender: studentData.parent_gender,
-          birth_of_place: studentData.parent_birth_of_place || null,
-          birth_of_date: studentData.parent_birth_of_date
-            ? new Date(studentData.parent_birth_of_date).toISOString()
-            : null,
-          phone_num: studentData.phone_num || null,
-          address: studentData.address || null,
-        }
-      : null;
-
-  const formatUserData =
-    studentData.parent_type !== "exist"
-      ? {
-          nid: studentData.parent_nid,
-          name: studentData.parent_name,
-          username: studentData.username,
-          password: studentData.password,
-          role: "parent",
-        }
-      : null;
 
   const payload = {
     parentData:
@@ -2114,7 +2112,8 @@ export const updateNotification = async (setLoading, greet, name) => {
 };
 
 export const fetchThresholdData = async (
-  setCheckInTime,
+  setCheckInTimeElementary,
+  setCheckInTimePreschool,
   setCheckOutEntries,
   setDefaultCheckOutTime,
   setAvailableClasses
@@ -2126,14 +2125,14 @@ export const fetchThresholdData = async (
     const data = response.data.data;
 
     // Set Check-In Time
-    const defaultCheckInEntry = data.find(
-      (entry) => entry.class_id === 1 && entry.method === 1001
-    );
-
-    if (defaultCheckInEntry) {
-      const checkInTime = moment.utc(defaultCheckInEntry.time).format("HH:mm");
-      setCheckInTime(checkInTime);
-    }
+    data.forEach((item) => {
+      if (item.method === 1001 && item.class_id >= 1 && item.class_id <= 6) {
+        setCheckInTimeElementary(moment.utc(item.time).format("HH:mm"));
+      }
+      if (item.method === 1001 && item.class_id >= 7 && item.class_id <= 9) {
+        setCheckInTimePreschool(moment.utc(item.time).format("HH:mm"));
+      }
+    });
 
     // Set Check-Out Entries
     const checkOutEntries = data
@@ -2173,12 +2172,13 @@ export const fetchThresholdData = async (
   }
 };
 
-export const CheckInSubmit = async (checkInTime) => {
+export const CheckInSubmit = async (checkInTime, type) => {
   try {
     await axiosInstance.put(
       `${import.meta.env.VITE_BASE_URL_BACKEND}/threshold/check-in`,
       {
         time: checkInTime,
+        type: type,
       }
     );
 

@@ -688,7 +688,8 @@ export const fetchPermitDataTeacher = async (user) => {
         return {
           ...item,
           name: student.data.name,
-          class: "Kelas " + item.class_id,
+          class:
+            item.class.id <= 6 ? "Kelas " + item.class.id : item.class.name,
           status:
             item.status === 300
               ? "Pending"

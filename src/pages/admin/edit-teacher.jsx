@@ -19,7 +19,8 @@ function EditTeacher() {
     birth_of_place: "",
     birth_of_date: "",
     type: "Class Teacher",
-    class: 0,
+    education_level: "PG",
+    class: 9,
     address: "",
     username: "",
     password: "",
@@ -50,9 +51,9 @@ function EditTeacher() {
               : new Date(response.teacher.birth_of_date)
                   .toISOString()
                   .split("T")[0],
-          class: String(response.teacher.class_id),
+          class: String(response.teacher.class.id),
         };
-
+        delete formattedData.class_id;
         setTeacherData(formattedData);
       } catch (error) {
         console.error("Error fetching teacher data:", error);
@@ -77,6 +78,13 @@ function EditTeacher() {
         ...teacherData,
         [name]: value === "" ? "" : String(value),
       });
+    } else if (name === "education_level") {
+      // Mengatur class sesuai jenjang
+      setTeacherData((prevData) => ({
+        ...prevData,
+        [name]: value,
+        class: value === "PG" ? 9 : value === "TK" ? 7 : 1,
+      }));
     } else {
       setTeacherData({
         ...teacherData,
@@ -87,6 +95,7 @@ function EditTeacher() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(teacherData);
     const success = await updateTeacherData(teacherData, id, setLoading);
     if (success) {
       navigate("/teacher");
@@ -203,8 +212,8 @@ function EditTeacher() {
             </div>
           </div>
         </div>
-        <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
-          <div className="sm:col-span-3">
+        <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-6 gap-y-3 sm:gap-y-0">
+          <div className="sm:col-span-3 mt-4 sm:mt-0">
             <label
               htmlFor="type"
               className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
@@ -228,31 +237,58 @@ function EditTeacher() {
           </div>
 
           {teacherData.type === "Class Teacher" && (
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="class"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text"
-              >
-                Kelas :
-              </label>
-              <div className="mt-2">
-                <select
-                  name="class"
-                  id="class"
-                  onChange={handleChange}
-                  value={teacherData.class}
-                  className="border dark:border-none p-3 rounded-md w-full dark:bg-base-300"
-                  required
-                >
-                  <option value="1">Kelas 1</option>
-                  <option value="2">Kelas 2</option>
-                  <option value="3">Kelas 3</option>
-                  <option value="4">Kelas 4</option>
-                  <option value="5">Kelas 5</option>
-                  <option value="6">Kelas 6</option>
-                </select>
+            <>
+              {/* Dropdown Jenjang */}
+              <div className="sm:col-span-1">
+                <label className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text">
+                  Jenjang:
+                </label>
+                <div className="mt-2">
+                  <select
+                    name="education_level"
+                    value={teacherData.education_level}
+                    onChange={handleChange}
+                    className="border dark:border-none text-gray-900 p-3 rounded-md w-full dark:bg-base-300"
+                    required
+                  >
+                    <option value="PG">Play Group</option>
+                    <option value="TK">TK</option>
+                    <option value="SD">SD</option>
+                  </select>
+                </div>
               </div>
-            </div>
+
+              {/* Dropdown Kelas */}
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium leading-6 text-gray-900 dark:text-dark-text">
+                  Kelas:
+                </label>
+                <div className="mt-2">
+                  <select
+                    name="class"
+                    id="class"
+                    onChange={handleChange}
+                    value={teacherData.class}
+                    className="border dark:border-none text-gray-900 p-3 rounded-md w-full dark:bg-base-300"
+                    required
+                    disabled={teacherData.education_level === "PG"} // PG ga punya kelas
+                  >
+                    {teacherData.education_level === "TK" && (
+                      <>
+                        <option value="7">A</option>
+                        <option value="8">B</option>
+                      </>
+                    )}
+                    {teacherData.education_level === "SD" &&
+                      [1, 2, 3, 4, 5, 6].map((num) => (
+                        <option key={num} value={num}>
+                          Kelas {num}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+            </>
           )}
         </div>
 

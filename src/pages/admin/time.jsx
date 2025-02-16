@@ -14,17 +14,26 @@ import { useDispatch } from "react-redux";
 
 function Threshold() {
   const dispatch = useDispatch();
-  const [checkInTime, setCheckInTime] = useState(moment().format("HH:mm"));
+  const [checkInTimeElementary, setCheckInTimeElementary] = useState(
+    moment().format("HH:mm")
+  );
+  const [checkInTimePreschool, setCheckInTimePreschool] = useState(
+    moment().format("HH:mm")
+  );
   const [checkOutEntries, setCheckOutEntries] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [defaultCheckOutTime, setDefaultCheckOutTime] = useState(
     moment().format("HH:mm")
   );
   const [availableClasses, setAvailableClasses] = useState([]);
+  const [selectedTime, setSelectedTime] = useState("");
 
-  const handleCheckInSubmit = async (event) => {
+  const handleCheckInSubmit = async (event, type) => {
     event.preventDefault();
-    await CheckInSubmit(checkInTime);
+
+    const checkInTime =
+      type === "elementary" ? checkInTimeElementary : checkInTimePreschool;
+    await CheckInSubmit(checkInTime, type);
   };
   const handleDefaultCheckOutSubmit = async (event) => {
     event.preventDefault();
@@ -83,13 +92,13 @@ function Threshold() {
   useEffect(() => {
     const fetchData = async () => {
       await fetchThresholdData(
-        setCheckInTime,
+        setCheckInTimeElementary,
+        setCheckInTimePreschool,
         setCheckOutEntries,
         setDefaultCheckOutTime,
         setAvailableClasses
       );
     };
-
     fetchData();
     dispatch(setPageTitle({ title: "Time Threshold" }));
   }, []);
@@ -115,7 +124,9 @@ function Threshold() {
               <span className="text-green-700 dark:text-green-500 font-bold">
                 "Set Time"
               </span>
-              . Waktu check-in ini berlaku untuk seluruh kelas
+              . Waktu check-in ini berlaku untuk seluruh{" "}
+              <span className="font-bold">"Kelas"</span> dan seluruh{" "}
+              <span className="font-bold">"Jenjang"</span>
             </p>
           </div>
           <div className="flex gap-2">
@@ -132,19 +143,43 @@ function Threshold() {
           <div className="grid grid-cols-8 gap-x-6 mb-6 mt-5">
             <div className="lg:col-span-7 col-span-8">
               <label className="block mb-1 text-green-500 dark:text-green-300 font-medium">
-                Check-In Time
+                Check-In Time SD
               </label>
               <input
+                name="checkInTimeElementary"
                 type="time"
-                value={checkInTime}
-                onChange={(e) => setCheckInTime(e.target.value)}
+                value={checkInTimeElementary}
+                onChange={(e) => setCheckInTimeElementary(e.target.value)}
                 className="border p-2 rounded-md w-full h-12 dark:bg-base-100"
               />
             </div>
 
             <div className="col-span-8 lg:col-span-1 flex items-end mt-2 lg:mt-0">
               <SingleButton
-                onClick={handleCheckInSubmit}
+                onClick={(e) => handleCheckInSubmit(e, "elementary")}
+                className="btn btn-success text-white w-full h-12"
+              >
+                Set Time
+              </SingleButton>
+            </div>
+          </div>
+          <div className="grid grid-cols-8 gap-x-6 mb-6 mt-5">
+            <div className="lg:col-span-7 col-span-8">
+              <label className="block mb-1 text-green-500 dark:text-green-300 font-medium">
+                Check-In Time TK / PAUD
+              </label>
+              <input
+                name="checkInTimePreschool"
+                type="time"
+                value={checkInTimePreschool}
+                onChange={(e) => setCheckInTimePreschool(e.target.value)}
+                className="border p-2 rounded-md w-full h-12 dark:bg-base-100"
+              />
+            </div>
+
+            <div className="col-span-8 lg:col-span-1 flex items-end mt-2 lg:mt-0">
+              <SingleButton
+                onClick={(e) => handleCheckInSubmit(e, "preschool")}
                 className="btn btn-success text-white w-full h-12"
               >
                 Set Time
@@ -173,7 +208,9 @@ function Threshold() {
           <div className="flex gap-2">
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
-              Default jam check-out <span className="font-bold">13:00:00</span>.
+              Default jam check-out <span className="font-bold">13:00:00</span>{" "}
+              untuk jenjang <span className="font-bold">"SD"</span>. Selain itu{" "}
+              <span className="font-bold">11:15:00</span>
             </p>
           </div>
           <div className="flex gap-2">
@@ -187,7 +224,7 @@ function Threshold() {
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
               Khusus <span className="font-bold">Jumat</span> waktu check-out
-              jam <span className="font-bold">11:15:00</span>
+              seluruh jenjang di jam <span className="font-bold">11:15:00</span>
             </p>
           </div>
           <div className="grid grid-cols-8 gap-x-6 mb-6 mt-5">
@@ -241,7 +278,13 @@ function Threshold() {
               >
                 {availableClasses.map((classOption, index) => (
                   <option key={`${classOption}-${index}`} value={classOption}>
-                    Kelas {classOption}
+                    {classOption === 7
+                      ? "TK A"
+                      : classOption === 8
+                      ? "TK B"
+                      : classOption === 9
+                      ? "Play Group"
+                      : `Kelas ${classOption}`}
                   </option>
                 ))}
               </select>
@@ -268,7 +311,13 @@ function Threshold() {
                 <label className="block mb-1 text-red-500 dark:text-red-300 font-medium">
                   Check-Out Time:{" "}
                   <span className="text-black dark:text-dark-text">
-                    Kelas {entry.class}
+                    {entry.class === 7
+                      ? "TK A"
+                      : entry.class === 8
+                      ? "TK B"
+                      : entry.class === 9
+                      ? "Play Group"
+                      : `Kelas ${entry.class}`}
                   </span>
                 </label>
                 <input

@@ -20,29 +20,20 @@ function SidebarSubMenu({ submenu, name, icon }) {
     sideBar ? "p-3 flex-1" : "p-1.5"
   }`;
 
-  // Pilihan 1: Truncate dengan ellipsis
-  const textClassesTruncate = `transition-transform duration-300 truncate ${
-    sideBar ? "max-w-[6rem] opacity-100" : "max-w-0 opacity-0"
-  }`;
-
-  // Pilihan 2: Two lines dengan text wrap
+  // Two lines dengan text wrap
   const textClassesTwoLines = `transition-transform duration-300 leading-tight ${
     sideBar
-      ? "max-w-[6rem] opacity-100 whitespace-normal line-clamp-2"
-      : "max-w-0 opacity-0"
+      ? "max-w-[6rem] lg:max-w-full opacity-100 whitespace-normal line-clamp-2"
+      : "w-0 opacity-0 hidden"
   }`;
 
-  // Pilihan 3: Smaller text size
-  const textClassesSmaller = `transition-transform duration-300 text-sm ${
-    sideBar ? "max-w-[6rem] opacity-100" : "max-w-0 opacity-0"
-  }`;
-
-  const chevronClasses = `w-6 h-6 transition-transform duration-300 ${
-    isExpanded ? "rotate-180" : "rotate-0"
+  const baseClasses = "w-6 h-6 transition-transform duration-300";
+  const chevronClasses = `${baseClasses} -rotate-${!isExpanded ? "90" : "0"} ${
+    sideBar ? "ml-0" : "ml-5"
   }`;
 
   // Pilih salah satu textClasses yang ingin digunakan:
-  const activeTextClasses = textClassesTwoLines; // atau textClassesTwoLines atau textClassesSmaller
+  const activeTextClasses = textClassesTwoLines;
 
   return (
     <>
@@ -56,9 +47,7 @@ function SidebarSubMenu({ submenu, name, icon }) {
           {cloneElement(icon, {
             className: `flex-shrink-0 ${iconSize}`,
           })}
-          <span className={window.innerWidth < 480 ? activeTextClasses : ""}>
-            {name}
-          </span>
+          <span className={activeTextClasses}>{name}</span>
         </div>
         <div className="flex-shrink-0 ml-auto">
           <HiOutlineChevronDown className={chevronClasses} />
@@ -84,8 +73,8 @@ function SidebarSubMenu({ submenu, name, icon }) {
                     to={item.path}
                     className={
                       active
-                        ? "bg-gray-200 text-black text-sm font-semibold"
-                        : "font-normal"
+                        ? "bg-gray-200 text-black text-sm font-semibold whitespace-nowrap"
+                        : "font-normal whitespace-nowrap"
                     }
                   >
                     <div className="flex items-center gap-x-3 p-3 hover:text-black dark:hover:bg-dark-text hover:bg-gray-200 rounded-md">

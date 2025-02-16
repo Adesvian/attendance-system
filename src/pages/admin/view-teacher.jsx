@@ -16,7 +16,8 @@ function ViewTeacher() {
     birth_of_place: "",
     birth_of_date: "",
     type: "Class Teacher",
-    class: 0,
+    education_level: "PG",
+    class: 9,
     address: "",
     username: "",
     password: "",
@@ -50,7 +51,7 @@ function ViewTeacher() {
                   .split("T")[0],
           class:
             response.teacher.type === "Class Teacher"
-              ? String(response.teacher.class_id)
+              ? String(response.teacher.class.name)
               : null,
           username: response.user.username,
         };
@@ -230,7 +231,7 @@ function ViewTeacher() {
                 name="class"
                 type="text"
                 label="Kelas"
-                value={`Kelas ${teacherData.class}`}
+                value={`${teacherData.class}`}
                 onChange={() => {}}
                 readOnly
               />

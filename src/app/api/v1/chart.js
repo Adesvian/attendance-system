@@ -1,9 +1,11 @@
 import moment from "moment";
 import axiosInstance from "../auth/axiosConfig";
+import { formControlClasses } from "@mui/material";
 
 export const fetchAttendanceChartData = async (
   chartData,
-  setAttendancesData
+  setAttendancesData,
+  setClasses
 ) => {
   const status = !!chartData;
   try {
@@ -11,6 +13,13 @@ export const fetchAttendanceChartData = async (
       `${import.meta.env.VITE_BASE_URL_BACKEND}/attendance`
     );
     const attendanceData = chartData ? chartData : response.data.data;
+
+    const classesResult = await axiosInstance.get(
+      `${import.meta.env.VITE_BASE_URL_BACKEND}/classes`
+    );
+    const classData = classesResult.data.data;
+    const classes = classData.map((classData) => classData.name);
+    setClasses(classes);
 
     // Grouping data by date (day and year)
     const groupedData = attendanceData.reduce((acc, curr) => {
@@ -51,14 +60,7 @@ export const fetchAttendanceChartData = async (
       );
 
       formattedClasses.sort((a, b) => {
-        const classOrder = [
-          "Kelas 1",
-          "Kelas 2",
-          "Kelas 3",
-          "Kelas 4",
-          "Kelas 5",
-          "Kelas 6",
-        ];
+        const classOrder = classes.map((c) => c.name);
         return classOrder.indexOf(a.name) - classOrder.indexOf(b.name);
       });
 
