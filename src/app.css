@@ -38,9 +38,21 @@
   font-size: 1rem; /* Change button font size */
 }
 
+@media (prefers-color-scheme: dark) {
+  .fc-popover-title {
+    color: black;
+    font-size: 0.6rem;
+  }
+
+  .fc-popover-body {
+    color: black;
+  }
+}
+
 @media (max-width: 768px) {
   .fc {
     font-size: 0.9rem; /* Adjust the font size for the calendar */
+    height: 100vh;
   }
 
   .fc-daygrid-day {
@@ -54,6 +66,10 @@
     align-items: center; /* Center align elements */
   }
 
+  .fc .fc-daygrid-day-number {
+    font-size: 0.6rem; /* Adjust size of day numbers */
+  }
+
   .fc-today-button,
   .fc-prev-button,
   .fc-next-button {
@@ -62,7 +78,7 @@
   }
 
   .fc-daygrid-event {
-    font-size: 0.8rem; /* Smaller font size for event titles */
+    font-size: 0.6rem; /* Smaller font size for event titles */
   }
 
   /* Optional: Make the modal full-width on small screens */

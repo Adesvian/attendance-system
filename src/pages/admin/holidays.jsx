@@ -8,6 +8,7 @@ import axiosInstance from "../../app/api/auth/axiosConfig";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../redux/headerSlice";
+import { Button } from "@mui/material";
 
 function Holidays() {
   const dispatch = useDispatch();
@@ -112,16 +113,20 @@ function Holidays() {
   return (
     <>
       <div className="relative">
-        <SingleButton
-          className="bg-blue-500 hover:bg-blue-600 text-white absolute -top-14 right-0 w-full lg:w-fit"
-          onClick={() => {
-            setHolidayName("");
-            setHolidayDate("");
-            setSelectedEventId(null);
-            document.getElementById("ModalEvent").showModal();
-          }}
-          btnTitle="Tambah Event"
-        />
+        <div className="flex justify-end">
+          <Button
+            variant="contained"
+            className="text-white w-screen md:w-auto"
+            onClick={() => {
+              setHolidayName("");
+              setHolidayDate("");
+              setSelectedEventId(null);
+              document.getElementById("ModalEvent").showModal();
+            }}
+          >
+            Tambah Event
+          </Button>
+        </div>
         <dialog id="ModalEvent" className="modal">
           <div className="modal-box bg-white max-w-md w-full p-5">
             <form onSubmit={handleSubmit}>
@@ -152,21 +157,24 @@ function Holidays() {
                   className="input input-bordered w-full"
                 />
               </div>
-              <div className="lg:modal-action flex flex-col md:flex-row">
-                <SingleButton
+              <div className="lg:modal-action flex flex-col md:flex-row gap-y-3">
+                <Button
                   type="submit"
-                  className="bg-blue-500 hover:bg-blue-600 text-white mb-2 md:mb-0 md:mr-2 w-full md:w-auto"
+                  variant="contained"
+                  className="text-white mb-2 md:mb-0 md:mr-2 w-full md:w-auto"
                 >
                   {selectedEventId ? "Update" : "Submit"}
-                </SingleButton>
+                </Button>
                 {selectedEventId && (
-                  <SingleButton
+                  <Button
                     type="button"
-                    className="bg-red-500 hover:bg-red-600 text-white w-full md:w-auto"
+                    variant="contained"
+                    color="error"
+                    className="text-white w-full md:w-auto"
                     onClick={handleDelete}
                   >
                     Delete
-                  </SingleButton>
+                  </Button>
                 )}
               </div>
               <button
@@ -178,9 +186,10 @@ function Holidays() {
             </form>
           </div>
         </dialog>
-        <div className="mt-16">
+        <div className="mt-3 md:mt-5">
           <FullCalendar
             plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
             dateClick={handleDateClick}
             eventClick={handleEventClick}
             events={events}
@@ -189,6 +198,12 @@ function Holidays() {
                 {arg.event.title}
               </div>
             )}
+            dayMaxEventRows={true}
+            views={{
+              dayGridMonth: {
+                dayMaxEvents: 3,
+              },
+            }}
           />
         </div>
       </div>

@@ -14,6 +14,9 @@ function Notifications({
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
   const [events, setEvents] = useState([]);
   const [activeEventId, setActiveEventId] = useState(null);
+  const [selectedValue, setSelectedValue] = useState(
+    initialRowsPerPage.toString()
+  );
 
   useEffect(() => {
     setEvents(data);
@@ -75,11 +78,19 @@ function Notifications({
           </label>
           <select
             id="rowsPerPage"
-            value={rowsPerPage}
-            onChange={(e) => setRowsPerPage(Number(e.target.value))}
+            value={selectedValue}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "All") {
+                setRowsPerPage(data.length);
+              } else {
+                setRowsPerPage(Number(value));
+              }
+              setSelectedValue(value);
+            }}
             className="cursor-pointer border bg-transparent rounded-md p-1"
           >
-            {[5, 10, 15, 20].map((value) => (
+            {[5, 10, 15, 20, "All"].map((value) => (
               <option key={value} value={value}>
                 {value}
               </option>
@@ -105,6 +116,12 @@ function Notifications({
             title: event.name,
             start: event.date,
           }))}
+          dayMaxEventRows={true}
+          views={{
+            dayGridMonth: {
+              dayMaxEvents: 3,
+            },
+          }}
           datesSet={handleDateSet}
           eventClick={handleEventClick}
         />
@@ -114,12 +131,12 @@ function Notifications({
           <div
             key={notification.id}
             id={`event-${notification.id}`}
-            className={`border-b p-2 ${
+            className={`border-b text-sm flex justify-between p-2 ${
               notification.id === activeEventId ? "bg-yellow-100" : ""
             }`}
           >
             <div className="font-semibold">{notification.name}</div>
-            <div className="text-sm text-gray-500">
+            <div className=" text-gray-500 dark:text-gray-300">
               {new Date(notification.date).toLocaleDateString()}
             </div>
           </div>

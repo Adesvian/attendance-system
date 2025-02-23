@@ -88,13 +88,13 @@ const DashboardParent = () => {
           ))}
         </div>
 
-        <div className="relative parent-welcome-card bg-white dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-8 font-poppins flex flex-row">
+        <div className="relative parent-welcome-card bg-green-100 dark:bg-base-100 rounded-md shadow-md text-gray-800 dark:text-white p-8 font-poppins flex flex-row">
           <div className="z-40">
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-black drop-shadow-[2px_2px_0px_white] dark:text-white dark:drop-shadow-[2px_2px_0px_black]">
               Assalammualaikum!{" "}
               <span className="block mt-2">Selamat datang, Ayah/Bunda...</span>
             </h1>
-            <h2 className="text-xl font-medium mt-5">
+            <h2 className="text-xl font-medium mt-5 text-black drop-shadow-[2px_2px_0px_white] dark:text-white dark:drop-shadow-[2px_2px_0px_black]">
               {child && child.name
                 ? `${child.name} - ${child.class.name}`
                 : "Loading data anak..."}
@@ -170,13 +170,13 @@ const DashboardParent = () => {
       <div className="relative bottom-14 right-5 flex justify-end">
         <a
           href="#recent-attendance"
-          className="btn btn-xs dark:bg-white dark:text-black"
+          className="btn btn-xs bg-gray-100 hover:bg-gray-300 hover:border-gray-300 border-gray-200 text-black dark:bg-white dark:text-black"
         >
           1
         </a>
         <a
           href="#notifications"
-          className="btn btn-xs ml-2 dark:bg-white dark:text-black"
+          className="btn btn-xs ml-2 bg-gray-100 hover:bg-gray-300 hover:border-gray-300 border-gray-200 text-black dark:bg-white dark:text-black"
         >
           2
         </a>

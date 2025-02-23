@@ -28,9 +28,9 @@ function SidebarSubMenu({ submenu, name, icon }) {
   }`;
 
   const baseClasses = "w-6 h-6 transition-transform duration-300";
-  const chevronClasses = `${baseClasses} -rotate-${!isExpanded ? "90" : "0"} ${
-    sideBar ? "ml-0" : "ml-5"
-  }`;
+  const chevronClasses = `${baseClasses} ${
+    isExpanded ? "rotate-0" : "-rotate-90"
+  } ${sideBar ? "ml-0" : "ml-5"}`;
 
   // Pilih salah satu textClasses yang ingin digunakan:
   const activeTextClasses = textClassesTwoLines;

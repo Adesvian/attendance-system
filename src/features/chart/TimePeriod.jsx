@@ -13,13 +13,13 @@ function PeriodButtons({ activeButton, setActiveButton }) {
   };
 
   return (
-    <div className="my-2">
-      <div className="flex space-x-2 mb-2 w-fit bg-gray-100 dark:bg-base-200 p-2 lg:float-none float-right">
+    <div className="my-2 flex justify-center lg:justify-end">
+      <div className="flex space-x-2 mb-2 w-fit bg-gray-100 dark:bg-base-200 p-2 text-center justify-center lg:justify-end">
         {["Day", "Month", "Year"].map((period) => (
           <SingleButton
             key={period}
             btnTitle={period}
-            className={`lg:px-4 px-2 lg:py-1.5 py-1 rounded-sm font-semibold lg:text-base text-xs ${getButtonBgClass(
+            className={`lg:px-4 px-4 lg:py-1.5 py-2 rounded-sm font-semibold lg:text-base text-xs ${getButtonBgClass(
               period
             )}`}
             onClick={() => handleButtonClick(period)}

@@ -1,4 +1,3 @@
-// CustomSelect.js
 import React from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -26,9 +25,23 @@ const CustomSelect = ({ value, onChange, options, name, size = "small" }) => {
         displayEmpty
         size={size}
         inputProps={{ "aria-label": "Filter by Status" }}
-        className={`text-xs `}
+        className={`text-xs`}
         style={{
           display: `${name === undefined || name === true ? "block" : "none"}`,
+        }}
+        sx={{
+          border: "1px solid #D3D3D380",
+          "&.MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderColor: "#D3D3D380",
+            },
+            "&:hover fieldset": {
+              borderColor: "#C0C0C090",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "#B0B0B0A0",
+            },
+          },
         }}
       >
         {options.map((option) => (

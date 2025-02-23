@@ -73,7 +73,7 @@ function TableDataManager({
               <>
                 {props.handleAct0 && (
                   <SingleButton
-                    className=" bg-sky-500 hover:bg-sky-600 text-white"
+                    className="px-4 py-4 bg-sky-500 hover:bg-sky-600 text-white"
                     onClick={() => props.handleAct0(params.row)}
                     aria-label={`View ${params.row.name}`}
                   >
@@ -81,14 +81,14 @@ function TableDataManager({
                   </SingleButton>
                 )}
                 <SingleButton
-                  className=" bg-amber-500 hover:bg-amber-600 text-white"
+                  className="px-4 py-4 bg-amber-500 hover:bg-amber-600 text-white"
                   onClick={() => props.handleAct1(params.row)}
                   aria-label={`Edit ${params.row.name}`}
                 >
                   <MdEdit />
                 </SingleButton>
                 <SingleButton
-                  className=" bg-rose-500 hover:bg-rose-600 text-white"
+                  className="px-4 py-4 bg-rose-500 hover:bg-rose-600 text-white"
                   onClick={() => props.handleAct2(params.row)}
                   aria-label={`Delete ${params.row.name}`}
                 >
@@ -231,7 +231,7 @@ function TableDataManager({
             },
           }))}
           pageSize={rowsPerPage}
-          rowHeight={100}
+          rowHeight={70}
           rowsPerPageOptions={[5, 10, 25]}
           hideFooter={true}
           disableSelectionOnClick

@@ -115,7 +115,7 @@ function Threshold() {
           aria-label="Check In"
           defaultChecked
         />
-        <div role="tabpanel" className="tab-content my-10">
+        <div role="tabpanel" className="tab-content my-5">
           <div className="flex gap-2">
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
@@ -196,7 +196,7 @@ function Threshold() {
           className="tab whitespace-nowrap"
           aria-label="Check Out"
         />
-        <div role="tabpanel" className="tab-content my-10">
+        <div role="tabpanel" className="tab-content my-5">
           <div className="flex gap-2">
             <span className="text-red-500 dark:text-red-300">*</span>
             <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-justify">
@@ -249,7 +249,7 @@ function Threshold() {
               </SingleButton>
             </div>
           </div>
-          <div className="divider my-16">Atur Waktu Untuk Setiap Kelas</div>
+          <div className="divider my-8">Atur Waktu Untuk Setiap Kelas</div>
           {/* Class Selection Dropdown */}
           <div className="flex gap-2 ">
             <span className="text-red-500 dark:text-red-300">*</span>
